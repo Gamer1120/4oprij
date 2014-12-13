@@ -65,12 +65,12 @@ public class Board {
 	 * @ requires 0 <= col & col < VERTICAL;
 	 */
 	/**
-	 * Calculates the lowest vertical empty row given the column if empty is
+	 * Calculates the lowest empty row given the column if empty is
 	 * true, or the highest full row if empty is false
 	 * 
-	 * @return the vertical index belonging to the field
+	 * @return the vertical index belonging to the row
 	 */
-	public int index(int col, boolean empty) {
+	public int emptyRow(int col, boolean empty) {
 		if (empty) {
 			for (int row = VERTICAL - 1; row >= 0; row--) {
 				if (getField(row, col) == Disc.EMPTY) {
@@ -93,7 +93,7 @@ public class Board {
 	/**
 	 * Returns true if i is a valid column of the board
 	 * 
-	 * @return true if 0 <= i < HORIZONTAL
+	 * @return true if 0 <= col < HORIZONTAL
 	 */
 	/* @pure */
 	public boolean isField(int col) {
@@ -140,7 +140,7 @@ public class Board {
 	 * (this.getField(row,col) == Disc.EMPTY);
 	 */
 	/**
-	 * Returns true if the field referred to by the (row,col) pair it empty.
+	 * Returns true if the field referred to by the (row,col) pair is empty.
 	 * 
 	 * @param row
 	 *            the row of the field
@@ -247,7 +247,7 @@ public class Board {
 	public boolean hasDiagonal(Disc d) {
 		return hasUpperDiagonal(d) || hasLowerDiagonal(d);
 	}
-
+	//TODO: Voeg commentaar toe aan dis shiz.
 	public boolean hasUpperDiagonal(Disc d) {
 		int r = VERTICAL - ROW;
 		int c = 0;
@@ -271,7 +271,7 @@ public class Board {
 		}
 		return false;
 	}
-
+	//TODO: Voeg commentaar toe aan dis shiz.
 	public boolean hasLowerDiagonal(Disc d) {
 		int r = ROW - 1;
 		int c = 0;
@@ -376,8 +376,8 @@ public class Board {
 	 *            the disc to be placed
 	 */
 	public void setField(int col, Disc d) {
-		if (isField(col) && index(col, true) != -1) {
-			fields[index(col, true)][col] = d;
+		if (isField(col) && emptyRow(col, true) != -1) {
+			fields[emptyRow(col, true)][col] = d;
 		}
 	}
 
