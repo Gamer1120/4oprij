@@ -65,23 +65,31 @@ public class Board {
 	 * @ requires 0 <= col & col < VERTICAL;
 	 */
 	/**
-	 * Calculates the lowest empty row given the column if empty is
-	 * true, or the highest full row if empty is false
+	 * Calculates the lowest empty row given the column
 	 * 
 	 * @return the vertical index belonging to the row
 	 */
-	public int emptyRow(int col, boolean empty) {
-		if (empty) {
-			for (int row = VERTICAL - 1; row >= 0; row--) {
-				if (getField(row, col) == Disc.EMPTY) {
-					return row;
-				}
+	public int emptyRow(int col) {
+		for (int row = VERTICAL - 1; row >= 0; row--) {
+			if (getField(row, col) == Disc.EMPTY) {
+				return row;
 			}
-		} else {
-			for (int row = 0; row < VERTICAL; row++) {
-				if (getField(row, col) != Disc.EMPTY) {
-					return row;
-				}
+		}
+		return -1;
+	}
+
+	/*
+	 * @ requires 0 <= col & col < VERTICAL;
+	 */
+	/**
+	 * Calculates the highest full row given the column
+	 * 
+	 * @return the vertical index belonging to the row
+	 */
+	public int fullRow(int col) {
+		for (int row = 0; row < VERTICAL; row++) {
+			if (getField(row, col) != Disc.EMPTY) {
+				return row;
 			}
 		}
 		return -1;
@@ -201,6 +209,7 @@ public class Board {
 	public boolean hasRow(Disc d) {
 		for (int row = 0; row < VERTICAL; row++) {
 			int count = 0;
+			// TODO: Check of dit klopt voor alle 4.
 			for (int col = 0; HORIZONTAL + count - col >= ROW; col++) {
 				if (getField(row, col) == d) {
 					if (++count >= ROW) {
@@ -238,7 +247,8 @@ public class Board {
 	}
 
 	/**
-	 * Checks whether there is a diagonal with 4 or more discs d.
+	 * Checks whether there is an upper or an lower diagonal with 4 or more
+	 * discs d.
 	 * 
 	 * @param d
 	 *            the disc of interest
@@ -247,7 +257,14 @@ public class Board {
 	public boolean hasDiagonal(Disc d) {
 		return hasUpperDiagonal(d) || hasLowerDiagonal(d);
 	}
-	//TODO: Voeg commentaar toe aan dis shiz.
+
+	/**
+	 * Checks whether there is an upper diagonal with 4 or more discs d.
+	 * 
+	 * @param d
+	 *            the disc of interest
+	 * @return true if there is a diagonal controlled by d
+	 */
 	public boolean hasUpperDiagonal(Disc d) {
 		int r = VERTICAL - ROW;
 		int c = 0;
@@ -271,7 +288,14 @@ public class Board {
 		}
 		return false;
 	}
-	//TODO: Voeg commentaar toe aan dis shiz.
+
+	/**
+	 * Checks whether there is an lower diagonal with 4 or more discs d.
+	 * 
+	 * @param d
+	 *            the disc of interest
+	 * @return true if there is a diagonal controlled by d
+	 */
 	public boolean hasLowerDiagonal(Disc d) {
 		int r = ROW - 1;
 		int c = 0;
@@ -376,8 +400,8 @@ public class Board {
 	 *            the disc to be placed
 	 */
 	public void setField(int col, Disc d) {
-		if (isField(col) && emptyRow(col, true) != -1) {
-			fields[emptyRow(col, true)][col] = d;
+		if (isField(col) && emptyRow(col) != -1) {
+			fields[emptyRow(col)][col] = d;
 		}
 	}
 
