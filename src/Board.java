@@ -155,10 +155,11 @@ public class Board {
 	 */
 	/*@pure*/public boolean isFull() {
 		for (int row = 0; row < VERTICAL; row++) {
-			for (int col = 0; col < HORIZONTAL; col++)
+			for (int col = 0; col < HORIZONTAL; col++) {
 				if (getField(row, col) == Disc.EMPTY) {
 					return false;
 				}
+			}
 		}
 		return true;
 	}
@@ -360,14 +361,14 @@ public class Board {
 		ensures (\forall int i; 0 <= i & i < VERTICAL; (\forall int j; 0 <= j & j < HORIZONTAL; this.getField(i, j) == d));
 	 */
 	/**
-	 * Sets the content of lowest empty field in the column to the disc d.
+	 * Places disc d in the lowest empty row in the column col.
 	 * 
 	 * @param col
 	 *            the field column
 	 * @param d
 	 *            the disc to be placed
 	 */
-	public void setField(int col, Disc d) {
+	public void insertDisc(int col, Disc d) {
 		if (isField(col) && emptyRow(col) != -1) {
 			fields[emptyRow(col)][col] = d;
 		}

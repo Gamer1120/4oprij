@@ -29,7 +29,7 @@ public class Test {
 		System.out.println(b.isWinner(D));
 		System.out.println(b.hasWinner());
 		System.out.println(b.toString());
-		b.setField(N, D);
+		b.insertDisc(N, D);
 		System.out.println(b);
 		b.setField(N, N, D);
 		System.out.println(b);
