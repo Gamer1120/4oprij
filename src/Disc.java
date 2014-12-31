@@ -1,4 +1,3 @@
-
 /**
  * Represents a disc in the connect4 game. There three possible values:
  * Disc.YELLOW, Disc.RED and Disc.EMPTY.

@@ -127,6 +127,26 @@ public class Board {
 	}
 
 	/*@
+	requires this.isField(row,col);
+	ensures \result == (this.getField(row,col) == Disc.EMPTY);
+	*/
+	/**
+	 * Returns true if there is an empty field in the row.
+	 * 
+	 * @param col
+	 *            the column of the field
+	 * @return true if the field is empty
+	 */
+	/*@pure*/public boolean isEmptyField(int col) {
+		for (int row = 0; row < VERTICAL; row++) {
+			if (getField(row, col) == Disc.EMPTY) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/*@
 		requires this.isField(row,col);
 		ensures \result == (this.getField(row,col) == Disc.EMPTY);
 	 */
