@@ -34,4 +34,6 @@ public class SmartStrategy implements Strategy {
 		}
 		return (int) empty.toArray()[((int) (Math.random() * empty.size()))];
 	}
+	
+	//TODO: Implement a canWin(Board b, Disc d) method, which is mainly copy-pasta.
 }
