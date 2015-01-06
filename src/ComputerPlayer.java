@@ -9,7 +9,7 @@ public class ComputerPlayer extends Player {
 	}
 
 	public ComputerPlayer(Disc disc) {
-		this(disc, new NaiveStrategy());
+		this(disc, new SmartStrategy());
 	}
 
 	public Strategy getStrategy() {
