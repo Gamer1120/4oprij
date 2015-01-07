@@ -171,13 +171,61 @@ public class BoardTest {
 			}
 		}
 	}
-	public void testIsEmptyField(){
-		//TODO: Implement this method
+
+	@Test
+	public void testIsEmptyField() {
 		for (int row = 0; row < Board.VERTICAL; row++) {
 			for (int col = 0; col < Board.HORIZONTAL; col++) {
-				assertEquals(
-						"For all fields on an empty board: b.isEmptyField(row, col) == true",
-						true, b.isEmptyField(row, col));
+				assertEquals(true, b.isEmptyField(row, col));
+			}
+		}
+		// Inserts some discs
+		b.insertDisc(2, Disc.RED);
+		b.insertDisc(2, Disc.YELLOW);
+		b.insertDisc(5, Disc.RED);
+		b.insertDisc(1, Disc.RED);
+		b.insertDisc(1, Disc.YELLOW);
+		b.insertDisc(1, Disc.RED);
+		b.insertDisc(1, Disc.YELLOW);
+		b.insertDisc(1, Disc.YELLOW);
+		assertEquals("(4,2) is no longer an empty field.", false,
+				b.isEmptyField(4, 2));
+		assertEquals("(5,2) is no longer an empty field.", false,
+				b.isEmptyField(5, 2));
+		assertEquals("(5,5) is no longer an empty field.", false,
+				b.isEmptyField(5, 5));
+		assertEquals("(1,1) is no longer an empty field.", false,
+				b.isEmptyField(1, 1));
+		assertEquals("(2,1) is no longer an empty field.", false,
+				b.isEmptyField(2, 1));
+		assertEquals("(3,1) is no longer an empty field.", false,
+				b.isEmptyField(3, 1));
+		assertEquals("(4,1) is no longer an empty field.", false,
+				b.isEmptyField(4, 1));
+		assertEquals("(5,1) is no longer an empty field.", false,
+				b.isEmptyField(5, 1));
+	}
+
+	@Test
+	public void testIsFull() {
+		// Puts a random disc on every position of the field. After each
+		// placement, a check is made to see that the board is not full yet. At
+		// the end, the board should be full.
+		for (int row = 0; row < Board.VERTICAL; row++) {
+			for (int col = 0; col < Board.HORIZONTAL; col++) {
+				if (row != Board.VERTICAL && col != Board.HORIZONTAL) {
+					if (Math.random() > 0.5) {
+						b.setField(row, col, Disc.RED);
+					} else {
+						b.setField(row, col, Disc.YELLOW);
+					}
+					assertEquals("For a non-full board: b.isFull() == false",
+							false, b.isFull());
+				} else {
+					assertEquals("For a full board: b.isFull() == true", true,
+							b.isFull());
+				}
+
 			}
 		}
 	}
