@@ -254,6 +254,7 @@ public class Board {
 		return hasUpperDiagonal(d) || hasLowerDiagonal(d);
 	}
 
+	// TODO: Discuss about the name of this method. This is NOT valid English.
 	/**
 	 * Checks whether there is an upper diagonal with 4 or more discs d.
 	 * 
@@ -285,6 +286,7 @@ public class Board {
 		return false;
 	}
 
+	// TODO: Discuss about the name of this method. This is NOT valid English.
 	/**
 	 * Checks whether there is an lower diagonal with 4 or more discs d.
 	 * 

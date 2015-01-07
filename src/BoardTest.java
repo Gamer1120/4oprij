@@ -213,20 +213,89 @@ public class BoardTest {
 		// the end, the board should be full.
 		for (int row = 0; row < Board.VERTICAL; row++) {
 			for (int col = 0; col < Board.HORIZONTAL; col++) {
-				if (row != Board.VERTICAL && col != Board.HORIZONTAL) {
-					if (Math.random() > 0.5) {
-						b.setField(row, col, Disc.RED);
-					} else {
-						b.setField(row, col, Disc.YELLOW);
-					}
+				if (Math.random() > 0.5) {
+					b.setField(row, col, Disc.RED);
+				} else {
+					b.setField(row, col, Disc.YELLOW);
+				}
+				System.out.println("I am now at column: " + col + " and row: "
+						+ row + " and the b.isFull==" + b.isFull());
+				if (!(row == Board.VERTICAL - 1 && col == Board.HORIZONTAL - 1)) {
 					assertEquals("For a non-full board: b.isFull() == false",
 							false, b.isFull());
 				} else {
 					assertEquals("For a full board: b.isFull() == true", true,
 							b.isFull());
 				}
-
 			}
 		}
+	}
+
+	@Test
+	public void testIsGameOver() {
+		// TODO: Discuss if this method is necessary.
+	}
+
+	@Test
+	public void testHasRow() {
+		// /TODO: Implement this method.
+	}
+
+	@Test
+	public void testHasColumn() {
+		// TODO: Implement this method.
+	}
+
+	@Test
+	public void testHasDiagonal() {
+		// TODO: Discuss if this method is necessary.
+	}
+
+	@Test
+	public void testIsWinner() {
+		// TODO: Discuss if this method is necessary.
+	}
+
+	@Test
+	public void testHasWinner() {
+		// TODO: Discuss if this method is necessary.
+	}
+
+	@Test
+	public void testToString() {
+		// TODO: Discuss how to test this.
+	}
+
+	@Test
+	public void testReset() {
+		// Fills the board with Discs
+		for (int row = 0; row < Board.VERTICAL; row++) {
+			for (int col = 0; col < Board.HORIZONTAL; col++) {
+				if (Math.random() > 0.5) {
+					b.setField(row, col, Disc.RED);
+				} else {
+					b.setField(row, col, Disc.YELLOW);
+				}
+			}
+		}
+		// Resets the board
+		b.reset();
+		// Tests if all fields are empty now.
+		for (int row = 0; row < Board.VERTICAL; row++) {
+			for (int col = 0; col < Board.HORIZONTAL; col++) {
+				assertEquals("All discs on the board are Disc.EMPTY now.",
+						Disc.EMPTY, b.getField(row, col));
+			}
+		}
+	}
+
+	@Test
+	public void testInsertDisc() {
+		// TODO: Discuss if this method is necessary.
+	}
+
+	@Test
+	public void testSetField() {
+		// TODO: Discuss if this method is necessary.
 	}
 }
