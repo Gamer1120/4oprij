@@ -28,16 +28,14 @@ public enum Disc {
 			return EMPTY;
 		}
 	}
-	
-	public String toString(){
-		if (this == EMPTY){
-			return " ";
-		} else if (this == RED){
+
+	public String toString() {
+		if (this == RED) {
 			return "R";
-		} else if (this == YELLOW){
+		} else if (this == YELLOW) {
 			return "Y";
 		} else {
-			return "";
+			return " ";
 		}
 	}
 }
