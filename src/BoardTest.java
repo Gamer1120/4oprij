@@ -218,8 +218,6 @@ public class BoardTest {
 				} else {
 					b.setField(row, col, Disc.YELLOW);
 				}
-				System.out.println("I am now at column: " + col + " and row: "
-						+ row + " and the b.isFull==" + b.isFull());
 				if (!(row == Board.VERTICAL - 1 && col == Board.HORIZONTAL - 1)) {
 					assertEquals("For a non-full board: b.isFull() == false",
 							false, b.isFull());
@@ -238,7 +236,45 @@ public class BoardTest {
 
 	@Test
 	public void testHasRow() {
-		// /TODO: Implement this method.
+		// A row is from left to right. At every boardrow, there are 4 potential
+		// rows, namely on the positions 0-3, 1-4, 2-5 and 3-6.
+		for (int row = 0; row < Board.VERTICAL; row++) {
+			// Col <= 3 is hardcoded. In case the Board.HORIZONTAL gets smaller,
+			// the Discs can't be changed, and the program will most likely
+			// crash. In case the Board.HORIZONTAL is changed to
+			// be bigger, this test will not cover all test results.
+			for (int col = 0; col <= 3; col++) {
+				// Reset the board
+				b.reset();
+				// Fill the boardrow with a row of 4 discs
+				for (int i = col; i <= (col + 3); i++) {
+					b.setField(row, i, Disc.RED);
+				}
+				// Red should now have a row, although yellow obviously
+				// shouldn't.
+				assertEquals("b.hasRow(Disc.RED) == true", true,
+						b.hasRow(Disc.RED));
+				assertEquals("b.hasRow(Disc.YELLOW) == false", false,
+						b.hasRow(Disc.YELLOW));
+
+			}
+		}
+		// Now tests with rows of 3. For comments, see above code.
+		for (int row = 0; row < Board.VERTICAL; row++) {
+			for (int col = 0; col <= 3; col++) {
+				b.reset();
+				// Fill the boardrow with a row of 3 discs
+				for (int i = col; i <= (col + 2); i++) {
+					b.setField(row, i, Disc.RED);
+				}
+				assertEquals("b.hasRow(Disc.RED) == false", false,
+						b.hasRow(Disc.RED));
+				assertEquals("b.hasRow(Disc.YELLOW) == false", false,
+						b.hasRow(Disc.YELLOW));
+
+			}
+			// TODO: Entend this test with invalid rows.
+		}
 	}
 
 	@Test
