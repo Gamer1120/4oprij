@@ -256,7 +256,6 @@ public class BoardTest {
 						b.hasRow(Disc.RED));
 				assertEquals("b.hasRow(Disc.YELLOW) == false", false,
 						b.hasRow(Disc.YELLOW));
-
 			}
 		}
 		// Now tests with rows of 3. For comments, see above code.
@@ -273,13 +272,73 @@ public class BoardTest {
 						b.hasRow(Disc.YELLOW));
 
 			}
+			// Fills a clean board with some Discs which don't give a situation
+			// where there's a row.
+			b.reset();
+			b.insertDisc(2, Disc.RED);
+			b.insertDisc(2, Disc.YELLOW);
+			b.insertDisc(5, Disc.RED);
+			b.insertDisc(1, Disc.RED);
+			b.insertDisc(1, Disc.YELLOW);
+			b.insertDisc(1, Disc.RED);
+			assertEquals("b.hasRow(Disc.RED) == false", false,
+					b.hasRow(Disc.RED));
+			assertEquals("b.hasRow(Disc.YELLOW) == false", false,
+					b.hasRow(Disc.YELLOW));
 			// TODO: Entend this test with invalid rows.
 		}
 	}
 
 	@Test
 	public void testHasColumn() {
-		// TODO: Implement this method.
+		// A row is from left to right. At every boardrow, there are 3 potential
+		// rows, namely on the positions 0-3, 1-4 and 2-5.
+		for (int col = 0; col < Board.HORIZONTAL; col++) {
+			// Row <= 2 is hardcoded. In case the Board.VERTICAL gets smaller,
+			// the Discs can't be changed, and the program will most likely
+			// crash. In case the Board.VERTICAL is changed to
+			// be bigger, this test will not cover all test results.
+			for (int row = 0; row <= 2; row++) {
+				// Resets the board
+				b.reset();
+				// Fill a boardcolumn with a column of 4 discs
+				for (int i = row; i <= (row + 3); i++) {
+					b.setField(i, col, Disc.RED);
+				}
+				// Red should now have a row, although yellow obviously
+				// shouldn't.
+				assertEquals("b.hasColumn(Disc.RED) == true", true,
+						b.hasColumn(Disc.RED));
+				assertEquals("b.hasColumn(Disc.YELLOW) == false", false,
+						b.hasColumn(Disc.YELLOW));
+			}
+		}
+		// Now tests with columns of 3. For comments, see above code.
+		for (int col = 0; col < Board.HORIZONTAL; col++) {
+			for (int row = 0; row <= 2; row++) {
+				b.reset();
+				for (int i = row; i <= (row + 2); i++) {
+					b.setField(i, col, Disc.RED);
+				}
+				assertEquals("b.hasColumn(Disc.RED) == false", false,
+						b.hasColumn(Disc.RED));
+				assertEquals("b.hasColumn(Disc.YELLOW) == false", false,
+						b.hasColumn(Disc.YELLOW));
+			}
+		}
+		// Fills a clean board with some Discs which don't give a situation
+		// where there's a column.
+		b.reset();
+		b.insertDisc(2, Disc.RED);
+		b.insertDisc(2, Disc.YELLOW);
+		b.insertDisc(5, Disc.RED);
+		b.insertDisc(1, Disc.RED);
+		b.insertDisc(1, Disc.YELLOW);
+		b.insertDisc(1, Disc.RED);
+		assertEquals("b.hasColumn(Disc.RED) == false", false,
+				b.hasColumn(Disc.RED));
+		assertEquals("b.hasColumn(Disc.YELLOW) == false", false,
+				b.hasColumn(Disc.YELLOW));
 	}
 
 	@Test
