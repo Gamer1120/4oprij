@@ -196,34 +196,6 @@ public class Board {
 	}
 
 	/**
-	 * Checks whether there are still enough rows left to win
-	 * 
-	 * @param row
-	 *            the row to check
-	 * @param count
-	 *            the ammount of discs already found
-	 * @return true if it's possible to fill the remaining rows with the same
-	 *         ammount or more discs than ROW
-	 */
-	/*@pure*/public boolean possibleRow(int row, int count) {
-		return VERTICAL + count - row >= ROW || row + count + 1 >= ROW;
-	}
-
-	/**
-	 * Checks whether there are still enough columns left to win
-	 * 
-	 * @param col
-	 *            the column to check
-	 * @param count
-	 *            the ammount of discs already found
-	 * @return true if it's possible to fill the remaining rows with the same
-	 *         ammount or more discs than ROW
-	 */
-	/*@pure*/public boolean possibleColumn(int col, int count) {
-		return HORIZONTAL + count - col >= ROW || col + count + 1 >= ROW;
-	}
-
-	/**
 	 * Checks whether there is a row with 4 or more discs d.
 	 * 
 	 * @param d
@@ -234,7 +206,7 @@ public class Board {
 		for (int row = 0; row < VERTICAL; row++) {
 			int count = 0;
 			// TODO: Check of dit klopt voor alle 4.
-			for (int col = 0; possibleColumn(col, count); col++) {
+			for (int col = 0; HORIZONTAL + count - col >= ROW; col++) {
 				if (getField(row, col) == d) {
 					if (++count >= ROW) {
 						return true;
@@ -257,7 +229,7 @@ public class Board {
 	/*@pure*/public boolean hasColumn(Disc d) {
 		for (int col = 0; col < HORIZONTAL; col++) {
 			int count = 0;
-			for (int row = 0; possibleRow(row, count); row++) {
+			for (int row = 0; VERTICAL + count - row >= ROW; row++) {
 				if (getField(row, col) == d) {
 					if (++count >= ROW) {
 						return true;
@@ -285,10 +257,10 @@ public class Board {
 			int col = c;
 			int count1 = 0;
 			int count2 = 0;
-			boolean diag1 = possibleRow(row, count1)
-					&& possibleColumn(col, count1);
-			boolean diag2 = possibleRow(row, count2)
-					&& possibleColumn(col, count2);
+			boolean diag1 = (VERTICAL + count1 - row >= ROW)
+					&& (HORIZONTAL + count1 - col >= ROW);
+			boolean diag2 = (row + count2 + 1 >= ROW)
+					&& (HORIZONTAL + count2 - col >= ROW);
 			while (diag1 || diag2) {
 				if (diag1) {
 					if (getField(row, col) == d) {
@@ -310,8 +282,10 @@ public class Board {
 				}
 				row++;
 				col++;
-				diag1 = possibleRow(row, count1) && possibleColumn(col, count1);
-				diag2 = possibleRow(row, count2) && possibleColumn(col, count2);
+				diag1 = (VERTICAL + count1 - row >= ROW)
+						&& (HORIZONTAL + count1 - col >= ROW);
+				diag2 = (row + count2 + 1 >= ROW)
+						&& (HORIZONTAL + count2 - col >= ROW);
 			}
 			if (r > 0) {
 				r--;
