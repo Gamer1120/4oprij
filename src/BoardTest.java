@@ -726,7 +726,6 @@ public class BoardTest {
 	public void testInsertDisc() {
 		for (int row = 5; row >= 0; row--) {
 			b.insertDisc(0, Disc.RED);
-			System.out.println(b.toString());
 			assertEquals("b.getField(row, 0) == Disc.RED", Disc.RED, b.getField(row, 0));
 		}
 	}
