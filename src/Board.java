@@ -259,7 +259,7 @@ public class Board {
 			int count2 = 0;
 			boolean diag1 = (VERTICAL + count1 - row >= ROW)
 					&& (HORIZONTAL + count1 - col >= ROW);
-			boolean diag2 = (row + count2 + 1 >= ROW)
+			boolean diag2 = (VERTICAL + count2 - row >= ROW)
 					&& (HORIZONTAL + count2 - col >= ROW);
 			while (diag1 || diag2) {
 				if (diag1) {
@@ -284,7 +284,7 @@ public class Board {
 				col++;
 				diag1 = (VERTICAL + count1 - row >= ROW)
 						&& (HORIZONTAL + count1 - col >= ROW);
-				diag2 = (row + count2 + 1 >= ROW)
+				diag2 = (VERTICAL + count2 - row >= ROW)
 						&& (HORIZONTAL + count2 - col >= ROW);
 			}
 			if (r > 0) {

@@ -24,8 +24,6 @@ public class Test {
 		System.out.println(b.hasRow(D));
 		System.out.println(b.hasColumn(D));
 		System.out.println(b.hasDiagonal(D));
-		System.out.println(b.hasUpperDiagonal(D));
-		System.out.println(b.hasLowerDiagonal(D));
 		System.out.println(b.isWinner(D));
 		System.out.println(b.hasWinner());
 		System.out.println(b.toString());
