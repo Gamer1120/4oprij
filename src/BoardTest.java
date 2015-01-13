@@ -343,6 +343,8 @@ public class BoardTest {
 
 	@Test
 	public void testHasDiagonal() {
+		// These are all possible combinations in which hasDiagonal == true. For
+		// all possible combinations, please have a look at doc/
 		// Option 1
 		b.setField(3, 0, Disc.RED);
 		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
@@ -511,7 +513,7 @@ public class BoardTest {
 		assertEquals("b.hasDiagonal(Disc.RED)==true", true,
 				b.hasDiagonal(Disc.RED));
 		b.reset();
-		// From now on testing the other verticals
+		// From now on testing the verticals the other way around.
 		// Option 13
 		b.setField(2, 0, Disc.RED);
 		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
@@ -722,7 +724,11 @@ public class BoardTest {
 
 	@Test
 	public void testInsertDisc() {
-		// TODO: Make a test for this method.
+		for (int row = 5; row >= 0; row--) {
+			b.insertDisc(0, Disc.RED);
+			System.out.println(b.toString());
+			assertEquals("b.getField(row, 0) == Disc.RED", Disc.RED, b.getField(row, 0));
+		}
 	}
 
 	@Test
