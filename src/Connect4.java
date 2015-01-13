@@ -4,6 +4,7 @@ public class Connect4 {
 
 	public static void main(String[] args) {
 		Player[] player = new Player[Game.NUMBER_PLAYERS];
+		GameView view = null;
 		Disc d = Disc.YELLOW;
 		for (int i = 0; i < Game.NUMBER_PLAYERS; i++) {
 			if (i >= args.length) {
@@ -13,12 +14,12 @@ public class Connect4 {
 			} else if (SMART_PLAYER.equalsIgnoreCase(args[i])) {
 				player[i] = new ComputerPlayer(d, new SmartStrategy());
 			} else {
-				player[i] = new HumanPlayer(args[i], d);
+				player[i] = new HumanPlayer(args[i], d, view);
 			}
 			d = d.other();
 		}
-		Game game = new Game(player[0], player[1]);
+		Game game = new Game(player[0], player[1], view);
 		game.start();
 	}
-
+	//TODO: argumenten voor view toevoegen
 }

@@ -1,10 +1,12 @@
+import java.util.Observable;
+
 /**
  * Abstract class for keeping a player in the Connect4 game.
  * 
  * @author Sven Konings en Michael Koopman
  * @version $Revision: 1.0 $
  */
-public abstract class Player {
+public abstract class Player extends Observable {
 
 	// Instance variables:
 	private String name;
@@ -63,6 +65,7 @@ public abstract class Player {
 	public void makeMove(Board board) {
 		int keuze = determineMove(board);
 		board.insertDisc(keuze, getDisc());
+		//TODO: Notify move gedaan
 	}
 
 }
