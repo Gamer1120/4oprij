@@ -196,6 +196,34 @@ public class Board {
 	}
 
 	/**
+	 * Checks whether there are still enough rows left to win
+	 * 
+	 * @param row
+	 *            the row to check
+	 * @param count
+	 *            the ammount of discs already found
+	 * @return true if it's possible to fill the remaining rows with the same
+	 *         ammount or more discs than ROW
+	 */
+	/*@pure*/public boolean possibleRow(int row, int count) {
+		return VERTICAL + count - row >= ROW || row + count + 1 >= ROW;
+	}
+
+	/**
+	 * Checks whether there are still enough columns left to win
+	 * 
+	 * @param col
+	 *            the column to check
+	 * @param count
+	 *            the ammount of discs already found
+	 * @return true if it's possible to fill the remaining rows with the same
+	 *         ammount or more discs than ROW
+	 */
+	/*@pure*/public boolean possibleColumn(int col, int count) {
+		return HORIZONTAL + count - col >= ROW || col + count + 1 >= ROW;
+	}
+
+	/**
 	 * Checks whether there is a row with 4 or more discs d.
 	 * 
 	 * @param d
@@ -206,7 +234,7 @@ public class Board {
 		for (int row = 0; row < VERTICAL; row++) {
 			int count = 0;
 			// TODO: Check of dit klopt voor alle 4.
-			for (int col = 0; HORIZONTAL + count - col >= ROW; col++) {
+			for (int col = 0; possibleColumn(col, count); col++) {
 				if (getField(row, col) == d) {
 					if (++count >= ROW) {
 						return true;
@@ -229,7 +257,7 @@ public class Board {
 	/*@pure*/public boolean hasColumn(Disc d) {
 		for (int col = 0; col < HORIZONTAL; col++) {
 			int count = 0;
-			for (int row = 0; VERTICAL + count - row >= ROW; row++) {
+			for (int row = 0; possibleRow(row, count); row++) {
 				if (getField(row, col) == d) {
 					if (++count >= ROW) {
 						return true;
@@ -243,76 +271,52 @@ public class Board {
 	}
 
 	/**
-	 * Checks whether there is an upper or an lower diagonal with 4 or more
-	 * discs d.
+	 * Checks whether there is an diagonal with 4 or more discs d.
 	 * 
 	 * @param d
 	 *            the disc of interest
 	 * @return true if there is a diagonal controlled by d
 	 */
 	/*@pure*/public boolean hasDiagonal(Disc d) {
-		return hasUpperDiagonal(d) || hasLowerDiagonal(d);
-	}
-
-	// TODO: Discuss about the name of this method. This is NOT valid English.
-	/**
-	 * Checks whether there is an upper diagonal with 4 or more discs d.
-	 * 
-	 * @param d
-	 *            the disc of interest
-	 * @return true if there is a diagonal controlled by d
-	 */
-	/*@pure*/public boolean hasUpperDiagonal(Disc d) {
 		int r = VERTICAL - ROW;
 		int c = 0;
 		while (c < HORIZONTAL) {
+			int row = r;
+			int col = c;
+			int count1 = 0;
+			int count2 = 0;
+			boolean diag1 = possibleRow(row, count1)
+					&& possibleColumn(col, count1);
+			boolean diag2 = possibleRow(row, count2)
+					&& possibleColumn(col, count2);
+			while (diag1 || diag2) {
+				if (diag1) {
+					if (getField(row, col) == d) {
+						if (++count1 >= ROW) {
+							return true;
+						}
+					} else {
+						count1 = 0;
+					}
+				}
+				if (diag2) {
+					if (getField(VERTICAL - 1 - row, col) == d) {
+						if (++count2 >= ROW) {
+							return true;
+						}
+					} else {
+						count2 = 0;
+					}
+				}
+				row++;
+				col++;
+				diag1 = possibleRow(row, count1) && possibleColumn(col, count1);
+				diag2 = possibleRow(row, count2) && possibleColumn(col, count2);
+			}
 			if (r > 0) {
 				r--;
 			} else {
 				c++;
-			}
-			int count = 0;
-			for (int row = r, col = c; VERTICAL + count - row >= ROW
-					&& HORIZONTAL + count - col >= ROW; row++, col++) {
-				if (getField(row, col) == d) {
-					if (++count >= ROW) {
-						return true;
-					}
-				} else {
-					count = 0;
-				}
-			}
-		}
-		return false;
-	}
-
-	// TODO: Discuss about the name of this method. This is NOT valid English.
-	/**
-	 * Checks whether there is an lower diagonal with 4 or more discs d.
-	 * 
-	 * @param d
-	 *            the disc of interest
-	 * @return true if there is a diagonal controlled by d
-	 */
-	/*@pure*/public boolean hasLowerDiagonal(Disc d) {
-		int r = ROW - 1;
-		int c = 0;
-		while (c < HORIZONTAL) {
-			if (r <= VERTICAL - 1) {
-				r++;
-			} else {
-				c++;
-			}
-			int count = 0;
-			for (int row = r, col = c; row + count + 1 >= ROW
-					&& HORIZONTAL + count - col >= ROW; row--, col++) {
-				if (getField(row, col) == d) {
-					if (++count >= ROW) {
-						return true;
-					}
-				} else {
-					count = 0;
-				}
 			}
 		}
 		return false;
