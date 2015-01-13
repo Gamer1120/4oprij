@@ -21,5 +21,5 @@ public class Connect4 {
 		Game game = new Game(player[0], player[1], view);
 		game.start();
 	}
-	//TODO: argumenten voor view toevoegen
+	//TODO: add arguments for view
 }

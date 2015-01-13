@@ -205,7 +205,6 @@ public class Board {
 	/*@pure*/public boolean hasRow(Disc d) {
 		for (int row = 0; row < VERTICAL; row++) {
 			int count = 0;
-			// TODO: Check of dit klopt voor alle 4.
 			for (int col = 0; HORIZONTAL + count - col >= ROW; col++) {
 				if (getField(row, col) == d) {
 					if (++count >= ROW) {

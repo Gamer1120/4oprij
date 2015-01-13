@@ -5,7 +5,6 @@
  * @version $Revision: 1.0 $
  */
 public class Game {
-	//TODO: opsplitsen in controller, view interface en TUI met MVC model
 	// Instance variables:
 	public static final int NUMBER_PLAYERS = 2;
 

@@ -43,7 +43,7 @@ public class HumanPlayer extends Player {
 		int choice = view.makeMove(this);
 		boolean valid = board.isField(choice) && board.isEmptyField(choice);
 		while (!valid) {
-			//TODO: notify invalid move
+			//TODO: Notify invalid move
 			choice = view.makeMove(this);
 			valid = board.isField(choice) && board.isEmptyField(choice);
 		}
