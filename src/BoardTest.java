@@ -231,7 +231,7 @@ public class BoardTest {
 
 	@Test
 	public void testIsGameOver() {
-		// TODO: Discuss if this method is necessary.
+		// Not necessary to write a test for this method.
 	}
 
 	@Test
@@ -343,22 +343,66 @@ public class BoardTest {
 
 	@Test
 	public void testHasDiagonal() {
-		// TODO: Discuss if this method is necessary.
+		b.setField(3, 0, Disc.RED);
+		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
+				b.hasDiagonal(Disc.RED));
+		b.setField(2, 1, Disc.RED);
+		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
+				b.hasDiagonal(Disc.RED));
+		b.setField(1, 2, Disc.RED);
+		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
+				b.hasDiagonal(Disc.RED));
+		b.setField(0, 3, Disc.RED);
+		System.out.println(b.toString());
+		System.out.println("Gaat stuk");
+		// assertEquals("b.hasDiagonal(Disc.RED)==true", true,
+		// b.hasDiagonal(Disc.RED));
+		b.reset();
+		b.setField(4, 0, Disc.RED);
+		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
+				b.hasDiagonal(Disc.RED));
+		b.setField(3, 1, Disc.RED);
+		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
+				b.hasDiagonal(Disc.RED));
+		b.setField(2, 2, Disc.RED);
+		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
+				b.hasDiagonal(Disc.RED));
+		b.setField(1, 3, Disc.RED);
+		System.out.println(b.toString());
+		System.out.println("Gaat stuk");
+		// assertEquals("b.hasDiagonal(Disc.RED)==true", true,
+		// b.hasDiagonal(Disc.RED));
+		b.reset();
+		b.setField(3, 1, Disc.RED);
+		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
+				b.hasDiagonal(Disc.RED));
+		b.setField(2, 2, Disc.RED);
+		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
+				b.hasDiagonal(Disc.RED));
+		b.setField(1, 3, Disc.RED);
+		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
+				b.hasDiagonal(Disc.RED));
+		b.setField(0, 4, Disc.RED);
+		System.out.println(b.toString());
+		System.out.println("Gaat stuk");
+		//assertEquals("b.hasDiagonal(Disc.RED)==true", true,
+		//		b.hasDiagonal(Disc.RED));
+
 	}
 
 	@Test
 	public void testIsWinner() {
-		// TODO: Discuss if this method is necessary.
+		// Not necessary to test this method.
 	}
 
 	@Test
 	public void testHasWinner() {
-		// TODO: Discuss if this method is necessary.
+		// Not necessary to test this method.
 	}
 
 	@Test
 	public void testToString() {
-		// TODO: Discuss how to test this.
+		// Is implicitly tested, not necessary to test this method.
 	}
 
 	@Test
@@ -386,11 +430,11 @@ public class BoardTest {
 
 	@Test
 	public void testInsertDisc() {
-		// TODO: Discuss if this method is necessary.
+		// TODO: Make a test for this method.
 	}
 
 	@Test
 	public void testSetField() {
-		// TODO: Discuss if this method is necessary.
+		// Is tested plenty of times in other tests. No need for another one.
 	}
 }
