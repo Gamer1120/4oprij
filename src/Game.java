@@ -64,7 +64,7 @@ public class Game {
 	 * to continue. Continues until the user does not want to play anymore.
 	 */
 	public void start() {
-		view.start();
+		view.start(this);
 	}
 
 	/**
@@ -82,11 +82,12 @@ public class Game {
 	 * the other. After each move, the changed game situation is printed.
 	 */
 	public void play() {
-		view.update(board);
+		reset();
+		view.printBoard(board);
 		current = 0;
 		while (!board.gameOver()) {
 			players[current].makeMove(board);
-			view.update(board);
+			view.printBoard(board);
 			current = (current + 1) % NUMBER_PLAYERS;
 		}
 		printResult();
@@ -100,7 +101,7 @@ public class Game {
 		if (board.hasWinner()) {
 			Player winner = board.isWinner(players[0].getDisc()) ? players[0]
 					: players[1];
-			view.printResult(winner);
+			view.printResult(winner.getName());
 		} else {
 			view.printResult(null);
 		}

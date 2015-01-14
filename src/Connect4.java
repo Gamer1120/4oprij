@@ -4,7 +4,7 @@ public class Connect4 {
 
 	public static void main(String[] args) {
 		Player[] player = new Player[Game.NUMBER_PLAYERS];
-		GameView view = null;
+		GameView view = new GameTUIView();
 		Disc d = Disc.YELLOW;
 		for (int i = 0; i < Game.NUMBER_PLAYERS; i++) {
 			if (i >= args.length) {

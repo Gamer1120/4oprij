@@ -40,11 +40,11 @@ public class HumanPlayer extends Player {
 	 * @return the player's chosen field
 	 */
 	public int determineMove(Board board) {
-		int choice = view.makeMove(this);
+		int choice = view.makeMove(getName());
 		boolean valid = board.isField(choice) && board.isEmptyField(choice);
 		while (!valid) {
 			//TODO: Notify invalid move
-			choice = view.makeMove(this);
+			choice = view.makeMove(getName());
 			valid = board.isField(choice) && board.isEmptyField(choice);
 		}
 		return choice;

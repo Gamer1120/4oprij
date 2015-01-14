@@ -1,13 +1,13 @@
 import java.util.Observer;
 
 public interface GameView extends Observer {
-	public void start();
+	public void start(Game controller);
 
-	public void play();
+	public void command();
 
-	public void update(Board board);
+	public void printBoard(Board board);
 
-	public int makeMove(Player player);
+	public int makeMove(String name);
 
-	public void printResult(Player player);
+	public void printResult(String name);
 }
