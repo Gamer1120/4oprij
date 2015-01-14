@@ -6,10 +6,10 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class ClientUI implements MessageUI {
+public class ClientTUI implements MessageUI {
 	private Client client;
 
-	public ClientUI(String name, InetAddress inet, int port) {
+	public ClientTUI(String name, InetAddress inet, int port) {
 		try {
 			this.client = new Client(name, inet, port, this);
 			client.start();
@@ -48,7 +48,7 @@ public class ClientUI implements MessageUI {
 			e.printStackTrace();
 		}
 		int port = 2727;
-		ClientUI c = new ClientUI("Michael", addr, port);
+		ClientTUI c = new ClientTUI("Michael", addr, port);
 		c.readInput();
 	}
 }

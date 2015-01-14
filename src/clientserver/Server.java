@@ -16,6 +16,19 @@ import java.util.LinkedList;
  * @version 2005.02.21
  */
 public class Server extends Thread {
+	// PROTOCOL
+	public static final String ACCEPT_CONNECT = "OK";
+	public static final String ERROR = "ERROR";
+	public static final String LOBBY = "LOBBY";
+	public static final String INVITE = "INVITE";
+	public static final String GAME_START = "START";
+	public static final String GAME_END = "END";
+	public static final String REQUEST_MOVE = "REQUEST";
+	public static final String MOVE_OK = "MOVE";
+	public static final String BOARD = "BOARD";
+	public static final String CHAT = "CHAT";
+	public static final String LEADERBOARD = "LEADERBOARD";
+	// END OF PROTOCOL
 	private int port;
 	private MessageUI mui;
 	private Collection<ClientHandler> threads;
@@ -44,7 +57,7 @@ public class Server extends Thread {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			
+
 		}
 	}
 

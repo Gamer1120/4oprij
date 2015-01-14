@@ -16,7 +16,18 @@ import java.net.Socket;
  * @version 2005.02.21
  */
 public class Client extends Thread {
-
+	// PROTOCOL
+	public static final String CONNECT = "CONNECT";
+	public static final String QUIT = "QUIT";
+	public static final String INVITE = "INVITE";
+	public static final String ACCEPT_INVITE = "ACCEPT";
+	public static final String DECLINE_INVITE = "DECLINE";
+	public static final String MOVE = "MOVE";
+	public static final String CHAT = "CHAT";
+	public static final String REQUEST_BOARD = "REQUEST";
+	public static final String REQUEST_LOBBY = "LOBBY";
+	public static final String REQUEST_LEADERBOARD = "LEADERBOARD";
+	// END OF PROTOCOL
 	private String clientName;
 	private MessageUI mui;
 	private Socket sock;
@@ -43,8 +54,34 @@ public class Client extends Thread {
 	 * Reads the messages in the socket connection. Each message will be
 	 * forwarded to the MessageUI
 	 */
+
 	public void run() {
 		sendMessage(getClientName());
+		// PROTOCOLTEST
+		sendMessage("Client: " + CONNECT + " " + getClientName()
+				+ " Feature1 Feature2 Feature3 Feature4");
+		sendMessage("Server: " + Server.ACCEPT_CONNECT
+				+ " ServerFeature1 ServerFeature2" + " (of " + Server.ERROR
+				+ ")");
+		sendMessage("Client: " + REQUEST_LOBBY);
+		sendMessage("Server: " + Server.LOBBY + " Michael Sven Kip Haan");
+		sendMessage("Client: " + INVITE + " Naam");
+		sendMessage("Server: " + Server.INVITE + " Naam");
+		sendMessage("Client2: " + ACCEPT_INVITE + " (of " + DECLINE_INVITE
+				+ ")");
+		sendMessage("Server: " + Server.GAME_START);
+		sendMessage("Loop:");
+		sendMessage("Server: " + Server.REQUEST_MOVE + " (naar client1)");
+		sendMessage("Client: " + MOVE + " move_getal");
+		sendMessage("Server: " + Server.MOVE_OK + " (of " + Server.ERROR + "?)");
+		sendMessage("Server: " + "Stuur naar client2 welke move is gedaan.");
+		sendMessage("Server: " + Server.REQUEST_MOVE+ " (naar client2uj)");
+		sendMessage("Client2: " + MOVE + " move_getal");
+		sendMessage("Server: " + Server.MOVE_OK + " (of " + Server.ERROR + "?)");
+		sendMessage("Server: " + "Stuur naar client1 welke move is gedaan.");
+		sendMessage("End loop.");
+		sendMessage("Server: " + Server.GAME_END);
+		// END PROTOCOLTEST
 		while (loop) {
 			try {
 				String message = in.readLine();
