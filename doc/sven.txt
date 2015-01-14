@@ -1,0 +1,6 @@
+De client als die opstart vraagt om poort en IP en vervolgens connecten
+Server moet constant naar connecties luisteren, waarschijnlijk op aparte thread
+En dan de OK sturen, en nieuwe connecties aanmaken.
+Als hij een client heeft toegevoegd, moet hij een ding maken waarin hij de commandos van de client opvangt.
+De server checkt voor connecties, de clienthandler doet alle commandos
+Uiteindelijk moeten er 2 clienthandlers geconnect zijn met 1 game.
