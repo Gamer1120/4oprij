@@ -1,6 +1,7 @@
 public class Connect4 {
 	public final static String NAIVE_PLAYER = "-N";
 	public final static String SMART_PLAYER = "-S";
+	public final static String MINMAX_PLAYER = "-M";
 
 	public static void main(String[] args) {
 		Player[] player = new Player[Game.NUMBER_PLAYERS];
@@ -13,6 +14,8 @@ public class Connect4 {
 				player[i] = new ComputerPlayer(d, new NaiveStrategy());
 			} else if (SMART_PLAYER.equalsIgnoreCase(args[i])) {
 				player[i] = new ComputerPlayer(d, new SmartStrategy());
+			} else if (MINMAX_PLAYER.equalsIgnoreCase(args[i])) {
+				player[i] = new ComputerPlayer(d, new MinMaxStrategy());
 			} else {
 				player[i] = new HumanPlayer(args[i], d, view);
 			}
