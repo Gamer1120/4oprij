@@ -52,7 +52,6 @@ public class Server extends Thread {
 				Socket s = ss.accept();
 				ClientHandler ch = new ClientHandler(this, s);
 				addHandler(ch);
-				ch.announce();
 				ch.start();
 			}
 		} catch (IOException e) {
@@ -69,12 +68,31 @@ public class Server extends Thread {
 	 *            message that is send
 	 */
 	public void broadcast(String msg) {
-		if (msg != null) {
-			for (ClientHandler ch : threads) {
-				ch.sendMessage(msg);
-			}
-			mui.addMessage(msg);
+		//TODO: alleen mensen zonder game
+		for (ClientHandler ch : threads) {
+			ch.sendMessage(msg);
 		}
+		mui.addMessage(msg);
+	}
+
+	/**
+	 * Sends a message using the collection of connected ClientHandlers to the
+	 * Client with the specified name
+	 * 
+	 * @param name
+	 *            name of the client
+	 * @param msg
+	 *            message that is send
+	 */
+	public void sendMessage(String name, String msg) {
+		for (ClientHandler ch : threads) {
+			if (name.equals(ch.getClientName())) {
+				ch.sendMessage(msg);
+				break;
+			}
+
+		}
+		mui.addMessage(name + ": " + msg);
 	}
 
 	/**

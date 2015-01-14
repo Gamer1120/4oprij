@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.Arrays;
 
 /**
  * ClientHandler.
@@ -20,6 +21,9 @@ public class ClientHandler extends Thread {
 	private BufferedReader in;
 	private BufferedWriter out;
 	private String clientName;
+	private String[] features;
+	//TODO: bijhouden in bord?
+	private String opponentName;
 	private boolean loop;
 
 	/**
@@ -37,17 +41,6 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Reads the name of a Client from the input stream and sends a broadcast
-	 * message to the Server to signal that the Client is participating in the
-	 * chat. Notice that this method should be called immediately after the
-	 * ClientHandler has been constructed.
-	 */
-	public void announce() throws IOException {
-		clientName = in.readLine();
-		server.broadcast("[" + clientName + " has entered]");
-	}
-
-	/**
 	 * This method takes care of sending messages from the Client. Every message
 	 * that is received, is preprended with the name of the Client, and the new
 	 * message is offered to the Server for broadcasting. If an IOException is
@@ -57,13 +50,70 @@ public class ClientHandler extends Thread {
 	public void run() {
 		while (loop) {
 			try {
-				String message = in.readLine();
-				if ("EXIT".equals(message) || message == null) {
+				String line = in.readLine();
+				String[] command = line.split("\\s+");
+				//TODO: checken of command lengte etc klopt
+				switch (command[0]) {
+				case Client.CONNECT:
+					clientName = command[1];
+					features = Arrays.copyOfRange(command, 2,
+							command.length - 1);
+					//TODO: voeg client toe aan server (lobby)
+					//TODO: broadcast de nieuwe lobby aan iedereen zonder game
+					sendMessage(Server.ACCEPT_CONNECT
+							+ " Feature array gescheiden met spaties");
+					break;
+				case Client.QUIT:
+					//TODO: reason broadcasten?
+					//TODO: broadcast de lobby als de client geen game had aan iedereen zonder game inclusief=
 					shutdown();
-				} else {
-					server.broadcast(message);
+					break;
+				case Client.INVITE:
+					String parameters = command[1];
+					//Hopen dat die i ook checkt aan begin en niet eind elke loop
+					for (int i = 2; i < command.length; i++) {
+						parameters += " " + command[i];
+					}
+					server.sendMessage(command[1], Server.INVITE + " "
+							+ parameters);
+					break;
+				case Client.ACCEPT_INVITE:
+					//TODO: extras verzenden (spectators?)
+					sendMessage(Server.GAME_START + " " + clientName + " "
+							+ command[1]);
+					server.sendMessage(command[1], Server.GAME_START + " "
+							+ clientName + " " + command[1]);
+					break;
+				case Client.DECLINE_INVITE:
+					server.sendMessage(command[1], Server.ERROR
+							+ " Invite declined");
+					break;
+				case Client.MOVE:
+					//TODO: zelf bord bijhouden voor nummer en move ok checken
+					sendMessage(Server.MOVE_OK + " " + clientName + " "
+							+ command[1]);
+					server.sendMessage(opponentName, (Server.MOVE_OK + " "
+							+ clientName + " " + command[1]));
+					break;
+				case Client.CHAT:
+					String message = command[1];
+					//Hopen dat die i ook checkt aan begin en niet eind elke loop
+					for (int i = 2; i < command.length; i++) {
+						message += " " + command[i];
+					}
+					server.broadcast(Server.CHAT + " " + message);
+					break;
+				case Client.REQUEST_BOARD:
+					//TODO: zelf bord bijhouden om op te sturen
+					break;
+				case Client.REQUEST_LOBBY:
+					//TODO: lobby maken
+					break;
+				case Client.REQUEST_LEADERBOARD:
+					//TODO: leaderbords opslaan
+					break;
 				}
-			} catch (IOException ex) {
+			} catch (IOException e) {
 				shutdown();
 			}
 		}
@@ -85,13 +135,31 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
+	 * returns the name of the client
+	 * 
+	 * @return the name of the client
+	 */
+	public String getClientName() {
+		return clientName;
+	}
+
+	/**
+	 * returns the features of the client
+	 * 
+	 * @return the features of the client
+	 */
+	public String[] getClientFeatures() {
+		return features;
+	}
+
+	/**
 	 * This ClientHandler signs off from the Server and subsequently sends a
 	 * last broadcast to the Server to inform that the Client is no longer
 	 * participating in the chat.
 	 */
 	private void shutdown() {
+		//TODO: verwijder speler (lobby)
 		server.removeHandler(this);
-		server.broadcast("[" + clientName + " has left]");
 		loop = false;
 	}
 
