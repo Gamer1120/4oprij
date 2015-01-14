@@ -16,19 +16,6 @@ import java.net.Socket;
  * @version 2005.02.21
  */
 public class Client extends Thread {
-	
-	//PROTOCOL
-	public static final String CONNECT = "CONNECT";
-	public static final String QUIT = "QUIT";
-	public static final String INVITE = "INVITE";
-	public static final String ACCEPT_INVITE = "ACCEPT";
-	public static final String DECLINE_INVITE = "DECLINE";
-	public static final String MOVE = "MOVE";
-	public static final String CHAT = "CHAT";
-	public static final String REQUEST_BOARD = "REQUEST";
-	public static final String REQUEST_LOBBY = "LOBBY";
-	public static final String REQUEST_LEADERBOARD = "LEADERBOARD";
-	//END OF PROTOCOL
 
 	private String clientName;
 	private MessageUI mui;
@@ -57,7 +44,7 @@ public class Client extends Thread {
 	 * forwarded to the MessageUI
 	 */
 	public void run() {
-		protocolTest();
+		sendMessage(getClientName());
 		while (loop) {
 			try {
 				String message = in.readLine();
@@ -100,7 +87,4 @@ public class Client extends Thread {
 		return clientName;
 	}
 
-	private void protocolTest() {
-		sendMessage(CONNECT + this.getClientName() + "");
-	}
 } // end of class Client
