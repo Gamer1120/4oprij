@@ -58,29 +58,30 @@ public class Client extends Thread {
 	public void run() {
 		sendMessage(getClientName());
 		// PROTOCOLTEST
-		sendMessage("Client: " + CONNECT + " " + getClientName()
-				+ " Feature1 Feature2 Feature3 Feature4");
-		sendMessage("Server: " + Server.ACCEPT_CONNECT
-				+ " ServerFeature1 ServerFeature2" + " (of " + Server.ERROR
-				+ ")");
-		sendMessage("Client: " + REQUEST_LOBBY);
-		sendMessage("Server: " + Server.LOBBY + " Michael Sven Kip Haan");
-		sendMessage("Client: " + INVITE + " Naam");
-		sendMessage("Server: " + Server.INVITE + " Naam");
-		sendMessage("Client2: " + ACCEPT_INVITE + " (of " + DECLINE_INVITE
-				+ ")");
-		sendMessage("Server: " + Server.GAME_START);
-		sendMessage("Loop:");
+		sendMessage(CONNECT + " " + getClientName());
+		// Wait for accept connect from server
+		/**
+		 * sendMessage("Server: " + Server.ACCEPT_CONNECT +
+		 * " ServerFeature1 ServerFeature2" + " (of " + Server.ERROR + ")");
+		 */
+		sendMessage(REQUEST_LOBBY);
+		// Wait for lobby
+		/**
+		 * sendMessage("Server: " + Server.LOBBY + " Michael Sven Kip Haan");
+		 * */
+		// Show players in lobby and ask user for a player to invite
+		String playerToInvite = "";
+		sendMessage(INVITE + " " + playerToInvite);
+		// Server sends message to invited player, invited player accepts or
+		// declines
+		// In case of accept: Receive Server.GAME_START, and start a new game.
+		// Loop:
 		sendMessage("Server: " + Server.REQUEST_MOVE + " (naar client1)");
-		sendMessage("Client: " + MOVE + " move_getal");
-		sendMessage("Server: " + Server.MOVE_OK + " (of " + Server.ERROR + "?)");
-		sendMessage("Server: " + "Stuur naar client2 welke move is gedaan.");
-		sendMessage("Server: " + Server.REQUEST_MOVE+ " (naar client2uj)");
-		sendMessage("Client2: " + MOVE + " move_getal");
-		sendMessage("Server: " + Server.MOVE_OK + " (of " + Server.ERROR + "?)");
-		sendMessage("Server: " + "Stuur naar client1 welke move is gedaan.");
-		sendMessage("End loop.");
-		sendMessage("Server: " + Server.GAME_END);
+		sendMessage(MOVE);// + " " + player.determineMove());
+		// Wacht op Server.Move_OK. Indien error: Terminate de game.
+		// Wacht op de move van de andere player.
+		// Stuur move van andere player door naar de game
+		// End loop als Server.GAME_END wordt ontvangen
 		// END PROTOCOLTEST
 		while (loop) {
 			try {
