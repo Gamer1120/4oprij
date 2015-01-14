@@ -65,7 +65,8 @@ public abstract class Player extends Observable {
 	public void makeMove(Board board) {
 		int keuze = determineMove(board);
 		board.insertDisc(keuze, getDisc());
-		//TODO: Notify move gedaan
+		super.setChanged();
+		super.notifyObservers(name + " made a move");
 	}
 
 }

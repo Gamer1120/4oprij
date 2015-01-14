@@ -43,7 +43,8 @@ public class HumanPlayer extends Player {
 		int choice = view.makeMove(getName());
 		boolean valid = board.isField(choice) && board.isEmptyField(choice);
 		while (!valid) {
-			//TODO: Notify invalid move
+			super.setChanged();
+			super.notifyObservers("This column doesn't exist or is full");
 			choice = view.makeMove(getName());
 			valid = board.isField(choice) && board.isEmptyField(choice);
 		}
