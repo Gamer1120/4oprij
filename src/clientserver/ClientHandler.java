@@ -40,9 +40,12 @@ public class ClientHandler extends Thread {
 				sock.getInputStream()));
 		this.out = new BufferedWriter(new OutputStreamWriter(
 				sock.getOutputStream()));
-		this.loop = true;
+		this.clientName = null;
+		this.features = null;
 		this.playerNumber = -1;
+		this.opponentName = null;
 		this.board = null;
+		this.loop = true;
 	}
 
 	/**
@@ -205,7 +208,7 @@ public class ClientHandler extends Thread {
 	 * the Client. If the writing of a message fails, the method concludes that
 	 * the socket connection has been lost and shutdown() is called.
 	 */
-	public void sendMessage(String msg) {
+	public synchronized void sendMessage(String msg) {
 		try {
 			String[] command = msg.split("\\s+");
 			switch (command[0]) {
@@ -221,9 +224,9 @@ public class ClientHandler extends Thread {
 				server.broadcastLobby();
 				break;
 			case Server.GAME_END:
+				playerNumber = -1;
 				board = null;
 				opponentName = null;
-				playerNumber = -1;
 				break;
 			case Server.MOVE_OK:
 				//TODO: move doen bijbehorende speler
@@ -265,26 +268,36 @@ public class ClientHandler extends Thread {
 	/**
 	 * Sets the board of this client
 	 */
-	public void setBoard(Board b) {
+	public synchronized void setBoard(Board b) {
 		board = b;
 	}
 
 	/**
 	 * This ClientHandler signs off from the Server and subsequently sends a
 	 * last broadcast to the Server to inform that the Client is no longer
-	 * participating in the chat.
+	 * participating in the lobby.
 	 */
-	private void shutdown() {
-		server.removeAllInvites(getClientName());
-		if (inGame()) {
-			server.sendMessage(opponentName, Server.GAME_END + " "
-					+ "DISCONNECT");
-		} else {
-			server.broadcastLobby();
+	private synchronized void shutdown() {
+		if (loop) {
+			this.loop = false;
+			server.removeAllInvites(getClientName());
+			server.removeHandler(this);
+			if (inGame()) {
+				server.sendMessage(opponentName, Server.GAME_END + " "
+						+ "DISCONNECT");
+			} else {
+				server.broadcastLobby();
+			}
+			server.print(": " + getClientName() + " has left");
+			this.server = null;
+			this.sock = null;
+			this.in = null;
+			this.out = null;
+			this.clientName = null;
+			this.features = null;
+			this.playerNumber = -1;
+			this.opponentName = null;
+			this.board = null;
 		}
-		server.print(": " + getClientName() + " has left");
-		server.removeHandler(this);
-		loop = false;
 	}
-
 } // end of class ClientHandler

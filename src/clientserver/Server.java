@@ -59,6 +59,7 @@ public class Server extends Thread {
 				ch.start();
 			}
 		} catch (IOException e) {
+			//TODO: betere error handling?
 			e.printStackTrace();
 
 		}
