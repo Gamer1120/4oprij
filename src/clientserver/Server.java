@@ -96,6 +96,20 @@ public class Server extends Thread {
 	}
 
 	/**
+	 * Checks if the name isn't already in use
+	 */
+	public boolean nameExists(String name) {
+		boolean available = false;
+		for (ClientHandler ch : threads) {
+			if (name.equals(ch.getClientName())) {
+				available = true;
+				break;
+			}
+		}
+		return available;
+	}
+
+	/**
 	 * Add a ClientHandler to the collection of ClientHandlers.
 	 * 
 	 * @param handler

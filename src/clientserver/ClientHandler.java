@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -22,7 +23,11 @@ public class ClientHandler extends Thread {
 	private BufferedWriter out;
 	private String clientName;
 	private String[] features;
+	//TODO: zorgen dat invites ook weer weggehaald worden bij accepts en declines
+	private ArrayList<String> invited = new ArrayList<String>();
+	private ArrayList<String> invites = new ArrayList<String>();
 	//TODO: bijhouden in bord?
+	private int playerNumber;
 	private String opponentName;
 	private boolean loop;
 
@@ -52,56 +57,97 @@ public class ClientHandler extends Thread {
 			try {
 				String line = in.readLine();
 				String[] command = line.split("\\s+");
-				//TODO: checken of command lengte etc klopt
 				switch (command[0]) {
 				case Client.CONNECT:
-					clientName = command[1];
-					features = Arrays.copyOfRange(command, 2,
-							command.length - 1);
+					if (command.length >= 2) {
+						if (!server.nameExists(command[0])) {
+							clientName = command[1];
+							if (command.length > 2) {
+								features = Arrays.copyOfRange(command, 2,
+										command.length - 1);
+							}
+							sendMessage(Server.ACCEPT_CONNECT
+									+ " Feature array gescheiden met spaties");
+						} else {
+							sendMessage(Server.ERROR + " Name in use");
+						}
+					} else {
+						sendMessage(Server.ERROR + " Invalid arguments");
+					}
 					//TODO: voeg client toe aan server (lobby)
 					//TODO: broadcast de nieuwe lobby aan iedereen zonder game
-					sendMessage(Server.ACCEPT_CONNECT
-							+ " Feature array gescheiden met spaties");
 					break;
 				case Client.QUIT:
+					//TODO: invites van deze client weghalen?
 					//TODO: reason broadcasten?
 					//TODO: broadcast de lobby als de client geen game had aan iedereen zonder game inclusief=
 					shutdown();
 					break;
 				case Client.INVITE:
-					String parameters = command[1];
-					//Hopen dat die i ook checkt aan begin en niet eind elke loop
-					for (int i = 2; i < command.length; i++) {
-						parameters += " " + command[i];
+					if (command.length >= 2) {
+						if (server.nameExists(command[1])) {
+							if (!invited.contains(command[1])) {
+								server.sendMessage(command[1], line);
+							} else {
+								sendMessage(Server.ERROR
+										+ " Already invited this client");
+							}
+						} else {
+							sendMessage(Server.ERROR + " Name doesn't exist");
+						}
+					} else {
+						sendMessage(Server.ERROR + " Invalid arguments");
 					}
-					server.sendMessage(command[1], Server.INVITE + " "
-							+ parameters);
 					break;
 				case Client.ACCEPT_INVITE:
-					//TODO: extras verzenden (spectators?)
-					sendMessage(Server.GAME_START + " " + clientName + " "
-							+ command[1]);
-					server.sendMessage(command[1], Server.GAME_START + " "
-							+ clientName + " " + command[1]);
+					if (command.length == 2) {
+						if (invites.contains(command[1])) {
+							invites.remove(command[1]);
+							playerNumber = 0;
+							//TODO: extras verzenden (spectators?)
+							sendMessage(Server.GAME_START + " " + clientName
+									+ " " + command[1]);
+							server.sendMessage(command[1], Server.GAME_START
+									+ " " + clientName + " " + command[1]);
+						} else {
+							sendMessage(Server.ERROR
+									+ " Not invited by this client");
+						}
+					} else {
+						sendMessage(Server.ERROR + " Invalid arguments");
+					}
 					break;
 				case Client.DECLINE_INVITE:
-					server.sendMessage(command[1], Server.ERROR
-							+ " Invite declined");
+					if (command.length == 2) {
+						if (invites.contains(command[1])) {
+							invites.remove(command[1]);
+							server.sendMessage(command[1], Server.ERROR
+									+ " Invite declined");
+						} else {
+							sendMessage(Server.ERROR
+									+ " Not invited by this client");
+						}
+					} else {
+						sendMessage(Server.ERROR + " Invalid arguments");
+					}
 					break;
 				case Client.MOVE:
-					//TODO: zelf bord bijhouden voor nummer en move ok checken
-					sendMessage(Server.MOVE_OK + " " + clientName + " "
-							+ command[1]);
-					server.sendMessage(opponentName, (Server.MOVE_OK + " "
-							+ clientName + " " + command[1]));
+					if (command.length == 2) {
+						//TODO: zelf bord bijhouden voor nummer en move ok checken
+						sendMessage(Server.MOVE_OK + " " + playerNumber + " "
+								+ command[1]);
+						server.sendMessage(opponentName, (Server.MOVE_OK + " "
+								+ playerNumber + " " + command[1]));
+					} else {
+						sendMessage(Server.ERROR + " Invalid arguments");
+					}
 					break;
 				case Client.CHAT:
-					String message = command[1];
-					//Hopen dat die i ook checkt aan begin en niet eind elke loop
-					for (int i = 2; i < command.length; i++) {
-						message += " " + command[i];
+					if (command.length >= 2) {
+						server.broadcast(line);
+					} else {
+						sendMessage(Server.ERROR + " Invalid arguments");
 					}
-					server.broadcast(Server.CHAT + " " + message);
 					break;
 				case Client.REQUEST_BOARD:
 					//TODO: zelf bord bijhouden om op te sturen
@@ -112,8 +158,10 @@ public class ClientHandler extends Thread {
 				case Client.REQUEST_LEADERBOARD:
 					//TODO: leaderbords opslaan
 					break;
+				default:
+					sendMessage(Server.ERROR + " Invalid command");
 				}
-			} catch (IOException e) {
+			} catch (IOException | NullPointerException e) {
 				shutdown();
 			}
 		}
