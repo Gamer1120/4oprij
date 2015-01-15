@@ -127,10 +127,27 @@ public class Client extends Thread {
 					if (currPlayer == -1) {
 						currPlayer = SECOND_PLAYER;
 					}
-					if (currPlayer == 0)
-						//TODO: Add errorhandling
-						board.insertDisc(Integer.parseInt(serverMessage[1]), Disc.EMPTY); //TODO: Change this Disc.EMPTY
-					sendMessage("");
+					int move = -1;
+					switch (currPlayer) {
+					case FIRST_PLAYER:
+						try {
+							move = Integer.parseInt(serverMessage[2]);
+						} catch (NumberFormatException e) {
+							mui.addMessage("Server did not send a valid move. TERMINATING.");
+							shutdown();
+							break;
+						}
+						board.insertDisc(move, Disc.YELLOW);
+					case SECOND_PLAYER:
+						try {
+							move = Integer.parseInt(serverMessage[2]);
+						} catch (NumberFormatException e) {
+							mui.addMessage("Server did not send a valid move. TERMINATING.");
+							shutdown();
+							break;
+						}
+						board.insertDisc(move, Disc.RED);
+					}
 				case Server.ERROR:
 					mui.addMessage(line);
 				}
