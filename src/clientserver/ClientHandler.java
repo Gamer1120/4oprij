@@ -69,6 +69,7 @@ public class ClientHandler extends Thread {
 							}
 							sendMessage(Server.ACCEPT_CONNECT
 									+ " Feature array gescheiden met spaties");
+							server.broadcastLobby();
 							server.print(": " + getClientName() + " has joined");
 						} else {
 							sendMessage(Server.ERROR + " Name in use");
@@ -81,7 +82,6 @@ public class ClientHandler extends Thread {
 					break;
 				case Client.QUIT:
 					//TODO: invites van deze client weghalen?
-					//TODO: reason broadcasten?
 					//TODO: broadcast de lobby als de client geen game had aan iedereen zonder game inclusief=
 					shutdown();
 					break;
@@ -192,6 +192,7 @@ public class ClientHandler extends Thread {
 					playerNumber = 1;
 					opponentName = command[1];
 				}
+				server.broadcastLobby();
 				//TODO: voeg bord toe
 				break;
 			case Server.GAME_END:
@@ -242,8 +243,10 @@ public class ClientHandler extends Thread {
 	 * participating in the chat.
 	 */
 	private void shutdown() {
+		if (!inGame()) {
+			server.broadcastLobby();
+		}
 		server.print(": " + getClientName() + " has left");
-		//TODO: verwijder speler (lobby)
 		server.removeHandler(this);
 		loop = false;
 	}

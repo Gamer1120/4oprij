@@ -67,11 +67,26 @@ public class Server extends Thread {
 	 *            message that is send
 	 */
 	public void broadcast(String msg) {
-		//TODO: alleen mensen zonder game
 		for (ClientHandler ch : threads) {
 			ch.sendMessage(msg);
 		}
 		mui.addMessage("Server: " + msg);
+	}
+
+	/**
+	 * Sends a message using the collection of connected ClientHandlers to all
+	 * connected Clients without a game.
+	 * 
+	 * @param msg
+	 *            message that is send
+	 */
+	public void broadcastLobby() {
+		for (ClientHandler ch : threads) {
+			if (!ch.inGame()) {
+				ch.sendMessage(LOBBY + getLobby());
+			}
+		}
+		mui.addMessage("Lobby:" + getLobby());
 	}
 
 	/**
