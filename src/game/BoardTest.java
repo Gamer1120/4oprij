@@ -148,7 +148,13 @@ public class BoardTest {
 	}
 
 	/**
-	 * Firstly tests the method <code>isField(col)</code>. 
+	 * Firstly tests the method <code>isField(col)</code>. First, it tests for
+	 * every valid column, that it's a valid column. Afterwards, it tests the
+	 * same for some invalid columns.
+	 * 
+	 * Secondly tests the method <code>isField(row, col)</code>. First, it tests
+	 * for every valid column and row, that they're valid. Afterwards, it tests
+	 * the same for some invalid ones.
 	 */
 	@Test
 	public void testIsField() {
@@ -181,6 +187,15 @@ public class BoardTest {
 		}
 	}
 
+	/**
+	 * Tests the method <code>getField(row, col)</code>. First, it assures that
+	 * on an empty board, <code>b.getField(row, col)</code> returns
+	 * <code>Disc.EMPTY</code> for every row and column. After that, the
+	 * <code>Board</code> is filled with some <code>Disc</code>s. Then, it's
+	 * tested that b.getField(row, col) returns the <code>Disc</code>s it's
+	 * intended to return. Finally, it's tested, that <code>null</code> is
+	 * returned for the fields outside of the <code>Board</code>.
+	 */
 	@Test
 	public void testGetField() {
 		// Calls all fields, and checks if they're Disc.EMPTY

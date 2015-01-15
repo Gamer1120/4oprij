@@ -125,6 +125,8 @@ public class Board {
 		if (isField(row, col)) {
 			return fields[row][col];
 		} else {
+			// TODO: Discuss if we want to return null here, or do it
+			// otherwise...
 			return null;
 		}
 	}
