@@ -189,8 +189,10 @@ public class ClientHandler extends Thread {
 			case Server.GAME_START:
 				if (clientName.equals(command[1])) {
 					playerNumber = 0;
+					opponentName = command[2];
 				} else {
 					playerNumber = 1;
+					opponentName = command[1];
 				}
 				//TODO: voeg bord toe
 				break;

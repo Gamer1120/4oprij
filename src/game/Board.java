@@ -1,4 +1,5 @@
 package game;
+
 import java.util.Arrays;
 
 /**
@@ -369,7 +370,7 @@ public class Board {
 	 *            the disc to be placed
 	 */
 	public void insertDisc(int col, Disc d) {
-		if (isField(col) && emptyRow(col) != -1) {
+		if (isField(col) && isEmptyField(col)) {
 			fields[emptyRow(col)][col] = d;
 		}
 	}
