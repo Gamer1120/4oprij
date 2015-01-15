@@ -2,6 +2,7 @@ Protocol implementeren
 Checkstyle installeren
 Server game logic
 Client game logic
+Commando INVITES
 
 Class Diagram
 A systematic overview of which part of the requirements is implemented by which classes.
