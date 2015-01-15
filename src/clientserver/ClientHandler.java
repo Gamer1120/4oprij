@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
@@ -77,35 +76,37 @@ public class ClientHandler extends Thread {
 					} else {
 						sendMessage(Server.ERROR + " Invalid arguments");
 					}
-					//TODO: voeg client toe aan server (lobby)
-					//TODO: broadcast de nieuwe lobby aan iedereen zonder game
 					break;
 				case Client.QUIT:
-					//TODO: invites van deze client weghalen?
-					//TODO: broadcast de lobby als de client geen game had aan iedereen zonder game inclusief=
 					shutdown();
 					break;
 				case Client.INVITE:
 					if (command.length >= 2) {
 						if (server.nameExists(command[1])) {
-							if (!server.inGame(command[1])) {
-								if (!server.isInvited(getClientName(),
-										command[1])) {
-									if (!server.isInvited(command[1],
-											getClientName())) {
-										server.sendMessage(command[1],
-												Server.INVITE + " "
-														+ getClientName());
+							if (!inGame()) {
+								if (!server.inGame(command[1])) {
+									if (!server.isInvited(getClientName(),
+											command[1])) {
+										if (!server.isInvited(command[1],
+												getClientName())) {
+											server.sendMessage(command[1],
+													Server.INVITE + " "
+															+ getClientName());
+										} else {
+											sendMessage(Server.ERROR
+													+ " This client already invited you");
+										}
 									} else {
 										sendMessage(Server.ERROR
-												+ " This client already invited you");
+												+ " Already invited this client");
 									}
 								} else {
 									sendMessage(Server.ERROR
-											+ " Already invited this client");
+											+ " This client is already in a game");
 								}
 							} else {
-								sendMessage(Server.ERROR + " Already in a game");
+								sendMessage(Server.ERROR
+										+ " You are already in a game");
 							}
 						} else {
 							sendMessage(Server.ERROR + " Name doesn't exist");
@@ -210,11 +211,10 @@ public class ClientHandler extends Thread {
 					opponentName = command[1];
 				}
 				server.broadcastLobby();
-				//TODO: voeg bord toe
 				break;
 			case Server.GAME_END:
-				//TODO: bord afsluiten en enden
 				board = null;
+				opponentName = null;
 				playerNumber = -1;
 				break;
 			case Server.MOVE_OK:
@@ -267,6 +267,7 @@ public class ClientHandler extends Thread {
 	 * participating in the chat.
 	 */
 	private void shutdown() {
+		server.removeAllInvites(getClientName());
 		if (inGame()) {
 			server.sendMessage(opponentName, Server.GAME_END + " "
 					+ "DISCONNECT");
