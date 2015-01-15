@@ -47,7 +47,12 @@ public class ClientTUI implements MessageUI {
 			e.printStackTrace();
 		}
 		int port = 2727;
-		ClientTUI c = new ClientTUI("Michael", addr, port);
-		c.readInput();
+		if (args.length == 1) {
+			ClientTUI c = new ClientTUI(args[0], addr, port);
+			c.readInput();
+		}else{
+			System.out.println("Use ClientTUI <name>");
+			System.exit(0);
+		}
 	}
 }
