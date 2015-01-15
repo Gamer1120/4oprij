@@ -87,6 +87,7 @@ public class Board {
 		return -1;
 	}
 
+	// TODO: Discuss whether or not to rename this to isColumn.
 	/*@ensures \result == (0 <= col && col < HORIZONTAL);*/
 	/**
 	 * Returns true if col is a valid column of the board
@@ -306,11 +307,8 @@ public class Board {
 	 * @return true if the disc has won
 	 */
 	/*@pure*/public boolean isWinner(Disc d) {
-		if (d == Disc.YELLOW || d == Disc.RED) {
-			return hasRow(d) || hasColumn(d) || hasDiagonal(d);
-		} else {
-			return false;
-		}
+		return (d == Disc.YELLOW || d == Disc.RED)
+				&& (hasRow(d) || hasColumn(d) || hasDiagonal(d));
 	}
 
 	/*@ensures \result == isWinner(Disc.YELLOW) | \result == isWinner(Disc.RED);*/
