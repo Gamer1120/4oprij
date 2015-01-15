@@ -24,10 +24,10 @@ public class ClientHandler extends Thread {
 	private String clientName;
 	private String[] features;
 	//TODO: zorgen dat invites ook weer weggehaald worden bij accepts en declines
-	private ArrayList<String> invited = new ArrayList<String>();
-	private ArrayList<String> invites = new ArrayList<String>();
+	private ArrayList<String> invited;
+	private ArrayList<String> invites;
 	//TODO: bijhouden in bord?
-	private int playerNumber = -1;
+	private int playerNumber;
 	private String opponentName;
 	private boolean loop;
 
@@ -43,6 +43,9 @@ public class ClientHandler extends Thread {
 		this.out = new BufferedWriter(new OutputStreamWriter(
 				sock.getOutputStream()));
 		this.loop = true;
+		this.invited = new ArrayList<String>();
+		this.invites = new ArrayList<String>();
+		this.playerNumber = -1;
 	}
 
 	/**
@@ -104,10 +107,10 @@ public class ClientHandler extends Thread {
 						if (invites.contains(command[1])) {
 							invites.remove(command[1]);
 							//TODO: extras verzenden (spectators?)
-							sendMessage(Server.GAME_START + " " + clientName
-									+ " " + command[1]);
+							sendMessage(Server.GAME_START + " "
+									+ getClientName() + " " + command[1]);
 							server.sendMessage(command[1], Server.GAME_START
-									+ " " + clientName + " " + command[1]);
+									+ " " + getClientName() + " " + command[1]);
 							sendMessage(Server.REQUEST_MOVE);
 						} else {
 							sendMessage(Server.ERROR

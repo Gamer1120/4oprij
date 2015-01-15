@@ -12,8 +12,6 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import game.Board;
-
 /**
  * P2 prac wk4. <br>
  * Client.
@@ -61,7 +59,7 @@ public class Client extends Thread {
 				sock.getOutputStream()));
 		this.loop = true;
 		this.isIngame = false;
-		invites = new ArrayList<String>();
+		this.invites = new ArrayList<String>();
 	}
 
 	/**
@@ -92,6 +90,7 @@ public class Client extends Thread {
 					mui.addMessage("The features of this server are: "
 							+ listOfFeatures);
 					// TODO: Discuss if the lobby should be asked for here.
+					break;
 				case Server.LOBBY:
 					mui.addMessage("The people that are currently in the lobby are: ");
 					String listOfPeople = "";
@@ -100,6 +99,7 @@ public class Client extends Thread {
 						listOfPeople = listOfPeople + serverMessage[i] + " ";
 					}
 					mui.addMessage(listOfPeople);
+					break;
 				case Server.INVITE:
 					String opponentName = serverMessage[1];
 					invites.add(opponentName);
@@ -107,6 +107,7 @@ public class Client extends Thread {
 						mui.addMessage("Player: " + opponentName
 								+ " has invited you to a game of Connect4!");
 					}
+					break;
 				case Server.GAME_START:
 					mui.addMessage("A game between you and " + serverMessage[2]
 							+ " has started!");
@@ -115,19 +116,23 @@ public class Client extends Thread {
 					// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
 					// 1 > Disc.RED
 					board = new Board();
+					break;
 				case Server.GAME_END:
 					this.isIngame = false;
 					// TODO: Maybe add something here? IDKLOL.
+					break;
 				case Server.REQUEST_MOVE:
 					if (currPlayer == -1) {
 						currPlayer = FIRST_PLAYER;
 					}
 					// TODO: Request a move from the player.
+					break;
 				case Server.MOVE_OK:
 					if (currPlayer == -1) {
 						currPlayer = SECOND_PLAYER;
 					}
 					int move = -1;
+					//TODO: if else?
 					switch (currPlayer) {
 					case FIRST_PLAYER:
 						try {
@@ -135,23 +140,25 @@ public class Client extends Thread {
 						} catch (NumberFormatException e) {
 							mui.addMessage("Server did not send a valid move. TERMINATING.");
 							shutdown();
-							break;
 						}
 						board.insertDisc(move, Disc.YELLOW);
+						break;
 					case SECOND_PLAYER:
 						try {
 							move = Integer.parseInt(serverMessage[2]);
 						} catch (NumberFormatException e) {
 							mui.addMessage("Server did not send a valid move. TERMINATING.");
 							shutdown();
-							break;
 						}
 						board.insertDisc(move, Disc.RED);
+						break;
 					}
+					break;
 				case Server.ERROR:
 					mui.addMessage(line);
+					break;
 				}
-			} catch (IOException e) {
+			} catch (IOException | NullPointerException e) {
 				shutdown();
 			}
 		}
