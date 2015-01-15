@@ -86,7 +86,7 @@ public class Server extends Thread {
 	 */
 	public void sendMessage(String name, String msg) {
 		for (ClientHandler ch : threads) {
-			if (name.equals(ch.getClientName())) {
+			if (ch.getClientName().equals(name)) {
 				ch.sendMessage(msg);
 				break;
 			}
