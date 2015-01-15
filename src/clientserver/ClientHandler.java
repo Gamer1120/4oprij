@@ -140,8 +140,9 @@ public class ClientHandler extends Thread {
 						//TODO: zelf bord bijhouden voor nummer en move ok checken
 						sendMessage(Server.MOVE_OK + " " + playerNumber + " "
 								+ command[1]);
-						server.sendMessage(opponentName, (Server.MOVE_OK + " "
-								+ playerNumber + " " + command[1]));
+						server.sendMessage(opponentName, Server.MOVE_OK + " "
+								+ playerNumber + " " + command[1]);
+						server.sendMessage(opponentName, Server.REQUEST_MOVE);
 						//TODO: gewonnen is game end sturen
 					} else {
 						sendMessage(Server.REQUEST_MOVE);
