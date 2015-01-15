@@ -91,7 +91,7 @@ public class Server extends Thread {
 				break;
 			}
 		}
-		mui.addMessage("Server to " + name + ": " + msg);
+		mui.addMessage("Server: " + name + ": " + msg);
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class Server extends Thread {
 	 *            message that is send
 	 */
 	public void print(String msg) {
-		mui.addMessage("ClientHandler to " + msg);
+		mui.addMessage("ClientHandler: " + msg);
 	}
 
 	/**
