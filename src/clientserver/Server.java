@@ -126,7 +126,6 @@ public class Server extends Thread {
 	 */
 	public void addHandler(ClientHandler handler) {
 		threads.add(handler);
-		mui.addMessage(handler.getClientName() + " has joined");
 	}
 
 	/**
@@ -137,7 +136,6 @@ public class Server extends Thread {
 	 */
 	public void removeHandler(ClientHandler handler) {
 		threads.remove(handler);
-		mui.addMessage(handler.getClientName() + " has left");
 	}
 
 } // end of class Server

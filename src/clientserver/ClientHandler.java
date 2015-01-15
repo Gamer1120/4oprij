@@ -71,6 +71,7 @@ public class ClientHandler extends Thread {
 							}
 							sendMessage(Server.ACCEPT_CONNECT
 									+ " Feature array gescheiden met spaties");
+							server.print(getClientName() + " has joined");
 						} else {
 							sendMessage(Server.ERROR + " Name in use");
 						}
@@ -81,6 +82,7 @@ public class ClientHandler extends Thread {
 					//TODO: broadcast de nieuwe lobby aan iedereen zonder game
 					break;
 				case Client.QUIT:
+					server.print(getClientName() + " has left");
 					//TODO: invites van deze client weghalen?
 					//TODO: reason broadcasten?
 					//TODO: broadcast de lobby als de client geen game had aan iedereen zonder game inclusief=
