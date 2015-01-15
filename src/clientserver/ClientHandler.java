@@ -82,7 +82,6 @@ public class ClientHandler extends Thread {
 					//TODO: broadcast de nieuwe lobby aan iedereen zonder game
 					break;
 				case Client.QUIT:
-					server.print(getClientName() + " has left");
 					//TODO: invites van deze client weghalen?
 					//TODO: reason broadcasten?
 					//TODO: broadcast de lobby als de client geen game had aan iedereen zonder game inclusief=
@@ -233,6 +232,7 @@ public class ClientHandler extends Thread {
 	 * participating in the chat.
 	 */
 	private void shutdown() {
+		server.print(getClientName() + " has left");
 		//TODO: verwijder speler (lobby)
 		server.removeHandler(this);
 		loop = false;
