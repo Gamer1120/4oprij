@@ -124,7 +124,7 @@ public class Server extends Thread {
 	public boolean inGame(String name) {
 		boolean game = false;
 		for (ClientHandler ch : threads) {
-			if (ch.getClientName().equals(name)) {
+			if (ch.getClientName().equals(name) && ch.inGame()) {
 				game = true;
 				break;
 			}
