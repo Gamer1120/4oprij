@@ -23,10 +23,8 @@ public class ClientHandler extends Thread {
 	private BufferedWriter out;
 	private String clientName;
 	private String[] features;
-	//TODO: zorgen dat invites ook weer weggehaald worden bij accepts en declines
 	private ArrayList<String> invited;
 	private ArrayList<String> invites;
-	//TODO: bijhouden in bord?
 	private int playerNumber;
 	private String opponentName;
 	private boolean loop;
@@ -71,7 +69,7 @@ public class ClientHandler extends Thread {
 							}
 							sendMessage(Server.ACCEPT_CONNECT
 									+ " Feature array gescheiden met spaties");
-							server.print(getClientName() + " has joined");
+							server.print(": " + getClientName() + " has joined");
 						} else {
 							sendMessage(Server.ERROR + " Name in use");
 						}
@@ -160,7 +158,7 @@ public class ClientHandler extends Thread {
 					//TODO: zelf bord bijhouden om op te sturen
 					break;
 				case Client.REQUEST_LOBBY:
-					//TODO: lobby maken
+					sendMessage(Server.LOBBY + server.getLobby());
 					break;
 				case Client.REQUEST_LEADERBOARD:
 					//TODO: leaderbords opslaan
@@ -206,7 +204,7 @@ public class ClientHandler extends Thread {
 			out.write(msg);
 			out.newLine();
 			out.flush();
-			server.print(getClientName() + ": " + msg);
+			server.print(" to " + getClientName() + ": " + msg);
 		} catch (IOException e) {
 			shutdown();
 		}
@@ -231,12 +229,20 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
+	 * returns wheter the client is playing a game
+	 */
+	public boolean inGame() {
+		//TODO: verbeteren
+		return playerNumber != -1;
+	}
+
+	/**
 	 * This ClientHandler signs off from the Server and subsequently sends a
 	 * last broadcast to the Server to inform that the Client is no longer
 	 * participating in the chat.
 	 */
 	private void shutdown() {
-		server.print(getClientName() + " has left");
+		server.print(": " + getClientName() + " has left");
 		//TODO: verwijder speler (lobby)
 		server.removeHandler(this);
 		loop = false;

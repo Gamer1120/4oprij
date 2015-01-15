@@ -3,8 +3,7 @@ package clientserver;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 /**
  * P2 prac wk5. <br>
@@ -31,13 +30,13 @@ public class Server extends Thread {
 	// END OF PROTOCOL
 	private int port;
 	private MessageUI mui;
-	private Collection<ClientHandler> threads;
+	private ArrayList<ClientHandler> threads;
 
 	/** Constructs a new Server object */
 	public Server(int portArg, MessageUI muiArg) {
 		this.port = portArg;
 		this.mui = muiArg;
-		this.threads = new LinkedList<ClientHandler>();
+		this.threads = new ArrayList<ClientHandler>();
 	}
 
 	/**
@@ -91,7 +90,7 @@ public class Server extends Thread {
 				break;
 			}
 		}
-		mui.addMessage("Server: " + name + ": " + msg);
+		mui.addMessage("Server to " + name + ": " + msg);
 	}
 
 	/**
@@ -101,7 +100,7 @@ public class Server extends Thread {
 	 *            message that is send
 	 */
 	public void print(String msg) {
-		mui.addMessage("ClientHandler: " + msg);
+		mui.addMessage("ClientHandler" + msg);
 	}
 
 	/**
@@ -116,6 +115,20 @@ public class Server extends Thread {
 			}
 		}
 		return available;
+	}
+
+	/**
+	 * Sends an string with the connected client names that aren't playing a
+	 * game
+	 */
+	public String getLobby() {
+		String clients = "";
+		for (ClientHandler ch : threads) {
+			if (!ch.inGame()) {
+				clients += " " + ch.getClientName();
+			}
+		}
+		return clients;
 	}
 
 	/**
