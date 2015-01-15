@@ -60,6 +60,7 @@ public class Client extends Thread {
 		this.loop = true;
 		this.isIngame = false;
 		this.invites = new ArrayList<String>();
+		System.out.println("Your name is: " + name);
 	}
 
 	/**
