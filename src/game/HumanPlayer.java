@@ -1,3 +1,4 @@
+package game;
 /**
  * Class for maintaining a human player in Tic Tac Toe.
  * 

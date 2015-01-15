@@ -1,3 +1,4 @@
+package game;
 import java.util.Observer;
 
 public interface GameView extends Observer {

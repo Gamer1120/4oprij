@@ -1,3 +1,4 @@
+package game;
 public class Test {
 	public final static int N = 0;
 	public final static Disc D = Disc.YELLOW;

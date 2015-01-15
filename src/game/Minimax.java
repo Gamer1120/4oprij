@@ -1,3 +1,4 @@
+package game;
 public class Minimax {
 	private final Board board;
 	public static final int[] INCREMENT = { 0, 1, 4, 32, 128, 512 };

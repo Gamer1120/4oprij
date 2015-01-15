@@ -1,3 +1,4 @@
+package game;
 public class Connect4 {
 	public final static String NAIVE_PLAYER = "-N";
 	public final static String SMART_PLAYER = "-S";

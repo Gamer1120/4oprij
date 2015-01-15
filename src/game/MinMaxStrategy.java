@@ -1,3 +1,4 @@
+package game;
 public class MinMaxStrategy implements Strategy {
 	public final static String NAME = "MinMax";
 

@@ -1,3 +1,4 @@
+package game;
 /**
  * Class for maintaining the Tic Tac Toe game.
  * 

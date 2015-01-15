@@ -1,3 +1,4 @@
+package game;
 public class ComputerPlayer extends Player {
 	private Strategy s;
 	private Disc d;
