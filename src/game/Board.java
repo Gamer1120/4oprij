@@ -162,11 +162,7 @@ public class Board {
 	 * @return true if the field is empty
 	 */
 	/*@pure*/public boolean isEmptyField(int row, int col) {
-		if (isField(row, col)) {
-			return getField(row, col) == Disc.EMPTY;
-		} else {
-			return false;
-		}
+		return isField(row, col) && getField(row, col) == Disc.EMPTY;
 	}
 
 	/*@ensures \result == (\forall int i; 0 <= i & i < VERTICAL; (\forall int j; 0 <= j & j < HORIZONTAL; this.getField(i, j) != Disc.EMPTY));*/
