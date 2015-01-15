@@ -91,7 +91,8 @@ public class ClientHandler extends Thread {
 					if (command.length >= 2) {
 						if (server.nameExists(command[1])) {
 							if (!invited.contains(command[1])) {
-								server.sendMessage(command[1], line);
+								server.sendMessage(command[1], Server.INVITE
+										+ " " + getClientName());
 							} else {
 								sendMessage(Server.ERROR
 										+ " Already invited this client");
