@@ -27,7 +27,7 @@ public class ClientHandler extends Thread {
 	private ArrayList<String> invited = new ArrayList<String>();
 	private ArrayList<String> invites = new ArrayList<String>();
 	//TODO: bijhouden in bord?
-	private int playerNumber;
+	private int playerNumber = -1;
 	private String opponentName;
 	private boolean loop;
 
@@ -103,12 +103,12 @@ public class ClientHandler extends Thread {
 					if (command.length == 2) {
 						if (invites.contains(command[1])) {
 							invites.remove(command[1]);
-							playerNumber = 0;
 							//TODO: extras verzenden (spectators?)
 							sendMessage(Server.GAME_START + " " + clientName
 									+ " " + command[1]);
 							server.sendMessage(command[1], Server.GAME_START
 									+ " " + clientName + " " + command[1]);
+							sendMessage(Server.REQUEST_MOVE);
 						} else {
 							sendMessage(Server.ERROR
 									+ " Not invited by this client");
@@ -138,8 +138,9 @@ public class ClientHandler extends Thread {
 								+ command[1]);
 						server.sendMessage(opponentName, (Server.MOVE_OK + " "
 								+ playerNumber + " " + command[1]));
+						//TODO: gewonnen is game end sturen
 					} else {
-						sendMessage(Server.ERROR + " Invalid arguments");
+						sendMessage(Server.REQUEST_MOVE);
 					}
 					break;
 				case Client.CHAT:
@@ -174,10 +175,30 @@ public class ClientHandler extends Thread {
 	 */
 	public void sendMessage(String msg) {
 		try {
+			String[] command = msg.split("\\s+");
+			switch (command[0]) {
+			case Server.INVITE:
+				invites.add(command[1]);
+				break;
+			case Server.GAME_START:
+				if (clientName.equals(command[1])) {
+					playerNumber = 0;
+				} else {
+					playerNumber = 1;
+				}
+				//TODO: voeg bord toe
+				break;
+			case Server.GAME_END:
+				//TODO: bord afsluiten en enden
+				playerNumber = -1;
+				break;
+			case Server.MOVE_OK:
+				//TODO: move doen bijbehorende speler
+			}
 			out.write(msg);
 			out.newLine();
 			out.flush();
-		} catch (IOException ex) {
+		} catch (IOException e) {
 			shutdown();
 		}
 	}
