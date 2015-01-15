@@ -1,9 +1,12 @@
 package clientserver;
 
+import game.Board;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.ListIterator;
 
 /**
  * P2 prac wk5. <br>
@@ -31,12 +34,14 @@ public class Server extends Thread {
 	private int port;
 	private MessageUI mui;
 	private ArrayList<ClientHandler> threads;
+	private ArrayList<String[]> invites;
 
 	/** Constructs a new Server object */
 	public Server(int portArg, MessageUI muiArg) {
 		this.port = portArg;
 		this.mui = muiArg;
 		this.threads = new ArrayList<ClientHandler>();
+		this.invites = new ArrayList<String[]>();
 	}
 
 	/**
@@ -109,6 +114,44 @@ public class Server extends Thread {
 	}
 
 	/**
+	 * Checks wether the client with the specified name is in a game
+	 * 
+	 * @param name
+	 *            name of the client
+	 * @param board
+	 *            board that is send
+	 */
+	public boolean inGame(String name) {
+		boolean game = false;
+		for (ClientHandler ch : threads) {
+			if (ch.getClientName().equals(name)) {
+				game = true;
+				break;
+			}
+		}
+		return game;
+	}
+
+	/**
+	 * Sends the board to use for the game so both clientHandlers are using the
+	 * same board
+	 * 
+	 * @param name
+	 *            name of the client
+	 * @param board
+	 *            board that is send
+	 */
+	public void startGame(String name, Board board) {
+		for (ClientHandler ch : threads) {
+			if (ch.getClientName().equals(name)) {
+				ch.setBoard(board);
+				break;
+			}
+		}
+		mui.addMessage("Server: Set board for " + name);
+	}
+
+	/**
 	 * Print the message on the server gui
 	 * 
 	 * @param msg
@@ -166,4 +209,69 @@ public class Server extends Thread {
 		threads.remove(handler);
 	}
 
+	/**
+	 * Add the names of the inviting and the invited client in a list
+	 * 
+	 * @param name
+	 *            name of the inviting client
+	 * @param invited
+	 *            name of the invited client
+	 */
+	public void addInvite(String name, String invited) {
+		invites.add(new String[] { name, invited });
+	}
+
+	/**
+	 * Checks wether the client is invited by the client with the specified name
+	 * 
+	 * @param name
+	 *            the name of the client that send the invite
+	 * @param invited
+	 *            the name of the client that received the invite
+	 */
+	public boolean isInvited(String name, String invited) {
+		boolean retBool = false;
+		for (String[] invite : invites) {
+			if (invite[0].equals(name) && invite[1].equals(invited)) {
+				retBool = true;
+				break;
+			}
+		}
+		return retBool;
+	}
+
+	/**
+	 * Removes the invite of the client with the specified name.
+	 * 
+	 * @param name
+	 *            the name of the client
+	 * @param invited
+	 *            the name of the invited client
+	 */
+	public void removeInvite(String name, String invited) {
+		for (ListIterator<String[]> iter = invites.listIterator(); iter
+				.hasNext();) {
+			String[] invite = iter.next();
+			if (invite[0].equals(name) && invite[1].equals(invited)) {
+				iter.remove();
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Removes all invites of the client with the specified name.
+	 * 
+	 * @param name
+	 *            the name of the client
+	 */
+	public void removeAllInvites(String name) {
+		for (ListIterator<String[]> iter = invites.listIterator(); iter
+				.hasNext();) {
+			String[] invite = iter.next();
+			if (invite[0].equals(name) || invite[1].equals(name)) {
+				iter.remove();
+			}
+		}
+	}
 } // end of class Server

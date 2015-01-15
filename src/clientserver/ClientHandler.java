@@ -1,5 +1,7 @@
 package clientserver;
 
+import game.Board;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -23,10 +25,9 @@ public class ClientHandler extends Thread {
 	private BufferedWriter out;
 	private String clientName;
 	private String[] features;
-	private ArrayList<String> invited;
-	private ArrayList<String> invites;
 	private int playerNumber;
 	private String opponentName;
+	private Board board;
 	private boolean loop;
 
 	/**
@@ -41,9 +42,8 @@ public class ClientHandler extends Thread {
 		this.out = new BufferedWriter(new OutputStreamWriter(
 				sock.getOutputStream()));
 		this.loop = true;
-		this.invited = new ArrayList<String>();
-		this.invites = new ArrayList<String>();
 		this.playerNumber = -1;
+		this.board = null;
 	}
 
 	/**
@@ -88,12 +88,24 @@ public class ClientHandler extends Thread {
 				case Client.INVITE:
 					if (command.length >= 2) {
 						if (server.nameExists(command[1])) {
-							if (!invited.contains(command[1])) {
-								server.sendMessage(command[1], Server.INVITE
-										+ " " + getClientName());
+							if (!server.inGame(command[1])) {
+								if (!server.isInvited(getClientName(),
+										command[1])) {
+									if (!server.isInvited(command[1],
+											getClientName())) {
+										server.sendMessage(command[1],
+												Server.INVITE + " "
+														+ getClientName());
+									} else {
+										sendMessage(Server.ERROR
+												+ " This client already invited you");
+									}
+								} else {
+									sendMessage(Server.ERROR
+											+ " Already invited this client");
+								}
 							} else {
-								sendMessage(Server.ERROR
-										+ " Already invited this client");
+								sendMessage(Server.ERROR + " Already in a game");
 							}
 						} else {
 							sendMessage(Server.ERROR + " Name doesn't exist");
@@ -104,9 +116,11 @@ public class ClientHandler extends Thread {
 					break;
 				case Client.ACCEPT_INVITE:
 					if (command.length == 2) {
-						if (invites.contains(command[1])) {
-							invites.remove(command[1]);
+						if (server.isInvited(command[1], getClientName())) {
 							//TODO: extras verzenden (spectators?)
+							board = new Board();
+							server.print(": Set board for " + getClientName());
+							server.startGame(command[1], board);
 							sendMessage(Server.GAME_START + " "
 									+ getClientName() + " " + command[1]);
 							server.sendMessage(command[1], Server.GAME_START
@@ -122,8 +136,8 @@ public class ClientHandler extends Thread {
 					break;
 				case Client.DECLINE_INVITE:
 					if (command.length == 2) {
-						if (invites.contains(command[1])) {
-							invites.remove(command[1]);
+						if (server.isInvited(command[1], getClientName())) {
+							server.removeInvite(command[1], getClientName());
 							server.sendMessage(command[1], Server.ERROR
 									+ " Invite declined");
 						} else {
@@ -186,10 +200,8 @@ public class ClientHandler extends Thread {
 		try {
 			String[] command = msg.split("\\s+");
 			switch (command[0]) {
-			case Server.INVITE:
-				invites.add(command[1]);
-				break;
 			case Server.GAME_START:
+				server.removeAllInvites(getClientName());
 				if (clientName.equals(command[1])) {
 					playerNumber = 0;
 					opponentName = command[2];
@@ -202,6 +214,7 @@ public class ClientHandler extends Thread {
 				break;
 			case Server.GAME_END:
 				//TODO: bord afsluiten en enden
+				board = null;
 				playerNumber = -1;
 				break;
 			case Server.MOVE_OK:
@@ -238,8 +251,14 @@ public class ClientHandler extends Thread {
 	 * returns wheter the client is playing a game
 	 */
 	public boolean inGame() {
-		//TODO: verbeteren
-		return playerNumber != -1;
+		return board != null;
+	}
+
+	/**
+	 * Sets the board of this client
+	 */
+	public void setBoard(Board b) {
+		board = b;
 	}
 
 	/**
