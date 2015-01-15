@@ -149,7 +149,12 @@ public class ClientHandler extends Thread {
 					break;
 				case Client.CHAT:
 					if (command.length >= 2) {
-						server.broadcast(line);
+						String chat = "";
+						for (int i = 1; i < command.length; i++) {
+							chat += " " + command[i];
+						}
+						server.broadcast(Server.CHAT + " " + getClientName()
+								+ ":" + chat);
 					} else {
 						sendMessage(Server.ERROR + " Invalid arguments");
 					}
@@ -243,7 +248,10 @@ public class ClientHandler extends Thread {
 	 * participating in the chat.
 	 */
 	private void shutdown() {
-		if (!inGame()) {
+		if (inGame()) {
+			server.sendMessage(opponentName, Server.GAME_END + " "
+					+ "DISCONNECT");
+		} else {
 			server.broadcastLobby();
 		}
 		server.print(": " + getClientName() + " has left");
