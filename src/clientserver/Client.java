@@ -1,5 +1,8 @@
 package clientserver;
 
+import game.Board;
+import game.Disc;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -7,6 +10,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+
+import game.Board;
 
 /**
  * P2 prac wk4. <br>
@@ -27,6 +33,8 @@ public class Client extends Thread {
 	public static final String REQUEST_BOARD = "REQUEST";
 	public static final String REQUEST_LOBBY = "LOBBY";
 	public static final String REQUEST_LEADERBOARD = "LEADERBOARD";
+	public static final int FIRST_PLAYER = 0;
+	public static final int SECOND_PLAYER = 1;
 	// END OF PROTOCOL
 	private String clientName;
 	private MessageUI mui;
@@ -34,6 +42,10 @@ public class Client extends Thread {
 	private BufferedReader in;
 	private BufferedWriter out;
 	private boolean loop;
+	private boolean isIngame;
+	private ArrayList<String> invites;
+	private Board board;
+	private int currPlayer;
 
 	/**
 	 * Constructs a Client-object and tries to make a socket connection
@@ -48,6 +60,8 @@ public class Client extends Thread {
 		this.out = new BufferedWriter(new OutputStreamWriter(
 				sock.getOutputStream()));
 		this.loop = true;
+		this.isIngame = false;
+		invites = new ArrayList<String>();
 	}
 
 	/**
@@ -57,42 +71,70 @@ public class Client extends Thread {
 
 	public void run() {
 		sendMessage(getClientName());
-		// PROTOCOLTEST
 		sendMessage(CONNECT + " " + getClientName());
-		// Wait for accept connect from server
-		/**
-		 * sendMessage("Server: " + Server.ACCEPT_CONNECT +
-		 * " ServerFeature1 ServerFeature2" + " (of " + Server.ERROR + ")");
-		 */
-		sendMessage(REQUEST_LOBBY);
-		// Wait for lobby
-		/**
-		 * sendMessage("Server: " + Server.LOBBY + " Michael Sven Kip Haan");
-		 * */
-		// Show players in lobby and ask user for a player to invite
-		String playerToInvite = "";
-		sendMessage(INVITE + " " + playerToInvite);
-		// Server sends message to invited player, invited player accepts or
-		// declines
-		// In case of accept: Receive Server.GAME_START, and start a new game.
-		// Loop:
-		sendMessage("Server: " + Server.REQUEST_MOVE + " (naar client1)");
-		sendMessage(MOVE);// + " " + player.determineMove());
-		// Wacht op Server.Move_OK. Indien error: Terminate de game.
-		// Wacht op de move van de andere player.
-		// Stuur move van andere player door naar de game
-		// End loop als Server.GAME_END wordt ontvangen
-		// END PROTOCOLTEST
 		while (loop) {
 			try {
-				String message = in.readLine();
-				if (message != null) {
-					if ("EXIT".equals(message)) {
-						shutdown();
+				String line = in.readLine();
+				String[] serverMessage = line.split("\\s+");
+				switch (serverMessage[0]) {
+				case Server.ACCEPT_CONNECT:
+					mui.addMessage("Successfully established connection to server: "
+							+ sock.getRemoteSocketAddress().toString() // IP of
+																		// the
+																		// server
+							+ ":" + sock.getPort()); // Port of the server
+					String listOfFeatures = "";
+					for (int i = 1; i < serverMessage.length; i++) {
+						// TODO: Print dit beter?
+						listOfFeatures = listOfFeatures + serverMessage[i]
+								+ " ";
 					}
-					mui.addMessage(message);
+					mui.addMessage("The features of this server are: "
+							+ listOfFeatures);
+					// TODO: Discuss if the lobby should be asked for here.
+				case Server.LOBBY:
+					mui.addMessage("The people that are currently in the lobby are: ");
+					String listOfPeople = "";
+					for (int i = 1; i < serverMessage.length; i++) {
+						// TODO: Print dit beter?
+						listOfPeople = listOfPeople + serverMessage[i] + " ";
+					}
+					mui.addMessage(listOfPeople);
+				case Server.INVITE:
+					String opponentName = serverMessage[1];
+					invites.add(opponentName);
+					if (!isIngame) {
+						mui.addMessage("Player: " + opponentName
+								+ " has invited you to a game of Connect4!");
+					}
+				case Server.GAME_START:
+					mui.addMessage("A game between you and " + serverMessage[2]
+							+ " has started!");
+					this.isIngame = true;
+					currPlayer = -1; // Not set yet.
+					// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
+					// 1 > Disc.RED
+					board = new Board();
+				case Server.GAME_END:
+					this.isIngame = false;
+					// TODO: Maybe add something here? IDKLOL.
+				case Server.REQUEST_MOVE:
+					if (currPlayer == -1) {
+						currPlayer = FIRST_PLAYER;
+					}
+					// TODO: Request a move from the player.
+				case Server.MOVE_OK:
+					if (currPlayer == -1) {
+						currPlayer = SECOND_PLAYER;
+					}
+					if (currPlayer == 0)
+						//TODO: Add errorhandling
+						board.insertDisc(Integer.parseInt(serverMessage[1]), Disc.EMPTY); //TODO: Change this Disc.EMPTY
+					sendMessage("");
+				case Server.ERROR:
+					mui.addMessage(line);
 				}
-			} catch (IOException ex) {
+			} catch (IOException e) {
 				shutdown();
 			}
 		}
@@ -112,6 +154,7 @@ public class Client extends Thread {
 	/** close the socket connection. */
 	public void shutdown() {
 		loop = false;
+		isIngame = false;
 		try {
 			sock.close();
 		} catch (IOException e) {
