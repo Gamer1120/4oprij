@@ -68,11 +68,11 @@ public class Client extends Thread {
 	 */
 
 	public void run() {
-		sendMessage(getClientName());
 		sendMessage(CONNECT + " " + getClientName());
 		while (loop) {
 			try {
 				String line = in.readLine();
+				mui.addMessage("Server: " + line);
 				String[] serverMessage = line.split("\\s+");
 				switch (serverMessage[0]) {
 				case Server.ACCEPT_CONNECT:

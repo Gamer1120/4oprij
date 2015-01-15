@@ -40,7 +40,6 @@ public class ClientTUI implements MessageUI {
 
 	public static void main(String[] args) {
 		// Connects to localhost:2727
-		System.out.println("Startup");
 		InetAddress addr = null;
 		try {
 			addr = InetAddress.getByName("localhost");
