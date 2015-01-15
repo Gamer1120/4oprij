@@ -1,17 +1,39 @@
 package game;
+
 import static org.junit.Assert.*;
 
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Test program for Board.java.
+ * 
+ * WARNING: THIS TEST CANNOT BE RELIABLY USED FOR BOARDS WITH OTHER SIZES THAN
+ * THE DEFAULT 7 COLUMNS BY 6 ROWS
+ * 
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015
+ * 
+ * @author Michael Koopman s1401335 & Sven Konings s1534130
+ */
 public class BoardTest {
+	/**
+	 * Test variable for a <code>Board</code> object.
+	 */
 	private Board b;
 
+	/**
+	 * This method creates a new <code>Board</code> before each test.
+	 */
 	@Before
 	public void setUp() throws Exception {
 		b = new Board();
 	}
 
+	/**
+	 * Tests if a new <code>Board</code> is actually empty, by calling
+	 * b.getField(row, col) for every valid field in the <code>Board</code>, and
+	 * checking if that returns Disc.EMPTY.
+	 */
 	@Test
 	public void testEmptyBoard() {
 		for (int row = 0; row < Board.VERTICAL; row++) {
@@ -22,6 +44,12 @@ public class BoardTest {
 		}
 	}
 
+	/**
+	 * Tests the method <code>deepCopy()</code>. It inserts some
+	 * <code>Disc</code>s in the original <code>Board</code>, then creates a
+	 * copy of it (using <code>b.deepCopy()</code>). After that it makes sure
+	 * that every <code>Disc<code> is the same in both <code>Board</code>s.
+	 */
 	@Test
 	public void testDeepCopy() {
 		b.insertDisc(1, Disc.YELLOW);
@@ -36,6 +64,17 @@ public class BoardTest {
 		}
 	}
 
+	/**
+	 * Tests the method <code>emptyRow(col)</code>. First it assures that
+	 * emptyRow returns 5 for all columns on an empty <code>Board</code>, since
+	 * 5 is the lowest row on the <code>Board</code>. It then inserts a
+	 * <code>Disc</code> into column 2, and assures that for all columns, except
+	 * for 2, the <code>emptyRow</code> still returns 5. For column 2, this
+	 * should now return 4 instead. After this, some more <code>Disc</code>s are
+	 * inserted, and a similar test is executed. The final test tests whether
+	 * <code>emptyRow</code> returns -1 when the specified column is full, as
+	 * it's supposed to do.
+	 */
 	@Test
 	public void testEmptyRow() {
 		for (int col = 0; col < Board.HORIZONTAL; col++) {
@@ -75,8 +114,20 @@ public class BoardTest {
 						b.emptyRow(col));
 			}
 		}
+		b.reset();
+		for (int row = 0; row < Board.VERTICAL; row++) {
+			b.insertDisc(0, Disc.RED);
+		}
+		assertEquals("b.emptyRow(0)", -1, b.emptyRow(0));
 	}
 
+	/**
+	 * Tests the method <code>fullRow(col)</code>. First, it assures that the
+	 * method returns -1 for every column on an empty <code>Board</code>, since
+	 * there's no Discs in any column. After that, some <code>Disc</code>s are
+	 * inserted, and it's assured that for the columns those were inserted into,
+	 * <code>b.fullRow(col)</code> returns the values it's supposed to.
+	 */
 	@Test
 	public void testFullRow() {
 		for (int col = 0; col < Board.HORIZONTAL; col++) {
@@ -96,6 +147,9 @@ public class BoardTest {
 		assertEquals("b.fullRow(5) == 5", 5, b.fullRow(5));
 	}
 
+	/**
+	 * Firstly tests the method <code>isField(col)</code>. 
+	 */
 	@Test
 	public void testIsField() {
 		// Calling isField(col) with a valid index
@@ -205,6 +259,12 @@ public class BoardTest {
 				b.isEmptyField(4, 1));
 		assertEquals("(5,1) is no longer an empty field.", false,
 				b.isEmptyField(5, 1));
+		b.reset();
+		for (int row = 0; row < Board.VERTICAL; row++) {
+			b.insertDisc(0, Disc.RED);
+		}
+		assertEquals("b.isEmptyField(0)", false, b.isEmptyField(0));
+		assertEquals("b.isEmptyField(9000,0)", false, b.isEmptyField(0));
 	}
 
 	@Test
@@ -727,7 +787,8 @@ public class BoardTest {
 	public void testInsertDisc() {
 		for (int row = 5; row >= 0; row--) {
 			b.insertDisc(0, Disc.RED);
-			assertEquals("b.getField(row, 0) == Disc.RED", Disc.RED, b.getField(row, 0));
+			assertEquals("b.getField(row, 0) == Disc.RED", Disc.RED,
+					b.getField(row, 0));
 		}
 	}
 
