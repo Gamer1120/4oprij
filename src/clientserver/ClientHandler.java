@@ -89,9 +89,17 @@ public class ClientHandler extends Thread {
 											command[1])) {
 										if (!server.isInvited(command[1],
 												getClientName())) {
+											server.addInvite(getClientName(),
+													command[1]);
+											String arguments = "";
+											//Hoop dat check voor eerste loop komt
+											for (int i = 2; i < command.length; i++) {
+												arguments += " " + command[i];
+											}
 											server.sendMessage(command[1],
 													Server.INVITE + " "
-															+ getClientName());
+															+ getClientName()
+															+ arguments);
 										} else {
 											sendMessage(Server.ERROR
 													+ " This client already invited you");

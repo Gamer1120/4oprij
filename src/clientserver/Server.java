@@ -72,10 +72,12 @@ public class Server extends Thread {
 	 *            message that is send
 	 */
 	public void broadcast(String msg) {
-		for (ClientHandler ch : threads) {
-			ch.sendMessage(msg);
+		synchronized (threads) {
+			for (ClientHandler ch : threads) {
+				ch.sendMessage(msg);
+			}
+			mui.addMessage("Server: " + msg);
 		}
-		mui.addMessage("Server: " + msg);
 	}
 
 	/**
@@ -86,12 +88,14 @@ public class Server extends Thread {
 	 *            message that is send
 	 */
 	public void broadcastLobby() {
-		for (ClientHandler ch : threads) {
-			if (!ch.inGame()) {
-				ch.sendMessage(LOBBY + getLobby());
+		synchronized (threads) {
+			for (ClientHandler ch : threads) {
+				if (!ch.inGame()) {
+					ch.sendMessage(LOBBY + getLobby());
+				}
 			}
+			mui.addMessage("Lobby:" + getLobby());
 		}
-		mui.addMessage("Lobby:" + getLobby());
 	}
 
 	/**
@@ -104,13 +108,15 @@ public class Server extends Thread {
 	 *            message that is send
 	 */
 	public void sendMessage(String name, String msg) {
-		for (ClientHandler ch : threads) {
-			if (ch.getClientName().equals(name)) {
-				ch.sendMessage(msg);
-				break;
+		synchronized (threads) {
+			for (ClientHandler ch : threads) {
+				if (ch.getClientName().equals(name)) {
+					ch.sendMessage(msg);
+					break;
+				}
 			}
+			mui.addMessage("Server to " + name + ": " + msg);
 		}
-		mui.addMessage("Server to " + name + ": " + msg);
 	}
 
 	/**
@@ -122,14 +128,16 @@ public class Server extends Thread {
 	 *            board that is send
 	 */
 	public boolean inGame(String name) {
-		boolean game = false;
-		for (ClientHandler ch : threads) {
-			if (ch.getClientName().equals(name) && ch.inGame()) {
-				game = true;
-				break;
+		synchronized (threads) {
+			boolean game = false;
+			for (ClientHandler ch : threads) {
+				if (ch.getClientName().equals(name) && ch.inGame()) {
+					game = true;
+					break;
+				}
 			}
+			return game;
 		}
-		return game;
 	}
 
 	/**
@@ -142,13 +150,15 @@ public class Server extends Thread {
 	 *            board that is send
 	 */
 	public void startGame(String name, Board board) {
-		for (ClientHandler ch : threads) {
-			if (ch.getClientName().equals(name)) {
-				ch.setBoard(board);
-				break;
+		synchronized (threads) {
+			for (ClientHandler ch : threads) {
+				if (ch.getClientName().equals(name)) {
+					ch.setBoard(board);
+					break;
+				}
 			}
+			mui.addMessage("Server: Set board for " + name);
 		}
-		mui.addMessage("Server: Set board for " + name);
 	}
 
 	/**
@@ -165,14 +175,16 @@ public class Server extends Thread {
 	 * Checks if the name isn't already in use
 	 */
 	public boolean nameExists(String name) {
-		boolean available = false;
-		for (ClientHandler ch : threads) {
-			if (name.equals(ch.getClientName())) {
-				available = true;
-				break;
+		synchronized (threads) {
+			boolean available = false;
+			for (ClientHandler ch : threads) {
+				if (name.equals(ch.getClientName())) {
+					available = true;
+					break;
+				}
 			}
+			return available;
 		}
-		return available;
 	}
 
 	/**
@@ -180,13 +192,15 @@ public class Server extends Thread {
 	 * game
 	 */
 	public String getLobby() {
-		String clients = "";
-		for (ClientHandler ch : threads) {
-			if (!ch.inGame()) {
-				clients += " " + ch.getClientName();
+		synchronized (threads) {
+			String clients = "";
+			for (ClientHandler ch : threads) {
+				if (!ch.inGame()) {
+					clients += " " + ch.getClientName();
+				}
 			}
+			return clients;
 		}
-		return clients;
 	}
 
 	/**
@@ -196,7 +210,9 @@ public class Server extends Thread {
 	 *            ClientHandler that will be added
 	 */
 	public void addHandler(ClientHandler handler) {
-		threads.add(handler);
+		synchronized (threads) {
+			threads.add(handler);
+		}
 	}
 
 	/**
@@ -206,7 +222,9 @@ public class Server extends Thread {
 	 *            ClientHandler that will be removed
 	 */
 	public void removeHandler(ClientHandler handler) {
-		threads.remove(handler);
+		synchronized (threads) {
+			threads.remove(handler);
+		}
 	}
 
 	/**
@@ -218,7 +236,9 @@ public class Server extends Thread {
 	 *            name of the invited client
 	 */
 	public void addInvite(String name, String invited) {
-		invites.add(new String[] { name, invited });
+		synchronized (invites) {
+			invites.add(new String[] { name, invited });
+		}
 	}
 
 	/**
@@ -230,14 +250,16 @@ public class Server extends Thread {
 	 *            the name of the client that received the invite
 	 */
 	public boolean isInvited(String name, String invited) {
-		boolean retBool = false;
-		for (String[] invite : invites) {
-			if (invite[0].equals(name) && invite[1].equals(invited)) {
-				retBool = true;
-				break;
+		synchronized (invites) {
+			boolean retBool = false;
+			for (String[] invite : invites) {
+				if (invite[0].equals(name) && invite[1].equals(invited)) {
+					retBool = true;
+					break;
+				}
 			}
+			return retBool;
 		}
-		return retBool;
 	}
 
 	/**
@@ -249,12 +271,14 @@ public class Server extends Thread {
 	 *            the name of the invited client
 	 */
 	public void removeInvite(String name, String invited) {
-		for (ListIterator<String[]> iter = invites.listIterator(); iter
-				.hasNext();) {
-			String[] invite = iter.next();
-			if (invite[0].equals(name) && invite[1].equals(invited)) {
-				iter.remove();
-				break;
+		synchronized (invites) {
+			for (ListIterator<String[]> iter = invites.listIterator(); iter
+					.hasNext();) {
+				String[] invite = iter.next();
+				if (invite[0].equals(name) && invite[1].equals(invited)) {
+					iter.remove();
+					break;
+				}
 			}
 		}
 	}
@@ -266,11 +290,13 @@ public class Server extends Thread {
 	 *            the name of the client
 	 */
 	public void removeAllInvites(String name) {
-		for (ListIterator<String[]> iter = invites.listIterator(); iter
-				.hasNext();) {
-			String[] invite = iter.next();
-			if (invite[0].equals(name) || invite[1].equals(name)) {
-				iter.remove();
+		synchronized (invites) {
+			for (ListIterator<String[]> iter = invites.listIterator(); iter
+					.hasNext();) {
+				String[] invite = iter.next();
+				if (invite[0].equals(name) || invite[1].equals(name)) {
+					iter.remove();
+				}
 			}
 		}
 	}
