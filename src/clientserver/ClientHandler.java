@@ -63,7 +63,7 @@ public class ClientHandler extends Thread {
 				switch (command[0]) {
 				case Client.CONNECT:
 					if (command.length >= 2) {
-						if (!server.nameExists(command[0])) {
+						if (!server.nameExists(command[1])) {
 							clientName = command[1];
 							if (command.length > 2) {
 								features = Arrays.copyOfRange(command, 2,
