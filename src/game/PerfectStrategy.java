@@ -7,13 +7,11 @@ public class PerfectStrategy extends Thread implements Strategy {
 	public final static int DEPTH = 3;
 	private Board board;
 	private Disc disc;
-	private int currentDepth;
 	private HashMap<Integer, Integer> scores;
 
 	public PerfectStrategy(Board b, Disc d, int currDepth) {
 		this.board = b;
 		this.disc = d;
-		this.currentDepth = currDepth;
 	}
 
 	@Override
