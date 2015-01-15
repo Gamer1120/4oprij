@@ -72,7 +72,7 @@ public class Server extends Thread {
 		for (ClientHandler ch : threads) {
 			ch.sendMessage(msg);
 		}
-		mui.addMessage(msg);
+		mui.addMessage("Server: " + msg);
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class Server extends Thread {
 				break;
 			}
 		}
-		mui.addMessage(name + ": " + msg);
+		mui.addMessage("Server to " + name + ": " + msg);
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class Server extends Thread {
 	 *            message that is send
 	 */
 	public void print(String msg) {
-		mui.addMessage(msg);
+		mui.addMessage("ClientHandler to " + msg);
 	}
 
 	/**
