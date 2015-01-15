@@ -90,9 +90,18 @@ public class Server extends Thread {
 				ch.sendMessage(msg);
 				break;
 			}
-
 		}
 		mui.addMessage(name + ": " + msg);
+	}
+
+	/**
+	 * Print the message on the server gui
+	 * 
+	 * @param msg
+	 *            message that is send
+	 */
+	public void print(String msg) {
+		mui.addMessage(msg);
 	}
 
 	/**
@@ -117,6 +126,7 @@ public class Server extends Thread {
 	 */
 	public void addHandler(ClientHandler handler) {
 		threads.add(handler);
+		mui.addMessage(handler.getClientName() + " has joined");
 	}
 
 	/**
@@ -127,6 +137,7 @@ public class Server extends Thread {
 	 */
 	public void removeHandler(ClientHandler handler) {
 		threads.remove(handler);
+		mui.addMessage(handler.getClientName() + " has left");
 	}
 
 } // end of class Server

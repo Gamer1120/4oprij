@@ -201,6 +201,7 @@ public class ClientHandler extends Thread {
 			out.write(msg);
 			out.newLine();
 			out.flush();
+			server.print(getClientName() + ": " + msg);
 		} catch (IOException e) {
 			shutdown();
 		}
