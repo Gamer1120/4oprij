@@ -11,60 +11,80 @@ import java.util.Arrays;
 public class Board {
 	//TODO: support meerdere grotes
 	// Constants:
-	public static final int VERTICAL = 6;
-	public static final int HORIZONTAL = 7;
-	public static final int ROW = 4;
+	public static final int CONNECT = 4;
 
 	// Instance variables:
+	public int rows;
+	public int columns;
 	/*@
-		private invariant fields.length == VERTICAL * HORIZONTAL;
-		invariant (\forall int i; 0 <= i & i < VERTICAL; (\forall int j; 0 <= j & j < HORIZONTAL; this.getField(i, j) == Disc.EMPTY || this.getField(i, j) == Disc.YELLOW || this.getField(i, j) == Disc.RED));
+		private invariant fields.length == rows * columns;
+		invariant (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) == Disc.EMPTY || this.getField(i, j) == Disc.YELLOW || this.getField(i, j) == Disc.RED));
 	 */
 	/**
-	 * The VERTICAL by HORIZONTAL board of the connect4 game.
+	 * The rows by columns board of the connect4 game.
 	 */
 	private Disc[][] fields;
 
 	// Constructors
-	/*@ensures (\forall int i; 0 <= i & i < VERTICAL; (\forall int j; 0 <= j & j < HORIZONTAL; this.getField(i, j) == Disc.EMPTY));*/
+	/*@ensures (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) == Disc.EMPTY));*/
 	/**
 	 * Creates an empty board.
 	 */
 	public Board() {
-		fields = new Disc[VERTICAL][HORIZONTAL];
-		for (int row = 0; row < VERTICAL; row++) {
-			for (int col = 0; col < HORIZONTAL; col++) {
+		this(6, 7);
+	}
+
+	/*@ensures (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) == Disc.EMPTY));*/
+	/**
+	 * Creates an empty board.
+	 */
+	public Board(int rowsArg, int columnsArg) {
+		this.rows = rowsArg;
+		this.columns = columnsArg;
+		fields = new Disc[rows][columns];
+		for (int row = 0; row < rows; row++) {
+			for (int col = 0; col < columns; col++) {
 				setField(row, col, Disc.EMPTY);
 			}
 		}
 	}
 
+	//TODO: javadoc en jml
+	/*@ pure */public int getRows() {
+		return rows;
+	}
+
+	//TODO: javadoc en jml
+	/*@ pure */public int getColumns() {
+		return columns;
+	}
+
 	// Queries:
 	/*@
 		ensures \result != this;
-		ensures (\forall int i; 0 <= i & i < VERTICAL; (\forall int j; 0 <= j & j < HORIZONTAL; \result.getField(i, j) == this.getField(i, j)));
+		ensures (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; \result.getField(i, j) == this.getField(i, j)));
 	 */
 	/**
 	 * Creates a deep copy of this board.
 	 */
 	public Board deepCopy() {
-		Board board = new Board();
-		for (int row = 0; row < VERTICAL; row++) {
-			for (int col = 0; col < HORIZONTAL; col++) {
+		Board board = new Board(rows, columns);
+		for (int row = 0; row < rows; row++) {
+			for (int col = 0; col < columns; col++) {
 				board.setField(row, col, getField(row, col));
 			}
 		}
 		return board;
 	}
 
-	/*@requires 0 <= col & col < VERTICAL;*/
+	/*@requires 0 <= col & col < rows;*/
 	/**
 	 * Calculates the lowest empty row given the column
 	 * 
 	 * @return the vertical index belonging to the row
 	 */
 	/*@pure*/public int emptyRow(int col) {
-		for (int row = VERTICAL - 1; row >= 0; row--) {
+		for (int row = rows - 1; row >= 0; row--) {
 			if (getField(row, col) == Disc.EMPTY) {
 				return row;
 			}
@@ -72,14 +92,14 @@ public class Board {
 		return -1;
 	}
 
-	/*@requires 0 <= col & col < VERTICAL;*/
+	/*@requires 0 <= col & col < rows;*/
 	/**
 	 * Calculates the highest full row given the column
 	 * 
 	 * @return the vertical index belonging to the row
 	 */
 	/*@pure*/public int fullRow(int col) {
-		for (int row = 0; row < VERTICAL; row++) {
+		for (int row = 0; row < rows; row++) {
 			if (getField(row, col) != Disc.EMPTY) {
 				return row;
 			}
@@ -88,24 +108,24 @@ public class Board {
 	}
 
 	// TODO: Discuss whether or not to rename this to isColumn.
-	/*@ensures \result == (0 <= col && col < HORIZONTAL);*/
+	/*@ensures \result == (0 <= col && col < columns);*/
 	/**
 	 * Returns true if col is a valid column of the board
 	 * 
-	 * @return true if 0 <= col < HORIZONTAL
+	 * @return true if 0 <= col < columns
 	 */
 	/*@pure*/public boolean isField(int col) {
-		return 0 <= col && col < HORIZONTAL;
+		return 0 <= col && col < columns;
 	}
 
-	/*@ensures \result == (0 <= row && row < VERTICAL && 0 <= col && col < HORIZONTAL);*/
+	/*@ensures \result == (0 <= row && row < rows && 0 <= col && col < columns);*/
 	/**
 	 * Returns true of the (row,col) pair refers to a valid field on the board.
 	 * 
-	 * @return true if 0 <= row < VERTICAL && 0 <= col < HORIZONTAL
+	 * @return true if 0 <= row < rows && 0 <= col < columns
 	 */
 	/*@pure*/public boolean isField(int row, int col) {
-		return 0 <= row && row < VERTICAL && 0 <= col && col < HORIZONTAL;
+		return 0 <= row && row < rows && 0 <= col && col < columns;
 	}
 
 	/*@
@@ -144,7 +164,7 @@ public class Board {
 	 * @return true if the field is empty
 	 */
 	/*@pure*/public boolean isEmptyField(int col) {
-		for (int row = 0; row < VERTICAL; row++) {
+		for (int row = 0; row < rows; row++) {
 			if (getField(row, col) == Disc.EMPTY) {
 				return true;
 			}
@@ -169,15 +189,15 @@ public class Board {
 		return isField(row, col) && getField(row, col) == Disc.EMPTY;
 	}
 
-	/*@ensures \result == (\forall int i; 0 <= i & i < VERTICAL; (\forall int j; 0 <= j & j < HORIZONTAL; this.getField(i, j) != Disc.EMPTY));*/
+	/*@ensures \result == (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) != Disc.EMPTY));*/
 	/**
 	 * Tests if the whole board is full.
 	 * 
 	 * @return true if all fields are occupied
 	 */
 	/*@pure*/public boolean isFull() {
-		for (int row = 0; row < VERTICAL; row++) {
-			for (int col = 0; col < HORIZONTAL; col++) {
+		for (int row = 0; row < rows; row++) {
+			for (int col = 0; col < columns; col++) {
 				if (getField(row, col) == Disc.EMPTY) {
 					return false;
 				}
@@ -205,11 +225,11 @@ public class Board {
 	 * @return true if there is a row controlled by d
 	 */
 	/*@pure*/public boolean hasRow(Disc d) {
-		for (int row = 0; row < VERTICAL; row++) {
+		for (int row = 0; row < rows; row++) {
 			int count = 0;
-			for (int col = 0; HORIZONTAL + count - col >= ROW; col++) {
+			for (int col = 0; columns + count - col >= CONNECT; col++) {
 				if (getField(row, col) == d) {
-					if (++count >= ROW) {
+					if (++count >= CONNECT) {
 						return true;
 					}
 				} else {
@@ -228,11 +248,11 @@ public class Board {
 	 * @return true if there is a column controlled by d
 	 */
 	/*@pure*/public boolean hasColumn(Disc d) {
-		for (int col = 0; col < HORIZONTAL; col++) {
+		for (int col = 0; col < columns; col++) {
 			int count = 0;
-			for (int row = 0; VERTICAL + count - row >= ROW; row++) {
+			for (int row = 0; rows + count - row >= CONNECT; row++) {
 				if (getField(row, col) == d) {
-					if (++count >= ROW) {
+					if (++count >= CONNECT) {
 						return true;
 					}
 				} else {
@@ -251,21 +271,21 @@ public class Board {
 	 * @return true if there is a diagonal controlled by d
 	 */
 	/*@pure*/public boolean hasDiagonal(Disc d) {
-		int r = VERTICAL - ROW;
+		int r = rows - CONNECT;
 		int c = 0;
-		while (c < HORIZONTAL) {
+		while (c < columns) {
 			int row = r;
 			int col = c;
 			int count1 = 0;
 			int count2 = 0;
-			boolean diag1 = (VERTICAL + count1 - row >= ROW)
-					&& (HORIZONTAL + count1 - col >= ROW);
-			boolean diag2 = (VERTICAL + count2 - row >= ROW)
-					&& (HORIZONTAL + count2 - col >= ROW);
+			boolean diag1 = (rows + count1 - row >= CONNECT)
+					&& (columns + count1 - col >= CONNECT);
+			boolean diag2 = (rows + count2 - row >= CONNECT)
+					&& (columns + count2 - col >= CONNECT);
 			while (diag1 || diag2) {
 				if (diag1) {
 					if (getField(row, col) == d) {
-						if (++count1 >= ROW) {
+						if (++count1 >= CONNECT) {
 							return true;
 						}
 					} else {
@@ -273,8 +293,8 @@ public class Board {
 					}
 				}
 				if (diag2) {
-					if (getField(VERTICAL - 1 - row, col) == d) {
-						if (++count2 >= ROW) {
+					if (getField(rows - 1 - row, col) == d) {
+						if (++count2 >= CONNECT) {
 							return true;
 						}
 					} else {
@@ -283,10 +303,10 @@ public class Board {
 				}
 				row++;
 				col++;
-				diag1 = (VERTICAL + count1 - row >= ROW)
-						&& (HORIZONTAL + count1 - col >= ROW);
-				diag2 = (VERTICAL + count2 - row >= ROW)
-						&& (HORIZONTAL + count2 - col >= ROW);
+				diag1 = (rows + count1 - row >= CONNECT)
+						&& (columns + count1 - col >= CONNECT);
+				diag2 = (rows + count2 - row >= CONNECT)
+						&& (columns + count2 - col >= CONNECT);
 			}
 			if (r > 0) {
 				r--;
@@ -341,14 +361,14 @@ public class Board {
 
 	// -- Commands ---------------------------------------------------
 
-	/*@ensures (\forall int i; 0 <= i & i < VERTICAL; (\forall int j; 0 <= j & j < HORIZONTAL; this.getField(i, j) == Disc.EMPTY));*/
+	/*@ensures (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) == Disc.EMPTY));*/
 	/**
 	 * Empties all fields of this board (i.e., let them refer to the value
 	 * Disc.EMPTY).
 	 */
 	public void reset() {
-		for (int row = 0; row < VERTICAL; row++) {
-			for (int col = 0; col < HORIZONTAL; col++) {
+		for (int row = 0; row < rows; row++) {
+			for (int col = 0; col < columns; col++) {
 				setField(row, col, Disc.EMPTY);
 			}
 		}
@@ -356,7 +376,7 @@ public class Board {
 
 	/*@
 		requires this.isField(col);
-		ensures (\forall int i; 0 <= i & i < VERTICAL; (\forall int j; 0 <= j & j < HORIZONTAL; this.getField(i, j) == d));
+		ensures (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) == d));
 	 */
 	/**
 	 * Places disc d in the lowest empty row in the column col.

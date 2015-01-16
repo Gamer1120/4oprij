@@ -37,11 +37,11 @@ public class Game {
 
 	private void requestMove() {
 		if (currTeam == 0) {
-			team0[currPlayer0].requestMove();
+			team0[currPlayer0].sendMessage("");
 			currPlayer0 = (currPlayer0 + 1) % team0.length - 1;
 			currTeam = 1;
 		} else {
-			team1[currPlayer1].requestMove();
+			team1[currPlayer1].sendMessage("");
 			currPlayer1 = (currPlayer1 + 1) % team1.length - 1;
 			currTeam = 0;
 		}
@@ -53,7 +53,7 @@ public class Game {
 
 	public void doMove(int col) {
 		for (ClientHandler ch : clients) {
-			ch.sendMessage(MOVE_OK);
+			ch.sendMessage("MOVE_OK");
 		}
 	}
 

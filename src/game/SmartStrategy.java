@@ -1,4 +1,5 @@
 package game;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,13 +12,13 @@ public class SmartStrategy implements Strategy {
 
 	public int determineMove(Board b, Disc d) {
 		Set<Integer> empty = new HashSet<Integer>();
-		for (int i = 0; i < Board.HORIZONTAL; i++) {
+		for (int i = 0; i < b.getColumns(); i++) {
 			if (b.isEmptyField(i)) {
 				empty.add(i);
 			}
 		}
-		if (empty.contains(Board.HORIZONTAL / 2)) {
-			return Board.HORIZONTAL / 2;
+		if (empty.contains(b.getColumns() / 2)) {
+			return b.getColumns() / 2;
 		}
 		for (Integer i : empty) {
 			Board board = b.deepCopy();
@@ -35,6 +36,6 @@ public class SmartStrategy implements Strategy {
 		}
 		return (int) empty.toArray()[((int) (Math.random() * empty.size()))];
 	}
-	
+
 	//TODO: Implement a canWin(Board b, Disc d) method, which is mainly copy-pasta.
 }

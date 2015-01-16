@@ -1,4 +1,5 @@
 package game;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,7 +12,7 @@ public class NaiveStrategy implements Strategy {
 
 	public int determineMove(Board b, Disc d) {
 		Set<Integer> empty = new HashSet<Integer>();
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < b.getColumns(); col++) {
 			if (b.isEmptyField(col)) {
 				empty.add(col);
 			}

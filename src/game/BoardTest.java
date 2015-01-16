@@ -40,8 +40,8 @@ public class BoardTest {
 	 */
 	@Test
 	public void testEmptyBoard() {
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int row = 0; row < b.getRows(); row++) {
+			for (int col = 0; col < b.getColumns(); col++) {
 				assertEquals("b.getField(" + row + "," + col + ")",
 						b.getField(row, col), Disc.EMPTY);
 			}
@@ -59,8 +59,8 @@ public class BoardTest {
 		b.insertDisc(1, Disc.YELLOW);
 		b.insertDisc(3, Disc.RED);
 		Board copy = b.deepCopy();
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int row = 0; row < b.getRows(); row++) {
+			for (int col = 0; col < b.getColumns(); col++) {
 				assertEquals(
 						"For all fields: b.getField(row, col) == copy.getField(row, col)",
 						b.getField(row, col), copy.getField(row, col));
@@ -81,12 +81,12 @@ public class BoardTest {
 	 */
 	@Test
 	public void testEmptyRow() {
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < b.getColumns(); col++) {
 			assertEquals("For all empty columns: b.emptyRow(col) == 5", 5,
 					b.emptyRow(col));
 		}
 		b.insertDisc(2, Disc.YELLOW);
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < b.getColumns(); col++) {
 			if (col != 2) {
 				assertEquals("For all empty columns: b.emptyRow(col) == 5", 5,
 						b.emptyRow(col));
@@ -103,7 +103,7 @@ public class BoardTest {
 		b.insertDisc(1, Disc.RED);
 		b.insertDisc(1, Disc.YELLOW);
 		b.insertDisc(1, Disc.YELLOW);
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < b.getColumns(); col++) {
 			if (col != 2 && col != 5 && col != 1) {
 				assertEquals("For all empty columns: b.emptyRow(col) == 5", 5,
 						b.emptyRow(col));
@@ -119,7 +119,7 @@ public class BoardTest {
 			}
 		}
 		b.reset();
-		for (int row = 0; row < Board.VERTICAL; row++) {
+		for (int row = 0; row < b.getRows(); row++) {
 			b.insertDisc(0, Disc.RED);
 		}
 		assertEquals("b.emptyRow(0)", -1, b.emptyRow(0));
@@ -135,7 +135,7 @@ public class BoardTest {
 	 */
 	@Test
 	public void testFullRow() {
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < b.getColumns(); col++) {
 			assertEquals("b.fullRow(col) should be -1 when there are no discs",
 					-1, b.fullRow(col));
 		}
@@ -164,27 +164,27 @@ public class BoardTest {
 	@Test
 	public void testIsField() {
 		// Calling isField(col) with a valid index
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < b.getColumns(); col++) {
 			assertEquals("b.isField(col)", true, b.isField(col));
 		}
 		// Calling isField(col) with an invalid index
 
-		for (int col = Board.HORIZONTAL; col < Board.HORIZONTAL * 2; col++) {
+		for (int col = b.getColumns(); col < b.getColumns() * 2; col++) {
 			assertEquals("For these invalid fields: b.isField(col) == false",
 					false, b.isField(col));
 		}
 
 		// Calling isField(row, col) with a valid index
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int row = 0; row < b.getRows(); row++) {
+			for (int col = 0; col < b.getColumns(); col++) {
 				assertEquals(
 						"For all valid fields: b.isField(row, col) == true",
 						true, b.isField(row, col));
 			}
 		}
 		// Calling isField(row, col) with some invalid indexes
-		for (int row = Board.VERTICAL; row < Board.VERTICAL * 2; row++) {
-			for (int col = Board.HORIZONTAL; col < Board.HORIZONTAL * 2; col++) {
+		for (int row = b.getRows(); row < b.getRows() * 2; row++) {
+			for (int col = b.getColumns(); col < b.getColumns() * 2; col++) {
 				assertEquals(
 						"For these invalid fields: b.isField(row, col) == false",
 						false, b.isField(row, col));
@@ -205,8 +205,8 @@ public class BoardTest {
 	@Test
 	public void testGetField() {
 		// Calls all fields, and checks if they're Disc.EMPTY
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int row = 0; row < b.getRows(); row++) {
+			for (int col = 0; col < b.getColumns(); col++) {
 				assertEquals(
 						"For all fields on an empty board: b.getField(row, col) == Disc.EMPTY",
 						Disc.EMPTY, b.getField(row, col));
@@ -239,8 +239,8 @@ public class BoardTest {
 		assertEquals("In (5,1) there's now a RED Disc", Disc.RED,
 				b.getField(5, 1));
 		// Tests some fields outside the board
-		for (int row = Board.VERTICAL; row < Board.VERTICAL * 2; row++) {
-			for (int col = Board.HORIZONTAL; col < Board.HORIZONTAL * 2; col++) {
+		for (int row = b.getRows(); row < b.getRows() * 2; row++) {
+			for (int col = b.getColumns(); col < b.getColumns() * 2; col++) {
 				assertEquals(
 						"For these invalid fields: b.getField(row, col) == null",
 						null, b.getField(row, col));
@@ -262,18 +262,18 @@ public class BoardTest {
 	 */
 	@Test
 	public void testIsEmptyField() {
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < b.getColumns(); col++) {
 			assertEquals(true, b.isEmptyField(col));
 		}
-		for (int row = 0; row < Board.VERTICAL; row++) {
+		for (int row = 0; row < b.getRows(); row++) {
 			assertEquals(true, b.isEmptyField(0));
 			b.insertDisc(0, Disc.RED);
 		}
 		assertEquals(false, b.isEmptyField(0));
 		// From here on testing isEmptyField(row, col)
 		b.reset();
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int row = 0; row < b.getRows(); row++) {
+			for (int col = 0; col < b.getColumns(); col++) {
 				assertEquals(true, b.isEmptyField(row, col));
 			}
 		}
@@ -314,14 +314,14 @@ public class BoardTest {
 
 	@Test
 	public void testIsFull() {
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int row = 0; row < b.getRows(); row++) {
+			for (int col = 0; col < b.getColumns(); col++) {
 				if (Math.random() > 0.5) {
 					b.setField(row, col, Disc.RED);
 				} else {
 					b.setField(row, col, Disc.YELLOW);
 				}
-				if (!(row == Board.VERTICAL - 1 && col == Board.HORIZONTAL - 1)) {
+				if (!(row == b.getRows() - 1 && col == b.getColumns() - 1)) {
 					assertEquals("For a non-full board: b.isFull() == false",
 							false, b.isFull());
 				} else {
@@ -363,7 +363,7 @@ public class BoardTest {
 	 */
 	@Test
 	public void testHasRow() {
-		for (int row = 0; row < Board.VERTICAL; row++) {
+		for (int row = 0; row < b.getRows(); row++) {
 			for (int col = 0; col <= 3; col++) {
 				b.reset();
 				for (int i = col; i <= (col + 3); i++) {
@@ -378,7 +378,7 @@ public class BoardTest {
 			}
 		}
 		// Now tests with rows of 3.
-		for (int row = 0; row < Board.VERTICAL; row++) {
+		for (int row = 0; row < b.getRows(); row++) {
 			for (int col = 0; col <= 3; col++) {
 				b.reset();
 				// Fill the boardrow with a row of 3 discs
@@ -428,7 +428,7 @@ public class BoardTest {
 	 */
 	@Test
 	public void testHasColumn() {
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < b.getColumns(); col++) {
 			for (int row = 0; row <= 2; row++) {
 				b.reset();
 				for (int i = row; i <= (row + 3); i++) {
@@ -443,7 +443,7 @@ public class BoardTest {
 			}
 		}
 		// Now tests with columns of 3.
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < b.getColumns(); col++) {
 			for (int row = 0; row <= 2; row++) {
 				b.reset();
 				// Fill the boardcolumn with a row of 3 discs
@@ -864,8 +864,8 @@ public class BoardTest {
 	@Test
 	public void testReset() {
 		// Fills the board with Discs
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int row = 0; row < b.getRows(); row++) {
+			for (int col = 0; col < b.getColumns(); col++) {
 				if (Math.random() > 0.5) {
 					b.setField(row, col, Disc.RED);
 				} else {
@@ -876,8 +876,8 @@ public class BoardTest {
 		// Resets the board
 		b.reset();
 		// Tests if all fields are empty now.
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int row = 0; row < b.getRows(); row++) {
+			for (int col = 0; col < b.getColumns(); col++) {
 				assertEquals("All discs on the board are Disc.EMPTY now.",
 						Disc.EMPTY, b.getField(row, col));
 			}
@@ -905,8 +905,8 @@ public class BoardTest {
 	 */
 	@Test
 	public void testSetField() {
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int row = 0; row < b.getRows(); row++) {
+			for (int col = 0; col < b.getColumns(); col++) {
 				b.setField(row, col, Disc.RED);
 				assertEquals("b.getField(row, col) == Disc.RED", Disc.RED,
 						b.getField(row, col));

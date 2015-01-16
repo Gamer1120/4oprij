@@ -1,4 +1,5 @@
 package game;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -36,7 +37,7 @@ public class PerfectStrategy extends Thread implements Strategy {
 		// Now check for the opponent: if you make a certain move, can he win?
 		if (disc == Disc.RED) {
 			// Check for all columns
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+			for (int col = 0; col < board.getColumns(); col++) {
 				// Make a copy of the board
 				copy = board.deepCopy();
 				// Insert a disc into that column
@@ -54,7 +55,7 @@ public class PerfectStrategy extends Thread implements Strategy {
 
 		} else if (disc == Disc.YELLOW) {
 			// Check for all columns
-			for (int col = 0; col < Board.HORIZONTAL; col++) {
+			for (int col = 0; col < board.getColumns(); col++) {
 				// Make a copy of the board
 				copy = board.deepCopy();
 				// Insert a disc into that column
@@ -74,7 +75,7 @@ public class PerfectStrategy extends Thread implements Strategy {
 
 	private LinkedList<Integer> instantWin(Board b, Disc d) {
 		LinkedList<Integer> winColumns = null;
-		for (int col = 0; col < Board.HORIZONTAL; col++) {
+		for (int col = 0; col < board.getColumns(); col++) {
 			Board copy = b.deepCopy();
 			copy.insertDisc(col, d);
 			if (copy.hasWinner()) {
@@ -83,7 +84,7 @@ public class PerfectStrategy extends Thread implements Strategy {
 		}
 		return winColumns;
 	}
-	
+
 	public static void main(String[] args) {
 		new PerfectStrategy(new Board(), Disc.RED, 9).start();
 	}

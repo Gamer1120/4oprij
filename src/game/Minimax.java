@@ -1,4 +1,5 @@
 package game;
+
 public class Minimax {
 	private final Board board;
 	public static final int[] INCREMENT = { 0, 1, 4, 32, 128, 512 };
@@ -63,7 +64,7 @@ public class Minimax {
 		if (depth == maxDepth) {
 			return score;
 		}
-		for (int c = 0; c < Board.HORIZONTAL; c++) {
+		for (int c = 0; c < board.getColumns(); c++) {
 			//TODO: werken met deepcopy inplaats van disc verwijderen?
 			if (board.isEmptyField(c)) {
 				int r = board.emptyRow(c);
@@ -106,7 +107,7 @@ public class Minimax {
 		if (depth == maxDepth) {
 			return score;
 		}
-		for (int c = 0; c < Board.HORIZONTAL; c++) {
+		for (int c = 0; c < board.getColumns(); c++) {
 			//TODO: werken met deepcopy inplaats van disc verwijderen?
 			if (board.isEmptyField(c)) {
 				int r = board.emptyRow(c);
@@ -139,8 +140,8 @@ public class Minimax {
 		redWinFound = yellowWinFound = false;
 
 		redCount = yellowCount = 0;
-		int cStart = col - 3, colStart = cStart >= 0 ? cStart : 0, colEnd = Board.HORIZONTAL
-				- 3 - (colStart - cStart);
+		int cStart = col - 3, colStart = cStart >= 0 ? cStart : 0, colEnd = board
+				.getColumns() - 3 - (colStart - cStart);
 		for (int c = colStart; c < colEnd; c++) {
 			redCount = yellowCount = 0;
 			for (int val = 0; val < 4; val++) {
@@ -166,7 +167,7 @@ public class Minimax {
 		}
 
 		redCount = yellowCount = 0;
-		int rowEnd = Math.min(Board.VERTICAL, row + 4);
+		int rowEnd = Math.min(board.getRows(), row + 4);
 		for (int r = row; r < rowEnd; r++) {
 			Disc disc = board.getField(r, col);
 			if (disc == Disc.RED) {
@@ -190,8 +191,8 @@ public class Minimax {
 
 		int minValue = Math.min(row, col), rowStart = row - minValue;
 		colStart = col - minValue;
-		for (int r = rowStart, c = colStart; r <= Board.VERTICAL - 4
-				&& c <= Board.HORIZONTAL - 4; r++, c++) {
+		for (int r = rowStart, c = colStart; r <= board.getRows() - 4
+				&& c <= board.getColumns() - 4; r++, c++) {
 			redCount = yellowCount = 0;
 			for (int val = 0; val < 4; val++) {
 				Disc disc = board.getField(r + val, c + val);
@@ -215,11 +216,11 @@ public class Minimax {
 			score += getScoreIncrement(redCount, yellowCount, d);
 		}
 
-		minValue = Math.min(Board.VERTICAL - 1 - row, col);
+		minValue = Math.min(board.getRows() - 1 - row, col);
 		rowStart = row + minValue;
 		colStart = col - minValue;
 		for (int r = rowStart, c = colStart; r >= 3
-				&& c <= Board.HORIZONTAL - 4; r--, c++) {
+				&& c <= board.getColumns() - 4; r--, c++) {
 			redCount = yellowCount = 0;
 			for (int val = 0; val < 4; val++) {
 				Disc disc = board.getField(r - val, c + val);
