@@ -282,7 +282,7 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Checks wether the client is invited by the client with the specified
+	 * Checks whether the client is invited by the client with the specified
 	 * name.
 	 *
 	 * @param name
