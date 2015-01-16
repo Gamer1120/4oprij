@@ -242,8 +242,31 @@ public class BoardTest {
 		}
 	}
 
+	/**
+	 * Firstly, it tests the method
+	 * <code>isEmptyField(col). It tests that for every column on an empty <code>Board</code>
+	 * there's at least 1 empty field in each of those columns. Then, a column
+	 * is filled, and after each Disc, it's checked whether the column still has
+	 * empty fields. Once the column is full, it should no longer have empty
+	 * fields.
+	 * 
+	 * Secondly, it tests the method <code>isEmptyField(row, col)</code>. First,
+	 * it assures that every field on an empty <code>Board</code> is empty.
+	 * After that it inserts some discs, and assures that the fields those
+	 * <code>Disc</code>s got inserted into are no longer empty.
+	 */
 	@Test
 	public void testIsEmptyField() {
+		for (int col = 0; col < Board.HORIZONTAL; col++) {
+			assertEquals(true, b.isEmptyField(col));
+		}
+		for (int row = 0; row < Board.VERTICAL; row++) {
+			assertEquals(true, b.isEmptyField(0));
+			b.insertDisc(0, Disc.RED);
+		}
+		assertEquals(false, b.isEmptyField(0));
+		// From here on testing isEmptyField(row, col)
+		b.reset();
 		for (int row = 0; row < Board.VERTICAL; row++) {
 			for (int col = 0; col < Board.HORIZONTAL; col++) {
 				assertEquals(true, b.isEmptyField(row, col));
@@ -274,12 +297,6 @@ public class BoardTest {
 				b.isEmptyField(4, 1));
 		assertEquals("(5,1) is no longer an empty field.", false,
 				b.isEmptyField(5, 1));
-		b.reset();
-		for (int row = 0; row < Board.VERTICAL; row++) {
-			b.insertDisc(0, Disc.RED);
-		}
-		assertEquals("b.isEmptyField(0)", false, b.isEmptyField(0));
-		assertEquals("b.isEmptyField(9000,0)", false, b.isEmptyField(0));
 	}
 
 	@Test

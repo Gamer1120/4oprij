@@ -130,7 +130,7 @@ public class Board {
 			return null;
 		}
 	}
-
+	//TODO: Discuss whether to rename this method to hasEmptyField(col).
 	/*@
 	requires this.isField(row,col);
 	ensures \result == (this.getField(row,col) == Disc.EMPTY);
