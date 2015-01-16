@@ -19,39 +19,61 @@ import java.util.Arrays;
  */
 public class ClientHandler extends Thread {
 
-	/** The server. */
+	/**
+	 * The <code>Server</code> for this <code>ClientHandler</code>.
+	 */
 	private Server server;
 
-	/** The sock. */
+	/**
+	 * The <code>Socket</code> this <code>ClientHandler</code> will use to
+	 * connect to the <code>Client</code>.
+	 */
 	private Socket sock;
 
-	/** The in. */
+	/**
+	 * The <code>BufferedReader</code> used to receive packets from the
+	 * <code>Client</code>.
+	 */
 	private BufferedReader in;
 
-	/** The out. */
+	/**
+	 * The <code>BufferedWriter</code> used to send packets to the
+	 * <code>Client</code>.
+	 */
 	private BufferedWriter out;
 
-	/** The client name. */
+	/**
+	 * The name of the <code>Client</code> this <code>ClientHandler</code> is
+	 * associated with.
+	 */
 	private String clientName;
 
-	/** The features. */
+	/**
+	 * The list of the features of the <code>Client</code> this
+	 * <code>ClientHandler</code> is associated with.
+	 */
 	private String[] features;
 
-	/** The player number. */
+	/** TO BE REMOVED */
 	private int playerNumber;
 
-	/** The opponent name. */
+	/** TO BE REMOVED */
 	private String opponentName;
 
-	/** The board. */
+	/** TO BE CHANGED TO GAME. */
 	private Board board;
 
-	/** The loop. */
+	/**
+	 * A loop variable used to check whether to keep looping or not in a certain
+	 * method.
+	 */
 	private boolean loop;
 
+	// @requires server != null && sock != null;
 	/**
-	 * Constructs a ClientHandler object Initialises both Data streams. @
-	 * requires server != null && sock != null;
+	 * Constructs a <code>ClientHandler</code> object. Initialises both the
+	 * <code>BufferedReader</code> and the <code>BufferedWriter</code>.
+	 * 
 	 *
 	 * @param serverArg
 	 *            the server arg
@@ -114,13 +136,13 @@ public class ClientHandler extends Thread {
 				chat(command);
 				break;
 			case Client.REQUEST_BOARD:
-				//TODO: zelf bord bijhouden om op te sturen
+				// TODO: zelf bord bijhouden om op te sturen
 				break;
 			case Client.REQUEST_LOBBY:
 				sendMessage(Server.LOBBY + server.getLobby());
 				break;
 			case Client.REQUEST_LEADERBOARD:
-				//TODO: leaderbords opslaan
+				// TODO: leaderbords opslaan
 				break;
 			default:
 				sendMessage(Server.ERROR + " Invalid command");
@@ -148,7 +170,7 @@ public class ClientHandler extends Thread {
 				endGame();
 				break;
 			case Server.MOVE_OK:
-				//TODO: move doen bijbehorende speler
+				// TODO: move doen bijbehorende speler
 			}
 			out.write(msg);
 			out.newLine();
@@ -203,16 +225,16 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void connect(String[] command) {
-		//TODO: controleren op naam lengte
+		// TODO: controleren op naam lengte
 		if (command.length >= 2) {
 			if (!server.nameExists(command[1])) {
 				clientName = command[1];
 				if (command.length > 2) {
-					//TODO: controleren valid features?
+					// TODO: controleren valid features?
 					features = Arrays.copyOfRange(command, 2,
 							command.length - 1);
 				}
-				//TODO: onze features sturen
+				// TODO: onze features sturen
 				sendMessage(Server.ACCEPT_CONNECT
 						+ " Feature array gescheiden met spaties");
 				server.broadcastLobby();
@@ -240,9 +262,9 @@ public class ClientHandler extends Thread {
 						if (!server.isInvited(clientName, command[1])) {
 							if (!server.isInvited(command[1], clientName)) {
 								server.addInvite(clientName, command[1]);
-								//TODO: controleren board size en settings
+								// TODO: controleren board size en settings
 								String arguments = "";
-								//Hoop dat check voor eerste loop komt
+								// Hoop dat check voor eerste loop komt
 								for (int i = 2; i < command.length; i++) {
 									arguments += " " + command[i];
 								}
@@ -280,7 +302,7 @@ public class ClientHandler extends Thread {
 	private void accept(String[] command) {
 		if (command.length == 2) {
 			if (server.isInvited(command[1], clientName)) {
-				//TODO: extras verzenden (spectators?)
+				// TODO: extras verzenden (spectators?)
 				board = new Board();
 				server.print("ClientHandler: Set board for " + clientName);
 				server.startGame(command[1], board);
@@ -325,14 +347,14 @@ public class ClientHandler extends Thread {
 	 */
 	private void move(String[] command) {
 		if (command.length == 2) {
-			//TODO: mogeljk game met players en spectators?
-			//TODO: check wie aan de beurt is, mogelijk bij request
-			//TODO: zelf bord bijhouden voor nummer en move ok checken
+			// TODO: mogeljk game met players en spectators?
+			// TODO: check wie aan de beurt is, mogelijk bij request
+			// TODO: zelf bord bijhouden voor nummer en move ok checken
 			sendMessage(Server.MOVE_OK + " " + playerNumber + " " + command[1]);
 			server.sendMessage(opponentName, Server.MOVE_OK + " "
 					+ playerNumber + " " + command[1]);
 			server.sendMessage(opponentName, Server.REQUEST_MOVE);
-			//TODO: gewonnen is game end sturen
+			// TODO: gewonnen is game end sturen
 		} else {
 			sendMessage(Server.REQUEST_MOVE);
 		}
@@ -363,7 +385,7 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void startGame(String[] command) {
-		//TODO: echte game maken
+		// TODO: echte game maken
 		server.removeInvite(clientName);
 		if (clientName.equals(command[1])) {
 			playerNumber = 0;
@@ -390,7 +412,7 @@ public class ClientHandler extends Thread {
 	 * participating in the lobby.
 	 */
 	private void shutdown() {
-		//TODO: clients moeten kunnen reconnecten na dc
+		// TODO: clients moeten kunnen reconnecten na dc
 		if (loop) {
 			this.loop = false;
 			server.removeInvite(clientName);
