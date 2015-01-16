@@ -182,6 +182,15 @@ public class Client extends Thread {
 		// TODO: Discuss if the lobby should be asked for here.
 	}
 
+	/**
+	 * This method accepts the <code>Server.LOBBY</code> packet sent by the
+	 * <code>Server</code>. When this method is called, it shows the
+	 * <code>Client</code> the other <code>Client</code>s that are currently in
+	 * the lobby.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
 	private void lobby(String[] serverMessage) {
 		mui.addMessage("The people that are currently in the lobby are: ");
 		String listOfPeople = "";
@@ -192,6 +201,16 @@ public class Client extends Thread {
 		mui.addMessage(listOfPeople);
 	}
 
+	/**
+	 * This method accepts the <code>Server.INVITE</code> packet sent by the
+	 * <code>Server</code>. When this method is called, it adds the inviter to
+	 * an inviterlist, and, if the player isn't ingame, it will also show the
+	 * <code>Client</code> that they have been invited by that
+	 * <code>Client</code>.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
 	private void invite(String[] serverMessage) {
 		String opponentName = serverMessage[1];
 		invites.add(opponentName);
@@ -201,6 +220,15 @@ public class Client extends Thread {
 		}
 	}
 
+	/**
+	 * This method accepts the <code>Server.GAME_START</code> packet sent by the
+	 * <code>Server</code>. When this method is called, it will show the
+	 * <code>Client</code> that a the game is started. The <code>Client</code>
+	 * is set to being in-game, and a new <code>Board</code> is created.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
 	private void gameStart(String[] serverMessage) {
 		mui.addMessage("A game between you and " + serverMessage[2]
 				+ " has started!");
@@ -211,17 +239,43 @@ public class Client extends Thread {
 		board = new Board();
 	}
 
+	/**
+	 * This method accepts the <code>Server.GAME_END</code> packet sent by the
+	 * <code>Server</code>. When this method is called, it will set the
+	 * <code>Client</code> to no longer being in-game.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
 	private void gameEnd(String[] serverMessage) {
 		this.isIngame = false;
 		// TODO: Maybe add something here? IDKLOL.
 	}
 
+	/**
+	 * This method accepts the <code>Server.MOVE</code> packet sent by the
+	 * <code>Server</code>. When this method is called, it will request a move
+	 * from the <code>Player</code>.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
 	private void requestMove(String[] serverMessage) {
 		if (currPlayer == -1) {
 			currPlayer = FIRST_PLAYER;
 		}
+		// TODO: Actually request a move
 	}
 
+	/**
+	 * This method accepts the <code>Server.MOVE_OK</code> packet sent by the
+	 * <code>Server</code>. When this method is called, it will update the
+	 * <code>Board</code> by inserting the <code>Disc</code> for the
+	 * <code>Player</code> that was given in the packet.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
 	private void moveOK(String[] serverMessage) {
 		if (currPlayer == -1) {
 			currPlayer = SECOND_PLAYER;
@@ -250,12 +304,25 @@ public class Client extends Thread {
 		}
 	}
 
+	/**
+	 * This method accepts the <code>Server.ERROR</code> packet sent by the
+	 * <code>Server</code>. When this method is called, it shows the
+	 * <code>Client</code> the error.
+	 * 
+	 * @param line
+	 *            The raw error the server sent.
+	 */
 	private void error(String line) {
 		mui.addMessage(line);
 	}
 
-	// TODO: Request a move from the player.
-	/** send a message to a ClientHandler. */
+	/**
+	 * This method sends a message to the <code>ClientHandler</code> using the
+	 * <code>OutputStream</code> out.
+	 * 
+	 * @param msg
+	 *            The message to be sent.
+	 */
 	public void sendMessage(String msg) {
 		try {
 			out.write(msg);
@@ -266,7 +333,11 @@ public class Client extends Thread {
 		}
 	}
 
-	/** close the socket connection. */
+	/**
+	 * This method closes the <code>Socket</code> connection and exits the
+	 * program. On a side note, before it does this, it also sets the loop and
+	 * isIngame variables for this <code>Client</code> to false.
+	 */
 	public void shutdown() {
 		loop = false;
 		isIngame = false;
@@ -278,7 +349,9 @@ public class Client extends Thread {
 		System.exit(0);
 	}
 
-	/** returns the client name */
+	/** 
+	 * This method returns the name of this <code>Client</code>.
+	 */
 	public String getClientName() {
 		return clientName;
 	}
