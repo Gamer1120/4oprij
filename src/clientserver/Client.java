@@ -338,7 +338,7 @@ public class Client extends Thread {
 	 * program. On a side note, before it does this, it also sets the loop and
 	 * isIngame variables for this <code>Client</code> to false.
 	 */
-	public void shutdown() {
+	private void shutdown() {
 		loop = false;
 		isIngame = false;
 		try {
