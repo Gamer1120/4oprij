@@ -851,6 +851,12 @@ public class BoardTest {
 	public void testToString() {
 	}
 
+	/**
+	 * Tests the method <code>reset()</code>. It basically fills the board with
+	 * random <code>Disc</code>s, it calls the method <code>b.reset()</code> and
+	 * it tests if all the fields on the board are <code>Disc.EMPTY</code>
+	 * afterwards.
+	 */
 	@Test
 	public void testReset() {
 		// Fills the board with Discs
@@ -874,6 +880,11 @@ public class BoardTest {
 		}
 	}
 
+	/**
+	 * Tests the method <code>insertDisc(col)</code>. It fills a column with a
+	 * couple of <code>Disc</code>s, and then makes sure that the inserted
+	 * <code>Disc</code>s are now in the places they should be.
+	 */
 	@Test
 	public void testInsertDisc() {
 		for (int row = 5; row >= 0; row--) {
@@ -883,8 +894,19 @@ public class BoardTest {
 		}
 	}
 
+	/**
+	 * Tests the method <code>setField(Disc)</code>. It basically places some
+	 * <code>Disc</code>s on the <code>Board</code>, and then checks whether the
+	 * field it just placed it on has the proper <code>Disc</code> in it.
+	 */
 	@Test
 	public void testSetField() {
-		// Is tested plenty of times in other tests. No need for another one.
+		for (int row = 0; row < Board.VERTICAL; row++) {
+			for (int col = 0; col < Board.HORIZONTAL; col++) {
+				b.setField(row, col, Disc.RED);
+				assertEquals("b.getField(row, col) == Disc.RED",
+						Disc.RED, b.getField(row, col));
+			}
+		}
 	}
 }
