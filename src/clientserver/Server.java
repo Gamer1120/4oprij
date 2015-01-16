@@ -58,6 +58,7 @@ public class Server extends Thread {
 
 	/** The mui. */
 	private MessageUI mui;
+	//TODO: feature lijst
 
 	/** The threads. */
 	private HashSet<ClientHandler> threads;
@@ -162,6 +163,19 @@ public class Server extends Thread {
 	 */
 	public void print(String msg) {
 		mui.addMessage(msg);
+	}
+
+	public ClientHandler getClient(String name) {
+		synchronized (threads) {
+			ClientHandler client = null;
+			for (ClientHandler ch : threads) {
+				if (ch.getClientName().equals(name)) {
+					client = ch;
+					break;
+				}
+			}
+			return client;
+		}
 	}
 
 	/**
