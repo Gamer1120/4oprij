@@ -174,6 +174,7 @@ public class Server extends Thread {
 	 *            board that is send
 	 */
 	public void startGame(String name, Board board) {
+		//TODO: echte game maken
 		synchronized (threads) {
 			for (ClientHandler ch : threads) {
 				if (ch.getClientName().equals(name)) {

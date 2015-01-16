@@ -363,6 +363,7 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void startGame(String[] command) {
+		//TODO: echte game maken
 		server.removeInvite(clientName);
 		if (clientName.equals(command[1])) {
 			playerNumber = 0;
