@@ -5,10 +5,8 @@ import game.Board;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.ListIterator;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -89,6 +87,7 @@ public class Server extends Thread {
 	 */
 	public void run() {
 		try {
+			@SuppressWarnings("resource")
 			ServerSocket ss = new ServerSocket(port);
 			while (true) {
 				Socket s = ss.accept();
