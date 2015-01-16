@@ -823,19 +823,32 @@ public class BoardTest {
 		b.reset();
 	}
 
+	/**
+	 * Tests the method <code>isWinner(Disc)</code>. It wasn't necessary to
+	 * implement a test for this method, since it only returns whether the
+	 * <code>Board</code> <code>hasRow(d)</code> or <code>hasColumn(d)</code> or
+	 * <code>hasDiagonal(d)</code>. These methods have been tested already.
+	 */
 	@Test
 	public void testIsWinner() {
-		// Not necessary to test this method.
 	}
 
+	/**
+	 * Tests the method <code>hasWinner(Disc)</code>. It wasn't necessary to
+	 * implement a test for this method, since it only returns whether
+	 * <code>isWinner(Disc.YELLOW)</code> or <code>isWinner(Disc.RED)</code>.
+	 * This method has been tested already.
+	 */
 	@Test
 	public void testHasWinner() {
-		// Not necessary to test this method.
 	}
 
+	/**
+	 * Tests the method <code>hasWinner(Disc)</code>. It wasn't necessary to
+	 * implement a test for this method, since it's implicitly tested.
+	 */
 	@Test
 	public void testToString() {
-		// Is implicitly tested, not necessary to test this method.
 	}
 
 	@Test
