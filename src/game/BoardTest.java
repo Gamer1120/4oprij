@@ -35,8 +35,8 @@ public class BoardTest {
 
 	/**
 	 * Tests if a new <code>Board</code> is actually empty, by calling
-	 * b.getField(row, col) for every valid field in the <code>Board</code>, and
-	 * checking if that returns Disc.EMPTY.
+	 * <code>b.getField(row, col)</code> for every valid field in the
+	 * <code>Board</code>, and checking if that returns <code>Disc.EMPTY.</code>
 	 */
 	@Test
 	public void testEmptyBoard() {
@@ -128,9 +128,10 @@ public class BoardTest {
 	/**
 	 * Tests the method <code>fullRow(col)</code>. First, it assures that the
 	 * method returns -1 for every column on an empty <code>Board</code>, since
-	 * there's no Discs in any column. After that, some <code>Disc</code>s are
-	 * inserted, and it's assured that for the columns those were inserted into,
-	 * <code>b.fullRow(col)</code> returns the values it's supposed to.
+	 * there's no <code>Disc</code>s in any column. After that, some
+	 * <code>Disc</code>s are inserted, and it's assured that for the columns
+	 * those were inserted into, <code>b.fullRow(col)</code> returns the values
+	 * it's supposed to.
 	 */
 	@Test
 	public void testFullRow() {
@@ -193,12 +194,13 @@ public class BoardTest {
 
 	/**
 	 * Tests the method <code>getField(row, col)</code>. First, it assures that
-	 * on an empty board, <code>b.getField(row, col)</code> returns
+	 * on an empty <code>Board</code>, <code>b.getField(row, col)</code> returns
 	 * <code>Disc.EMPTY</code> for every row and column. After that, the
 	 * <code>Board</code> is filled with some <code>Disc</code>s. Then, it's
-	 * tested that b.getField(row, col) returns the <code>Disc</code>s it's
-	 * intended to return. Finally, it's tested, that <code>null</code> is
-	 * returned for the fields outside of the <code>Board</code>.
+	 * tested that <code>b.getField(row, col)</code> returns the
+	 * <code>Disc</code>s it's intended to return. Finally, it's tested, that
+	 * <code>null</code> is returned for the fields outside of the
+	 * <code>Board</code>.
 	 */
 	@Test
 	public void testGetField() {
@@ -250,13 +252,13 @@ public class BoardTest {
 	 * Firstly, it tests the method <code>isEmptyField(col)</code>. It tests
 	 * that for every column on an empty <code>Board</code> there's at least 1
 	 * empty field in each of those columns. Then, a column is filled, and after
-	 * each Disc, it's checked whether the column still has empty fields. Once
-	 * the column is full, it should no longer have empty fields.
+	 * each <code>Disc</code>, it's checked whether the column still has empty
+	 * fields. Once the column is full, it should no longer have empty fields.
 	 * 
 	 * Secondly, it tests the method <code>isEmptyField(row, col)</code>. First,
 	 * it assures that every field on an empty <code>Board</code> is empty.
-	 * After that it inserts some discs, and assures that the fields those
-	 * <code>Disc</code>s got inserted into are no longer empty.
+	 * After that it inserts some <code>Disc</code>s, and assures that the
+	 * fields those <code>Disc</code>s got inserted into are no longer empty.
 	 */
 	@Test
 	public void testIsEmptyField() {
@@ -303,9 +305,11 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method isFull(). It puts a random disc on every position of the
-	 * field. After each placement, a check is made to see that the board is not
-	 * full yet. After every disc has been placed, the board should be full.
+	 * Tests the method <code>isFull()</code>. It puts a random
+	 * <code>Disc</code> on every position of the <code>Board</code>. After each
+	 * placement, a check is made to see that the <code>Board</code> is not full
+	 * yet. After every <code>Disc</code> has been placed, the
+	 * <code>Board</code> should be full.
 	 */
 
 	@Test
@@ -904,8 +908,8 @@ public class BoardTest {
 		for (int row = 0; row < Board.VERTICAL; row++) {
 			for (int col = 0; col < Board.HORIZONTAL; col++) {
 				b.setField(row, col, Disc.RED);
-				assertEquals("b.getField(row, col) == Disc.RED",
-						Disc.RED, b.getField(row, col));
+				assertEquals("b.getField(row, col) == Disc.RED", Disc.RED,
+						b.getField(row, col));
 			}
 		}
 	}

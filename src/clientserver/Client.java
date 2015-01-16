@@ -20,7 +20,8 @@ import java.util.ArrayList;
  * @version 2005.02.21
  */
 public class Client extends Thread {
-	// PROTOCOL
+	// The protocol, as discussed in our TI-2 group. For further explanation,
+	// you can look at the protocol documentation.
 	public static final String CONNECT = "CONNECT";
 	public static final String QUIT = "QUIT";
 	public static final String INVITE = "INVITE";
@@ -34,12 +35,36 @@ public class Client extends Thread {
 	public static final int FIRST_PLAYER = 0;
 	public static final int SECOND_PLAYER = 1;
 	// END OF PROTOCOL
+
+	/**
+	 * The name of this client.
+	 */
 	private String clientName;
+	/**
+	 * The User Interface of this client.
+	 */
 	private MessageUI mui;
+	/**
+	 * The socket of this client.
+	 */
 	private Socket sock;
+	/**
+	 * The BufferedReader that will be used to communicate over the socket.
+	 */
 	private BufferedReader in;
+	/**
+	 * The BufferedWriter that will be used to communicate over the socket.
+	 */
 	private BufferedWriter out;
+	/**
+	 * While this boolean is true, it makes sure that commands are continuously
+	 * read from the BufferedReader.
+	 */
 	private boolean loop;
+	/**
+	 * A variable to test if a <code>Player</code> is in-game. If they are, they
+	 * won't receive any invite messages.
+	 */
 	private boolean isIngame;
 	private ArrayList<String> invites;
 	private Board board;
@@ -71,39 +96,41 @@ public class Client extends Thread {
 	public void run() {
 		sendMessage(CONNECT + " " + getClientName());
 		while (loop) {
+			String line = "";
 			try {
-				String line = in.readLine();
-				mui.addMessage("Server: " + line);
-				String[] serverMessage = line.split("\\s+");
-				switch (serverMessage[0]) {
-				case Server.ACCEPT_CONNECT:
-					connect(serverMessage);
-					break;
-				case Server.LOBBY:
-					lobby(serverMessage);
-					break;
-				case Server.INVITE:
-					invite(serverMessage);
-					break;
-				case Server.GAME_START:
-					gameStart(serverMessage);
-					break;
-				case Server.GAME_END:
-					gameEnd(serverMessage);
-					break;
-				case Server.REQUEST_MOVE:
-					requestMove(serverMessage);
-					break;
-				case Server.MOVE_OK:
-					moveOK(serverMessage);
-					break;
-				case Server.ERROR:
-					error(line);
-					break;
-				}
+				line = in.readLine();
 			} catch (IOException | NullPointerException e) {
 				shutdown();
 			}
+			mui.addMessage("Server: " + line);
+			String[] serverMessage = line.split("\\s+");
+			switch (serverMessage[0]) {
+			case Server.ACCEPT_CONNECT:
+				connect(serverMessage);
+				break;
+			case Server.LOBBY:
+				lobby(serverMessage);
+				break;
+			case Server.INVITE:
+				invite(serverMessage);
+				break;
+			case Server.GAME_START:
+				gameStart(serverMessage);
+				break;
+			case Server.GAME_END:
+				gameEnd(serverMessage);
+				break;
+			case Server.REQUEST_MOVE:
+				requestMove(serverMessage);
+				break;
+			case Server.MOVE_OK:
+				moveOK(serverMessage);
+				break;
+			case Server.ERROR:
+				error(line);
+				break;
+			}
+
 		}
 	}
 
