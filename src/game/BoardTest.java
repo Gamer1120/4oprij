@@ -6,14 +6,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test program for Board.java.
+ * Test program for Board.java. <br><br>
  * 
  * WARNING: THIS TEST CANNOT BE RELIABLY USED FOR BOARDS WITH OTHER SIZES THAN
- * THE DEFAULT 7 COLUMNS BY 6 ROWS
+ * THE DEFAULT 7 COLUMNS BY 6 ROWS <br><br>
  * 
- * Programming Project Connect4 Module 2 Softwaresystems 2014-2015
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br><br>
  * 
- * @author Michael Koopman s1401335 & Sven Konings s1534130
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
 public class BoardTest {
 	/**
@@ -23,6 +23,7 @@ public class BoardTest {
 
 	/**
 	 * This method creates a new <code>Board</code> before each test.
+	 * @throws Exception Any general exception.
 	 */
 	@Before
 	public void setUp() throws Exception {
@@ -48,7 +49,7 @@ public class BoardTest {
 	 * Tests the method <code>deepCopy()</code>. It inserts some
 	 * <code>Disc</code>s in the original <code>Board</code>, then creates a
 	 * copy of it (using <code>b.deepCopy()</code>). After that it makes sure
-	 * that every <code>Disc<code> is the same in both <code>Board</code>s.
+	 * that every <code>Disc</code> is the same in both <code>Board</code>s.
 	 */
 	@Test
 	public void testDeepCopy() {
@@ -244,7 +245,7 @@ public class BoardTest {
 
 	/**
 	 * Firstly, it tests the method
-	 * <code>isEmptyField(col). It tests that for every column on an empty <code>Board</code>
+	 * <code>isEmptyField(col)</code>. It tests that for every column on an empty <code>Board</code>
 	 * there's at least 1 empty field in each of those columns. Then, a column
 	 * is filled, and after each Disc, it's checked whether the column still has
 	 * empty fields. Once the column is full, it should no longer have empty
@@ -299,11 +300,14 @@ public class BoardTest {
 				b.isEmptyField(5, 1));
 	}
 
+	/**
+	 * Tests the method isFull(). It puts a random disc on every position of the
+	 * field. After each placement, a check is made to see that the board is not
+	 * full yet. After every disc has been placed, the board should be full.
+	 */
+
 	@Test
 	public void testIsFull() {
-		// Puts a random disc on every position of the field. After each
-		// placement, a check is made to see that the board is not full yet. At
-		// the end, the board should be full.
 		for (int row = 0; row < Board.VERTICAL; row++) {
 			for (int col = 0; col < Board.HORIZONTAL; col++) {
 				if (Math.random() > 0.5) {
@@ -322,24 +326,39 @@ public class BoardTest {
 		}
 	}
 
+	/**
+	 * Tests the method <code>gameOver()</code>. It wasn't necessary to
+	 * implement a test for this method, since it only returns whether the
+	 * <code>Board</code> <code>isFull()</code> or <code>hasWinner()</code>.
+	 * These methods have been tested already.
+	 */
 	@Test
 	public void testIsGameOver() {
-		// Not necessary to write a test for this method.
 	}
 
+	/**
+	 * Tests the method <code>hasRow(Disc)</code>. It basically creates every
+	 * possible situation, in which there's a row on the <code>Board</code>. At
+	 * every boardrow, there are 4 potential rows, namely on the positions 0-3,
+	 * 1-4, 2-5 and 3-6. To make every possible combination, the algorithm works
+	 * as follows: Reset the <code>Board</code> before every test, then for
+	 * every single boardrow, put 4 discs in that boardrow, such that there's 4
+	 * <code>Disc</code>s in a row. Then, check whether
+	 * <code>b.hasRow(Disc)</code> is true for the <code>Disc</code> you
+	 * inserted, and make sure (because why not) that for the <code>Disc</code>
+	 * you didn't insert, <code>b.hasRow(otherDisc)</code> is false. After this,
+	 * the same test is done, but with rows of 3 <code>Disc</code>s. None of
+	 * these should make <code>b.hasRow(Disc)</code> or
+	 * <code>b.hasRow(otherDisc)</code> return true. After this, a pre-defined
+	 * realistic situation is created, in which there's no row for either of the
+	 * players, and it's made sure, that <code>b.hasRow(Disc)</code> and
+	 * <code>b.hasRow(otherDisc)</code> are false.
+	 */
 	@Test
 	public void testHasRow() {
-		// A row is from left to right. At every boardrow, there are 4 potential
-		// rows, namely on the positions 0-3, 1-4, 2-5 and 3-6.
 		for (int row = 0; row < Board.VERTICAL; row++) {
-			// Col <= 3 is hardcoded. In case the Board.HORIZONTAL gets smaller,
-			// the Discs can't be changed, and the program will most likely
-			// crash. In case the Board.HORIZONTAL is changed to
-			// be bigger, this test will not cover all test results.
 			for (int col = 0; col <= 3; col++) {
-				// Reset the board
 				b.reset();
-				// Fill the boardrow with a row of 4 discs
 				for (int i = col; i <= (col + 3); i++) {
 					b.setField(row, i, Disc.RED);
 				}
@@ -378,7 +397,6 @@ public class BoardTest {
 					b.hasRow(Disc.RED));
 			assertEquals("b.hasRow(Disc.YELLOW) == false", false,
 					b.hasRow(Disc.YELLOW));
-			// TODO: Entend this test with invalid rows.
 		}
 	}
 
