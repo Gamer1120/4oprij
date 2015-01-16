@@ -8,11 +8,9 @@ import org.junit.Test;
 /**
  * Test program for Board.java. <br>
  * <br>
- * 
  * WARNING: THIS TEST CANNOT BE RELIABLY USED FOR BOARDS WITH OTHER SIZES THAN
  * THE DEFAULT 7 COLUMNS BY 6 ROWS <br>
  * <br>
- * 
  * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * <br>
  * 
