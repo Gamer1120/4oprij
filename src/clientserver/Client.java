@@ -77,86 +77,28 @@ public class Client extends Thread {
 				String[] serverMessage = line.split("\\s+");
 				switch (serverMessage[0]) {
 				case Server.ACCEPT_CONNECT:
-					mui.addMessage("Successfully established connection to server: "
-							+ sock.getRemoteSocketAddress().toString() // IP of
-																		// the
-																		// server
-							+ ":" + sock.getPort()); // Port of the server
-					String listOfFeatures = "";
-					for (int i = 1; i < serverMessage.length; i++) {
-						// TODO: Print dit beter?
-						listOfFeatures = listOfFeatures + serverMessage[i]
-								+ " ";
-					}
-					mui.addMessage("The features of this server are: "
-							+ listOfFeatures);
-					// TODO: Discuss if the lobby should be asked for here.
+					connect(serverMessage);
 					break;
 				case Server.LOBBY:
-					mui.addMessage("The people that are currently in the lobby are: ");
-					String listOfPeople = "";
-					for (int i = 1; i < serverMessage.length; i++) {
-						// TODO: Print dit beter?
-						listOfPeople = listOfPeople + serverMessage[i] + " ";
-					}
-					mui.addMessage(listOfPeople);
+					lobby(serverMessage);
 					break;
 				case Server.INVITE:
-					String opponentName = serverMessage[1];
-					invites.add(opponentName);
-					if (!isIngame) {
-						mui.addMessage("Player: " + opponentName
-								+ " has invited you to a game of Connect4!");
-					}
+					invite(serverMessage);
 					break;
 				case Server.GAME_START:
-					mui.addMessage("A game between you and " + serverMessage[2]
-							+ " has started!");
-					this.isIngame = true;
-					currPlayer = -1; // Not set yet.
-					// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
-					// 1 > Disc.RED
-					board = new Board();
+					gameStart(serverMessage);
 					break;
 				case Server.GAME_END:
-					this.isIngame = false;
-					// TODO: Maybe add something here? IDKLOL.
+					gameEnd(serverMessage);
 					break;
 				case Server.REQUEST_MOVE:
-					if (currPlayer == -1) {
-						currPlayer = FIRST_PLAYER;
-					}
-					// TODO: Request a move from the player.
+					requestMove(serverMessage);
 					break;
 				case Server.MOVE_OK:
-					if (currPlayer == -1) {
-						currPlayer = SECOND_PLAYER;
-					}
-					int move = -1;
-					//TODO: if else?
-					switch (currPlayer) {
-					case FIRST_PLAYER:
-						try {
-							move = Integer.parseInt(serverMessage[2]);
-						} catch (NumberFormatException e) {
-							mui.addMessage("Server did not send a valid move. TERMINATING.");
-							shutdown();
-						}
-						board.insertDisc(move, Disc.YELLOW);
-						break;
-					case SECOND_PLAYER:
-						try {
-							move = Integer.parseInt(serverMessage[2]);
-						} catch (NumberFormatException e) {
-							mui.addMessage("Server did not send a valid move. TERMINATING.");
-							shutdown();
-						}
-						board.insertDisc(move, Disc.RED);
-						break;
-					}
+					moveOK(serverMessage);
 					break;
 				case Server.ERROR:
-					mui.addMessage(line);
+					error(line);
 					break;
 				}
 			} catch (IOException | NullPointerException e) {
@@ -165,6 +107,94 @@ public class Client extends Thread {
 		}
 	}
 
+	private void connect(String[] serverMessage) {
+		mui.addMessage("Successfully established connection to server: "
+				+ sock.getRemoteSocketAddress().toString() // IP of
+															// the
+															// server
+				+ ":" + sock.getPort()); // Port of the server
+		String listOfFeatures = "";
+		for (int i = 1; i < serverMessage.length; i++) {
+			// TODO: Print dit beter?
+			listOfFeatures = listOfFeatures + serverMessage[i] + " ";
+		}
+		mui.addMessage("The features of this server are: " + listOfFeatures);
+		// TODO: Discuss if the lobby should be asked for here.
+	}
+
+	private void lobby(String[] serverMessage) {
+		mui.addMessage("The people that are currently in the lobby are: ");
+		String listOfPeople = "";
+		for (int i = 1; i < serverMessage.length; i++) {
+			// TODO: Print dit beter?
+			listOfPeople = listOfPeople + serverMessage[i] + " ";
+		}
+		mui.addMessage(listOfPeople);
+	}
+
+	private void invite(String[] serverMessage) {
+		String opponentName = serverMessage[1];
+		invites.add(opponentName);
+		if (!isIngame) {
+			mui.addMessage("Player: " + opponentName
+					+ " has invited you to a game of Connect4!");
+		}
+	}
+
+	private void gameStart(String[] serverMessage) {
+		mui.addMessage("A game between you and " + serverMessage[2]
+				+ " has started!");
+		this.isIngame = true;
+		currPlayer = -1; // Not set yet.
+		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
+		// 1 > Disc.RED
+		board = new Board();
+	}
+
+	private void gameEnd(String[] serverMessage) {
+		this.isIngame = false;
+		// TODO: Maybe add something here? IDKLOL.
+	}
+
+	private void requestMove(String[] serverMessage) {
+		if (currPlayer == -1) {
+			currPlayer = FIRST_PLAYER;
+		}
+	}
+
+	private void moveOK(String[] serverMessage) {
+		if (currPlayer == -1) {
+			currPlayer = SECOND_PLAYER;
+		}
+		int move = -1;
+		// TODO: if else?
+		switch (currPlayer) {
+		case FIRST_PLAYER:
+			try {
+				move = Integer.parseInt(serverMessage[2]);
+			} catch (NumberFormatException e) {
+				mui.addMessage("Server did not send a valid move. TERMINATING.");
+				shutdown();
+			}
+			board.insertDisc(move, Disc.YELLOW);
+			break;
+		case SECOND_PLAYER:
+			try {
+				move = Integer.parseInt(serverMessage[2]);
+			} catch (NumberFormatException e) {
+				mui.addMessage("Server did not send a valid move. TERMINATING.");
+				shutdown();
+			}
+			board.insertDisc(move, Disc.RED);
+			break;
+		}
+	}
+
+	private void error(String line) {
+		mui.addMessage(line);
+	}
+
+	// TODO: Request a move from the player.
 	/** send a message to a ClientHandler. */
 	public void sendMessage(String msg) {
 		try {
