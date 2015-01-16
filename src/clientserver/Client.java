@@ -13,11 +13,11 @@ import java.net.Socket;
 import java.util.ArrayList;
 
 /**
- * P2 prac wk4. <br>
- * Client.
+ * Client program for the Connect4 according to the protocol of the TI-2 group.<br>
+ * <br>
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 
- * @author Theo Ruys
- * @version 2005.02.21
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
 public class Client extends Thread {
 	// The protocol, as discussed in our TI-2 group. For further explanation,
@@ -37,28 +37,30 @@ public class Client extends Thread {
 	// END OF PROTOCOL
 
 	/**
-	 * The name of this client.
+	 * The name of this <code>Client</code>.
 	 */
 	private String clientName;
 	/**
-	 * The User Interface of this client.
+	 * The User Interface of this <code>Client</code>.
 	 */
 	private MessageUI mui;
 	/**
-	 * The socket of this client.
+	 * The <code>Socket</code> of this <code>Client</code>.
 	 */
 	private Socket sock;
 	/**
-	 * The BufferedReader that will be used to communicate over the socket.
+	 * The <code>BufferedReader</code> that will be used to communicate over the
+	 * <code>Socket</code>.
 	 */
 	private BufferedReader in;
 	/**
-	 * The BufferedWriter that will be used to communicate over the socket.
+	 * The <code>BufferedWriter</code> that will be used to communicate over the
+	 * <code>Socket</code>.
 	 */
 	private BufferedWriter out;
 	/**
 	 * While this boolean is true, it makes sure that commands are continuously
-	 * read from the BufferedReader.
+	 * read from the <code>BufferedReader</code>.
 	 */
 	private boolean loop;
 	/**
@@ -66,12 +68,33 @@ public class Client extends Thread {
 	 * won't receive any invite messages.
 	 */
 	private boolean isIngame;
+	/**
+	 * An <code>ArrayList</code> in which all the invites that are sent by this
+	 * client are kept.
+	 */
 	private ArrayList<String> invites;
+	/**
+	 * The <code>Board</code> this <code>Client</code> uses for determining
+	 * their move.
+	 */
 	private Board board;
+	/**
+	 * An integer to determine which <code>Player</code>'s turn it is.
+	 */
 	private int currPlayer;
 
 	/**
-	 * Constructs a Client-object and tries to make a socket connection
+	 * Constructs a <code>Client</code> object and tries to make a
+	 * <code>Socket</code> connection
+	 * 
+	 * @param name
+	 *            The name of this <code>Client</code> object.
+	 * @param host
+	 *            The IP-adress of this <code>Client</code>
+	 * @param port
+	 *            The port of this <code>Client</code>
+	 * @param muiArg
+	 *            The <code>MessageUI</code> for this <code>Client</code>
 	 */
 	public Client(String name, InetAddress host, int port, MessageUI muiArg)
 			throws IOException {
@@ -89,10 +112,10 @@ public class Client extends Thread {
 	}
 
 	/**
-	 * Reads the messages in the socket connection. Each message will be
-	 * forwarded to the MessageUI
+	 * This method reads the messages in the InputStream. Then, it decides which
+	 * command was sent, and executes this command by calling the method created
+	 * for it.
 	 */
-
 	public void run() {
 		sendMessage(CONNECT + " " + getClientName());
 		while (loop) {
@@ -134,6 +157,16 @@ public class Client extends Thread {
 		}
 	}
 
+	/**
+	 * This method accepts the <code>Server.CONNECT</code> packet sent by the
+	 * <code>Server</code>. When this method is called, it prints that a
+	 * connection has been established with the <code>Server</code>, as well as
+	 * the IP adress and port of the <code>Server</code>. After this, it lists
+	 * the features the <code>Server</code> has.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
 	private void connect(String[] serverMessage) {
 		mui.addMessage("Successfully established connection to server: "
 				+ sock.getRemoteSocketAddress().toString() // IP of
