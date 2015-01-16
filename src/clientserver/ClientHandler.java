@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Arrays;
 
+// TODO: Auto-generated Javadoc
 /**
  * ClientHandler.
  * 
@@ -18,20 +19,46 @@ import java.util.Arrays;
  */
 public class ClientHandler extends Thread {
 
+	/** The server. */
 	private Server server;
+
+	/** The sock. */
 	private Socket sock;
+
+	/** The in. */
 	private BufferedReader in;
+
+	/** The out. */
 	private BufferedWriter out;
+
+	/** The client name. */
 	private String clientName;
+
+	/** The features. */
 	private String[] features;
+
+	/** The player number. */
 	private int playerNumber;
+
+	/** The opponent name. */
 	private String opponentName;
+
+	/** The board. */
 	private Board board;
+
+	/** The loop. */
 	private boolean loop;
 
 	/**
 	 * Constructs a ClientHandler object Initialises both Data streams. @
 	 * requires server != null && sock != null;
+	 *
+	 * @param serverArg
+	 *            the server arg
+	 * @param sockArg
+	 *            the sock arg
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
 	 */
 	public ClientHandler(Server serverArg, Socket sockArg) throws IOException {
 		this.server = serverArg;
@@ -104,6 +131,9 @@ public class ClientHandler extends Thread {
 	 * This method can be used to send a message over the socket connection to
 	 * the Client. If the writing of a message fails, the method concludes that
 	 * the socket connection has been lost and shutdown() is called.
+	 *
+	 * @param msg
+	 *            the msg
 	 */
 	public synchronized void sendMessage(String msg) {
 		try {
@@ -128,8 +158,8 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * returns the name of the client
-	 * 
+	 * returns the name of the client.
+	 *
 	 * @return the name of the client
 	 */
 	public String getClientName() {
@@ -137,8 +167,8 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * returns the features of the client
-	 * 
+	 * returns the features of the client.
+	 *
 	 * @return the features of the client
 	 */
 	public String[] getClientFeatures() {
@@ -146,19 +176,30 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * returns wheter the client is playing a game
+	 * returns wheter the client is playing a game.
+	 *
+	 * @return true, if successful
 	 */
 	public boolean inGame() {
 		return board != null;
 	}
 
 	/**
-	 * Sets the board of this client
+	 * Sets the board of this client.
+	 *
+	 * @param b
+	 *            the new board
 	 */
 	public void setBoard(Board b) {
 		board = b;
 	}
 
+	/**
+	 * Connect.
+	 *
+	 * @param command
+	 *            the command
+	 */
 	private void connect(String[] command) {
 		if (command.length >= 2) {
 			if (!server.nameExists(command[1])) {
@@ -180,6 +221,12 @@ public class ClientHandler extends Thread {
 	}
 
 	// You can invite and play against yourself
+	/**
+	 * Invite.
+	 *
+	 * @param command
+	 *            the command
+	 */
 	private void invite(String[] command) {
 		if (command.length >= 2) {
 			if (server.nameExists(command[1])) {
@@ -219,6 +266,12 @@ public class ClientHandler extends Thread {
 		}
 	}
 
+	/**
+	 * Accept.
+	 *
+	 * @param command
+	 *            the command
+	 */
 	private void accept(String[] command) {
 		if (command.length == 2) {
 			if (server.isInvited(command[1], clientName)) {
@@ -239,6 +292,12 @@ public class ClientHandler extends Thread {
 		}
 	}
 
+	/**
+	 * Decline.
+	 *
+	 * @param command
+	 *            the command
+	 */
 	private void decline(String[] command) {
 		if (command.length == 2) {
 			if (server.isInvited(command[1], clientName)) {
@@ -253,6 +312,12 @@ public class ClientHandler extends Thread {
 		}
 	}
 
+	/**
+	 * Move.
+	 *
+	 * @param command
+	 *            the command
+	 */
 	private void move(String[] command) {
 		if (command.length == 2) {
 			//TODO: zelf bord bijhouden voor nummer en move ok checken
@@ -266,6 +331,12 @@ public class ClientHandler extends Thread {
 		}
 	}
 
+	/**
+	 * Chat.
+	 *
+	 * @param command
+	 *            the command
+	 */
 	private void chat(String[] command) {
 		if (command.length >= 2) {
 			String chat = "";
@@ -278,6 +349,12 @@ public class ClientHandler extends Thread {
 		}
 	}
 
+	/**
+	 * Start game.
+	 *
+	 * @param command
+	 *            the command
+	 */
 	private void startGame(String[] command) {
 		server.removeInvite(clientName);
 		if (clientName.equals(command[1])) {
@@ -290,6 +367,9 @@ public class ClientHandler extends Thread {
 		server.broadcastLobby();
 	}
 
+	/**
+	 * End game.
+	 */
 	private void endGame() {
 		playerNumber = -1;
 		board = null;

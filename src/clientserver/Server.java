@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.ListIterator;
 
+// TODO: Auto-generated Javadoc
 /**
  * P2 prac wk5. <br>
  * Server. A Thread class that listens to a socket connection on a specified
@@ -21,24 +22,59 @@ import java.util.ListIterator;
  */
 public class Server extends Thread {
 	// PROTOCOL
+	/** The Constant ACCEPT_CONNECT. */
 	public static final String ACCEPT_CONNECT = "OK";
+
+	/** The Constant ERROR. */
 	public static final String ERROR = "ERROR";
+
+	/** The Constant LOBBY. */
 	public static final String LOBBY = "LOBBY";
+
+	/** The Constant INVITE. */
 	public static final String INVITE = "INVITE";
+
+	/** The Constant GAME_START. */
 	public static final String GAME_START = "START";
+
+	/** The Constant GAME_END. */
 	public static final String GAME_END = "END";
+
+	/** The Constant REQUEST_MOVE. */
 	public static final String REQUEST_MOVE = "REQUEST";
+
+	/** The Constant MOVE_OK. */
 	public static final String MOVE_OK = "MOVE";
+
+	/** The Constant BOARD. */
 	public static final String BOARD = "BOARD";
+
+	/** The Constant CHAT. */
 	public static final String CHAT = "CHAT";
+
+	/** The Constant LEADERBOARD. */
 	public static final String LEADERBOARD = "LEADERBOARD";
 	// END OF PROTOCOL
+	/** The port. */
 	private int port;
+
+	/** The mui. */
 	private MessageUI mui;
+
+	/** The threads. */
 	private HashSet<ClientHandler> threads;
+
+	/** The invites. */
 	private HashSet<String[]> invites;
 
-	/** Constructs a new Server object */
+	/**
+	 * Constructs a new Server object.
+	 *
+	 * @param portArg
+	 *            the port arg
+	 * @param muiArg
+	 *            the mui arg
+	 */
 	public Server(int portArg, MessageUI muiArg) {
 		this.port = portArg;
 		this.mui = muiArg;
@@ -86,9 +122,6 @@ public class Server extends Thread {
 	/**
 	 * Sends a message using the collection of connected ClientHandlers to all
 	 * connected Clients without a game.
-	 * 
-	 * @param msg
-	 *            message that is send
 	 */
 	public void broadcastLobby() {
 		synchronized (threads) {
@@ -103,8 +136,8 @@ public class Server extends Thread {
 
 	/**
 	 * Sends a message using the collection of connected ClientHandlers to the
-	 * Client with the specified name
-	 * 
+	 * Client with the specified name.
+	 *
 	 * @param name
 	 *            name of the client
 	 * @param msg
@@ -123,8 +156,8 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Print the message on the server gui
-	 * 
+	 * Print the message on the server gui.
+	 *
 	 * @param msg
 	 *            message that is send
 	 */
@@ -134,8 +167,8 @@ public class Server extends Thread {
 
 	/**
 	 * Sends the board to use for the game so both clientHandlers are using the
-	 * same board
-	 * 
+	 * same board.
+	 *
 	 * @param name
 	 *            name of the client
 	 * @param board
@@ -154,12 +187,11 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Checks wether the client with the specified name is in a game
-	 * 
+	 * Checks wether the client with the specified name is in a game.
+	 *
 	 * @param name
 	 *            name of the client
-	 * @param board
-	 *            board that is send
+	 * @return true, if successful
 	 */
 	public boolean inGame(String name) {
 		synchronized (threads) {
@@ -175,7 +207,11 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Checks if the name isn't already in use
+	 * Checks if the name isn't already in use.
+	 *
+	 * @param name
+	 *            the name
+	 * @return true, if successful
 	 */
 	public boolean nameExists(String name) {
 		synchronized (threads) {
@@ -192,7 +228,9 @@ public class Server extends Thread {
 
 	/**
 	 * Sends an string with the connected client names that aren't playing a
-	 * game
+	 * game.
+	 *
+	 * @return the lobby
 	 */
 	public String getLobby() {
 		synchronized (threads) {
@@ -231,8 +269,8 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Add the names of the inviting and the invited client in a list
-	 * 
+	 * Add the names of the inviting and the invited client in a list.
+	 *
 	 * @param name
 	 *            name of the inviting client
 	 * @param invited
@@ -245,12 +283,14 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Checks wether the client is invited by the client with the specified name
-	 * 
+	 * Checks wether the client is invited by the client with the specified
+	 * name.
+	 *
 	 * @param name
 	 *            the name of the client that send the invite
 	 * @param invited
 	 *            the name of the client that received the invite
+	 * @return true, if is invited
 	 */
 	public boolean isInvited(String name, String invited) {
 		synchronized (invites) {
