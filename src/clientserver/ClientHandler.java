@@ -84,46 +84,48 @@ public class ClientHandler extends Thread {
 	 */
 	public void run() {
 		while (loop) {
+			String line = "";
 			try {
-				String line = in.readLine();
-				String[] command = line.split("\\s+");
-				switch (command[0]) {
-				case Client.CONNECT:
-					connect(command);
-					break;
-				case Client.QUIT:
-					shutdown();
-					break;
-				case Client.INVITE:
-					invite(command);
-					break;
-				case Client.ACCEPT_INVITE:
-					accept(command);
-					break;
-				case Client.DECLINE_INVITE:
-					decline(command);
-					break;
-				case Client.MOVE:
-					move(command);
-					break;
-				case Client.CHAT:
-					chat(command);
-					break;
-				case Client.REQUEST_BOARD:
-					//TODO: zelf bord bijhouden om op te sturen
-					break;
-				case Client.REQUEST_LOBBY:
-					sendMessage(Server.LOBBY + server.getLobby());
-					break;
-				case Client.REQUEST_LEADERBOARD:
-					//TODO: leaderbords opslaan
-					break;
-				default:
-					sendMessage(Server.ERROR + " Invalid command");
-				}
+				line = in.readLine();
 			} catch (IOException | NullPointerException e) {
 				shutdown();
 			}
+			String[] command = line.split("\\s+");
+			switch (command[0]) {
+			case Client.CONNECT:
+				connect(command);
+				break;
+			case Client.QUIT:
+				shutdown();
+				break;
+			case Client.INVITE:
+				invite(command);
+				break;
+			case Client.ACCEPT_INVITE:
+				accept(command);
+				break;
+			case Client.DECLINE_INVITE:
+				decline(command);
+				break;
+			case Client.MOVE:
+				move(command);
+				break;
+			case Client.CHAT:
+				chat(command);
+				break;
+			case Client.REQUEST_BOARD:
+				//TODO: zelf bord bijhouden om op te sturen
+				break;
+			case Client.REQUEST_LOBBY:
+				sendMessage(Server.LOBBY + server.getLobby());
+				break;
+			case Client.REQUEST_LEADERBOARD:
+				//TODO: leaderbords opslaan
+				break;
+			default:
+				sendMessage(Server.ERROR + " Invalid command");
+			}
+
 		}
 	}
 
@@ -201,13 +203,16 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void connect(String[] command) {
+		//TODO: controleren op naam lengte
 		if (command.length >= 2) {
 			if (!server.nameExists(command[1])) {
 				clientName = command[1];
 				if (command.length > 2) {
+					//TODO: controleren valid features?
 					features = Arrays.copyOfRange(command, 2,
 							command.length - 1);
 				}
+				//TODO: onze features sturen
 				sendMessage(Server.ACCEPT_CONNECT
 						+ " Feature array gescheiden met spaties");
 				server.broadcastLobby();
@@ -235,8 +240,8 @@ public class ClientHandler extends Thread {
 						if (!server.isInvited(clientName, command[1])) {
 							if (!server.isInvited(command[1], clientName)) {
 								server.addInvite(clientName, command[1]);
+								//TODO: controleren board size en settings
 								String arguments = "";
-								//TODO: check overige argumenten, ook om bord te maken
 								//Hoop dat check voor eerste loop komt
 								for (int i = 2; i < command.length; i++) {
 									arguments += " " + command[i];
@@ -320,6 +325,8 @@ public class ClientHandler extends Thread {
 	 */
 	private void move(String[] command) {
 		if (command.length == 2) {
+			//TODO: mogeljk game met players en spectators?
+			//TODO: check wie aan de beurt is, mogelijk bij request
 			//TODO: zelf bord bijhouden voor nummer en move ok checken
 			sendMessage(Server.MOVE_OK + " " + playerNumber + " " + command[1]);
 			server.sendMessage(opponentName, Server.MOVE_OK + " "
