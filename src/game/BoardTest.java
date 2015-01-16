@@ -6,12 +6,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Test program for Board.java. <br><br>
+ * Test program for Board.java. <br>
+ * <br>
  * 
  * WARNING: THIS TEST CANNOT BE RELIABLY USED FOR BOARDS WITH OTHER SIZES THAN
- * THE DEFAULT 7 COLUMNS BY 6 ROWS <br><br>
+ * THE DEFAULT 7 COLUMNS BY 6 ROWS <br>
+ * <br>
  * 
- * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br><br>
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
+ * <br>
  * 
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
@@ -23,7 +26,9 @@ public class BoardTest {
 
 	/**
 	 * This method creates a new <code>Board</code> before each test.
-	 * @throws Exception Any general exception.
+	 * 
+	 * @throws Exception
+	 *             Any general exception.
 	 */
 	@Before
 	public void setUp() throws Exception {
@@ -244,12 +249,11 @@ public class BoardTest {
 	}
 
 	/**
-	 * Firstly, it tests the method
-	 * <code>isEmptyField(col)</code>. It tests that for every column on an empty <code>Board</code>
-	 * there's at least 1 empty field in each of those columns. Then, a column
-	 * is filled, and after each Disc, it's checked whether the column still has
-	 * empty fields. Once the column is full, it should no longer have empty
-	 * fields.
+	 * Firstly, it tests the method <code>isEmptyField(col)</code>. It tests
+	 * that for every column on an empty <code>Board</code> there's at least 1
+	 * empty field in each of those columns. Then, a column is filled, and after
+	 * each Disc, it's checked whether the column still has empty fields. Once
+	 * the column is full, it should no longer have empty fields.
 	 * 
 	 * Secondly, it tests the method <code>isEmptyField(row, col)</code>. First,
 	 * it assures that every field on an empty <code>Board</code> is empty.
@@ -343,15 +347,16 @@ public class BoardTest {
 	 * 1-4, 2-5 and 3-6. To make every possible combination, the algorithm works
 	 * as follows: Reset the <code>Board</code> before every test, then for
 	 * every single boardrow, put 4 discs in that boardrow, such that there's 4
-	 * <code>Disc</code>s in a row. Then, check whether
+	 * <code>Disc</code>s connected. Then, check whether
 	 * <code>b.hasRow(Disc)</code> is true for the <code>Disc</code> you
 	 * inserted, and make sure (because why not) that for the <code>Disc</code>
 	 * you didn't insert, <code>b.hasRow(otherDisc)</code> is false. After this,
-	 * the same test is done, but with rows of 3 <code>Disc</code>s. None of
-	 * these should make <code>b.hasRow(Disc)</code> or
+	 * the same test is done, but with 3 <code>Disc</code>s connected at a time.
+	 * None of these should make <code>b.hasRow(Disc)</code> or
 	 * <code>b.hasRow(otherDisc)</code> return true. After this, a pre-defined
-	 * realistic situation is created, in which there's no row for either of the
-	 * players, and it's made sure, that <code>b.hasRow(Disc)</code> and
+	 * realistic situation is created, in which there's no 4 connected
+	 * <code>Disc</code>s for either of the players in a row, and it's made
+	 * sure, that <code>b.hasRow(Disc)</code> and
 	 * <code>b.hasRow(otherDisc)</code> are false.
 	 */
 	@Test
@@ -370,7 +375,7 @@ public class BoardTest {
 						b.hasRow(Disc.YELLOW));
 			}
 		}
-		// Now tests with rows of 3. For comments, see above code.
+		// Now tests with rows of 3.
 		for (int row = 0; row < Board.VERTICAL; row++) {
 			for (int col = 0; col <= 3; col++) {
 				b.reset();
@@ -400,19 +405,30 @@ public class BoardTest {
 		}
 	}
 
+	/**
+	 * Tests the method <code>hasColumn(Disc)</code>. It basically creates every
+	 * possible situation, in which there's a column on the <code>Board</code>.
+	 * At every boardcolumn, there are 3 potential columns, namely on the
+	 * positions 0-3, 1-4 and 2-5. To make every possible combination, the
+	 * algorithm works as follows: Reset the <code>Board</code> before every
+	 * test, then for every single boardcolumn, put 4 discs in that boardcolumn,
+	 * such that there's 4 <code>Disc</code>s connected. Then, check whether
+	 * <code>b.hasColumn(Disc)</code> is true for the <code>Disc</code> you
+	 * inserted, and make sure (because why not) that for the <code>Disc</code>
+	 * you didn't insert, <code>b.hasColumn(otherDisc)</code> is false. After
+	 * this, the same test is done, but with 3 <code>Disc</code>s connected at a
+	 * time. None of these should make <code>b.hasColumn(Disc)</code> or
+	 * <code>b.hasColumn(otherDisc)</code> return true. After this, a
+	 * pre-defined realistic situation is created, in which there's no 4
+	 * connected <code>Disc</code>s for either of the players in a column, and
+	 * it's made sure, that <code>b.hasColumn(Disc)</code> and
+	 * <code>b.hasColumn(otherDisc)</code> are false.
+	 */
 	@Test
 	public void testHasColumn() {
-		// A row is from left to right. At every boardrow, there are 3 potential
-		// rows, namely on the positions 0-3, 1-4 and 2-5.
 		for (int col = 0; col < Board.HORIZONTAL; col++) {
-			// Row <= 2 is hardcoded. In case the Board.VERTICAL gets smaller,
-			// the Discs can't be changed, and the program will most likely
-			// crash. In case the Board.VERTICAL is changed to
-			// be bigger, this test will not cover all test results.
 			for (int row = 0; row <= 2; row++) {
-				// Resets the board
 				b.reset();
-				// Fill a boardcolumn with a column of 4 discs
 				for (int i = row; i <= (row + 3); i++) {
 					b.setField(i, col, Disc.RED);
 				}
@@ -424,10 +440,11 @@ public class BoardTest {
 						b.hasColumn(Disc.YELLOW));
 			}
 		}
-		// Now tests with columns of 3. For comments, see above code.
+		// Now tests with columns of 3.
 		for (int col = 0; col < Board.HORIZONTAL; col++) {
 			for (int row = 0; row <= 2; row++) {
 				b.reset();
+				// Fill the boardcolumn with a row of 3 discs
 				for (int i = row; i <= (row + 2); i++) {
 					b.setField(i, col, Disc.RED);
 				}
@@ -452,10 +469,23 @@ public class BoardTest {
 				b.hasColumn(Disc.YELLOW));
 	}
 
+	/**
+	 * Tests the method <code>hasDiagonal()</code>. It basically creates every
+	 * possible situation, in which there's a diagonal on the <code>Board</code>
+	 * . The way it does the test, is as follows: it inserts 4 <code>Disc</code>
+	 * s into the Board, which make the <code>Board</code> have a diagonal.
+	 * After each <code>Disc</code> is inserted, a check is made, to see whether
+	 * the <code>Board</code> has a diagonal. After each of the first three
+	 * <code>Disc</code>s, the <code>Board</code> should not have a diagonal,
+	 * but after the fourth <code>Disc</code>, the <code>Board</code> should
+	 * have one. Since there were only 24 options, each option was coded
+	 * manually. This was humanly faster, than writing an algorithm for it. All
+	 * possible diagonals can be found in the Excel-speadsheet located in
+	 * /doc/PossibleDiagonals.xlsx. The numbers of the options in the code
+	 * represent the numbers of options in the spreadsheet.
+	 */
 	@Test
 	public void testHasDiagonal() {
-		// These are all possible combinations in which hasDiagonal == true. For
-		// all possible combinations, please have a look at doc/
 		// Option 1
 		b.setField(3, 0, Disc.RED);
 		assertEquals("b.hasDiagonal(Disc.RED)==false", false,
