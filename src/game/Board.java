@@ -9,7 +9,7 @@ import java.util.Arrays;
  * @version $Revision: 1.0 $
  */
 public class Board {
-
+	//TODO: support meerdere grotes
 	// Constants:
 	public static final int VERTICAL = 6;
 	public static final int HORIZONTAL = 7;
@@ -130,6 +130,7 @@ public class Board {
 			return null;
 		}
 	}
+
 	//TODO: Discuss whether to rename this method to hasEmptyField(col).
 	/*@
 	requires this.isField(row,col);

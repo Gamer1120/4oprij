@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.ListIterator;
 
 /**
@@ -33,15 +35,15 @@ public class Server extends Thread {
 	// END OF PROTOCOL
 	private int port;
 	private MessageUI mui;
-	private ArrayList<ClientHandler> threads;
-	private ArrayList<String[]> invites;
+	private HashSet<ClientHandler> threads;
+	private HashSet<String[]> invites;
 
 	/** Constructs a new Server object */
 	public Server(int portArg, MessageUI muiArg) {
 		this.port = portArg;
 		this.mui = muiArg;
-		this.threads = new ArrayList<ClientHandler>();
-		this.invites = new ArrayList<String[]>();
+		this.threads = new HashSet<ClientHandler>();
+		this.invites = new HashSet<String[]>();
 	}
 
 	/**
@@ -59,7 +61,7 @@ public class Server extends Thread {
 				ch.start();
 			}
 		} catch (IOException e) {
-			//TODO: betere error handling?
+			//TODO: betere error handling
 			e.printStackTrace();
 
 		}
@@ -77,7 +79,7 @@ public class Server extends Thread {
 			for (ClientHandler ch : threads) {
 				ch.sendMessage(msg);
 			}
-			mui.addMessage("Server: " + msg);
+			mui.addMessage("Broadcast: " + msg);
 		}
 	}
 
@@ -116,7 +118,38 @@ public class Server extends Thread {
 					break;
 				}
 			}
-			mui.addMessage("Server to " + name + ": " + msg);
+			mui.addMessage("Server send message to " + name + ": " + msg);
+		}
+	}
+
+	/**
+	 * Print the message on the server gui
+	 * 
+	 * @param msg
+	 *            message that is send
+	 */
+	public void print(String msg) {
+		mui.addMessage(msg);
+	}
+
+	/**
+	 * Sends the board to use for the game so both clientHandlers are using the
+	 * same board
+	 * 
+	 * @param name
+	 *            name of the client
+	 * @param board
+	 *            board that is send
+	 */
+	public void startGame(String name, Board board) {
+		synchronized (threads) {
+			for (ClientHandler ch : threads) {
+				if (ch.getClientName().equals(name)) {
+					ch.setBoard(board);
+					break;
+				}
+			}
+			mui.addMessage("Server set board for " + name);
 		}
 	}
 
@@ -139,37 +172,6 @@ public class Server extends Thread {
 			}
 			return game;
 		}
-	}
-
-	/**
-	 * Sends the board to use for the game so both clientHandlers are using the
-	 * same board
-	 * 
-	 * @param name
-	 *            name of the client
-	 * @param board
-	 *            board that is send
-	 */
-	public void startGame(String name, Board board) {
-		synchronized (threads) {
-			for (ClientHandler ch : threads) {
-				if (ch.getClientName().equals(name)) {
-					ch.setBoard(board);
-					break;
-				}
-			}
-			mui.addMessage("Server: Set board for " + name);
-		}
-	}
-
-	/**
-	 * Print the message on the server gui
-	 * 
-	 * @param msg
-	 *            message that is send
-	 */
-	public void print(String msg) {
-		mui.addMessage("ClientHandler" + msg);
 	}
 
 	/**
@@ -264,6 +266,23 @@ public class Server extends Thread {
 	}
 
 	/**
+	 * Removes all invites of the client with the specified name.
+	 * 
+	 * @param name
+	 *            the name of the client
+	 */
+	public void removeInvite(String name) {
+		synchronized (invites) {
+			for (Iterator<String[]> iter = invites.iterator(); iter.hasNext();) {
+				String[] invite = iter.next();
+				if (invite[0].equals(name) || invite[1].equals(name)) {
+					iter.remove();
+				}
+			}
+		}
+	}
+
+	/**
 	 * Removes the invite of the client with the specified name.
 	 * 
 	 * @param name
@@ -273,30 +292,11 @@ public class Server extends Thread {
 	 */
 	public void removeInvite(String name, String invited) {
 		synchronized (invites) {
-			for (ListIterator<String[]> iter = invites.listIterator(); iter
-					.hasNext();) {
+			for (Iterator<String[]> iter = invites.iterator(); iter.hasNext();) {
 				String[] invite = iter.next();
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
 					iter.remove();
 					break;
-				}
-			}
-		}
-	}
-
-	/**
-	 * Removes all invites of the client with the specified name.
-	 * 
-	 * @param name
-	 *            the name of the client
-	 */
-	public void removeAllInvites(String name) {
-		synchronized (invites) {
-			for (ListIterator<String[]> iter = invites.listIterator(); iter
-					.hasNext();) {
-				String[] invite = iter.next();
-				if (invite[0].equals(name) || invite[1].equals(name)) {
-					iter.remove();
 				}
 			}
 		}
