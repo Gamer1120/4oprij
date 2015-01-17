@@ -114,7 +114,9 @@ public class ClientHandler extends Thread {
 			try {
 				line = in.readLine();
 			} catch (IOException | NullPointerException e) {
-				shutdown();
+				if (loop) {
+					shutdown();
+				}
 			}
 			String[] command = line.split("\\s+");
 			switch (command[0]) {
@@ -164,25 +166,27 @@ public class ClientHandler extends Thread {
 	 *            the msg
 	 */
 	public synchronized void sendMessage(String msg) {
+		String[] command = msg.split("\\s+");
+		switch (command[0]) {
+		case Server.GAME_START:
+			startGame(command);
+			break;
+		case Server.GAME_END:
+			endGame();
+			break;
+		case Server.REQUEST_MOVE:
+			move = true;
+			break;
+		}
 		try {
-			String[] command = msg.split("\\s+");
-			switch (command[0]) {
-			case Server.GAME_START:
-				startGame(command);
-				break;
-			case Server.GAME_END:
-				endGame();
-				break;
-			case Server.REQUEST_MOVE:
-				move = true;
-				break;
-			}
 			out.write(msg);
 			out.newLine();
 			out.flush();
 			server.print("ClientHandler to " + clientName + ": " + msg);
-		} catch (IOException e) {
-			shutdown();
+		} catch (IOException | NullPointerException e) {
+			if (loop) {
+				shutdown();
+			}
 		}
 	}
 
@@ -480,27 +484,25 @@ public class ClientHandler extends Thread {
 	 */
 	private void shutdown() {
 		// TODO: clients moeten kunnen reconnecten na dc
-		if (loop) {
-			this.loop = false;
-			server.removeInvite(clientName);
-			server.removeHandler(this);
-			if (inGame()) {
-				server.sendMessage(opponentName, Server.GAME_END + " "
-						+ "DISCONNECT");
-			} else {
-				server.broadcastLobby();
-			}
-			server.print("ClientHandler: " + clientName + " has left");
-			this.server = null;
-			this.sock = null;
-			this.in = null;
-			this.out = null;
-			this.clientName = null;
-			this.features = null;
-			this.playerNumber = -1;
-			this.opponentName = null;
-			this.board = null;
-			this.move = false;
+		this.loop = false;
+		server.removeInvite(clientName);
+		server.removeHandler(this);
+		if (inGame()) {
+			server.sendMessage(opponentName, Server.GAME_END + " "
+					+ "DISCONNECT");
+		} else {
+			server.broadcastLobby();
 		}
+		server.print("ClientHandler: " + clientName + " has left");
+		this.server = null;
+		this.sock = null;
+		this.in = null;
+		this.out = null;
+		this.clientName = null;
+		this.features = null;
+		this.playerNumber = -1;
+		this.opponentName = null;
+		this.board = null;
+		this.move = false;
 	}
 } // end of class ClientHandler

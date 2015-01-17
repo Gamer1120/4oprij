@@ -206,8 +206,8 @@ public class Server extends Thread {
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
 					Integer[] boardSize = invites.get(invite);
-					board = new Board(boardSize[0].intValue(),
-							boardSize[1].intValue());
+					board = new Board(boardSize[1].intValue(),
+							boardSize[0].intValue());
 					break;
 				}
 			}
