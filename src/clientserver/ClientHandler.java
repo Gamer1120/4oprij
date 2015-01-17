@@ -1,6 +1,7 @@
 package clientserver;
 
 import game.Board;
+import game.Disc;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -63,6 +64,8 @@ public class ClientHandler extends Thread {
 	/** TO BE CHANGED TO GAME. */
 	private Board board;
 
+	private boolean move;
+
 	/**
 	 * A loop variable used to check whether to keep looping or not in a certain
 	 * method.
@@ -94,6 +97,7 @@ public class ClientHandler extends Thread {
 		this.playerNumber = -1;
 		this.opponentName = null;
 		this.board = null;
+		this.move = false;
 		this.loop = true;
 	}
 
@@ -169,8 +173,9 @@ public class ClientHandler extends Thread {
 			case Server.GAME_END:
 				endGame();
 				break;
-			case Server.MOVE_OK:
-				// TODO: move doen bijbehorende speler
+			case Server.REQUEST_MOVE:
+				move = true;
+				break;
 			}
 			out.write(msg);
 			out.newLine();
@@ -261,15 +266,28 @@ public class ClientHandler extends Thread {
 					if (!server.inGame(command[1])) {
 						if (!server.isInvited(clientName, command[1])) {
 							if (!server.isInvited(command[1], clientName)) {
-								server.addInvite(clientName, command[1]);
-								// TODO: controleren board size en settings
-								String arguments = "";
-								// Hoop dat check voor eerste loop komt
-								for (int i = 2; i < command.length; i++) {
-									arguments += " " + command[i];
+								int boardX = 7;
+								int boardY = 6;
+								if (command.length >= 4) {
+									try {
+										boardX = Integer.parseInt(command[2]);
+										boardY = Integer.parseInt(command[3]);
+									} catch (NumberFormatException e) {
+										sendMessage(Server.ERROR
+												+ " could not parse boardsize, using default");
+										boardX = 7;
+										boardY = 6;
+									}
+									server.sendMessage(command[1],
+											Server.INVITE + " " + clientName
+													+ " " + boardX + " "
+													+ boardY);
+								} else {
+									server.sendMessage(command[1],
+											Server.INVITE + " " + clientName);
 								}
-								server.sendMessage(command[1], Server.INVITE
-										+ " " + clientName + arguments);
+								server.addInvite(clientName, command[1],
+										boardX, boardY);
 							} else {
 								sendMessage(Server.ERROR
 										+ " This client already invited you");
@@ -303,9 +321,7 @@ public class ClientHandler extends Thread {
 		if (command.length == 2) {
 			if (server.isInvited(command[1], clientName)) {
 				// TODO: extras verzenden (spectators?)
-				board = new Board();
-				server.print("ClientHandler: Set board for " + clientName);
-				server.startGame(command[1], board);
+				server.generateBoard(command[1], clientName);
 				sendMessage(Server.GAME_START + " " + clientName + " "
 						+ command[1]);
 				server.sendMessage(command[1], Server.GAME_START + " "
@@ -346,17 +362,68 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void move(String[] command) {
-		if (command.length == 2) {
-			// TODO: mogeljk game met players en spectators?
-			// TODO: check wie aan de beurt is, mogelijk bij request
-			// TODO: zelf bord bijhouden voor nummer en move ok checken
-			sendMessage(Server.MOVE_OK + " " + playerNumber + " " + command[1]);
-			server.sendMessage(opponentName, Server.MOVE_OK + " "
-					+ playerNumber + " " + command[1]);
-			server.sendMessage(opponentName, Server.REQUEST_MOVE);
-			// TODO: gewonnen is game end sturen
+		// TODO: mogeljk game met players en spectators?
+		// TODO: check wie aan de beurt is, mogelijk bij request
+		// TODO: zelf bord bijhouden voor nummer en move ok checken
+		if (inGame()) {
+			if (move) {
+				move = false;
+				if (command.length == 2) {
+					try {
+						int col = Integer.parseInt(command[1]);
+						if (board.isField(col)) {
+							if (board.isEmptyField(col)) {
+								if (playerNumber == 0) {
+									board.insertDisc(col, Disc.YELLOW);
+								} else if (playerNumber == 1) {
+									board.insertDisc(col, Disc.RED);
+								}
+								sendMessage(Server.MOVE_OK + " " + playerNumber
+										+ " " + command[1] + " " + clientName);
+								server.sendMessage(opponentName, Server.MOVE_OK
+										+ " " + playerNumber + " " + command[1]
+										+ " " + clientName);
+								if (!board.gameOver()) {
+									server.sendMessage(opponentName,
+											Server.REQUEST_MOVE);
+								} else {
+									if (board.hasWinner()) {
+										//TODO: game end finals
+										server.sendMessage(opponentName,
+												Server.GAME_END + " " + "WIN"
+														+ " " + clientName);
+										sendMessage(Server.GAME_END + " "
+												+ "WIN" + " " + clientName);
+									} else {
+										server.sendMessage(opponentName,
+												Server.GAME_END + " " + "DRAW");
+										sendMessage(Server.GAME_END + " "
+												+ "DRAW");
+									}
+								}
+							} else {
+								sendMessage(Server.ERROR
+										+ " That column is full");
+								sendMessage(Server.REQUEST_MOVE);
+							}
+						} else {
+							sendMessage(Server.ERROR
+									+ " That column doesn't exist");
+							sendMessage(Server.REQUEST_MOVE);
+						}
+					} catch (NumberFormatException e) {
+						sendMessage(Server.ERROR + " Can't parse move");
+						sendMessage(Server.REQUEST_MOVE);
+					}
+				} else {
+					sendMessage(Server.ERROR + " Invalid arguments");
+					sendMessage(Server.REQUEST_MOVE);
+				}
+			} else {
+				sendMessage(Server.ERROR + " It's not your turn to move");
+			}
 		} else {
-			sendMessage(Server.REQUEST_MOVE);
+			sendMessage(Server.ERROR + " You aren't in a game");
 		}
 	}
 
@@ -433,6 +500,7 @@ public class ClientHandler extends Thread {
 			this.playerNumber = -1;
 			this.opponentName = null;
 			this.board = null;
+			this.move = false;
 		}
 	}
 } // end of class ClientHandler

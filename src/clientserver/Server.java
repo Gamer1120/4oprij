@@ -5,6 +5,7 @@ import game.Board;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -64,7 +65,7 @@ public class Server extends Thread {
 	private HashSet<ClientHandler> threads;
 
 	/** The invites. */
-	private HashSet<String[]> invites;
+	private HashMap<String[], Integer[]> invites;
 
 	/**
 	 * Constructs a new Server object.
@@ -78,7 +79,7 @@ public class Server extends Thread {
 		this.port = portArg;
 		this.mui = muiArg;
 		this.threads = new HashSet<ClientHandler>();
-		this.invites = new HashSet<String[]>();
+		this.invites = new HashMap<String[], Integer[]>();
 	}
 
 	/**
@@ -179,28 +180,6 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Sends the board to use for the game so both clientHandlers are using the
-	 * same board.
-	 *
-	 * @param name
-	 *            name of the client
-	 * @param board
-	 *            board that is send
-	 */
-	public void startGame(String name, Board board) {
-		//TODO: echte game maken
-		synchronized (threads) {
-			for (ClientHandler ch : threads) {
-				if (ch.getClientName().equals(name)) {
-					ch.setBoard(board);
-					break;
-				}
-			}
-			mui.addMessage("Server set board for " + name);
-		}
-	}
-
-	/**
 	 * Checks wether the client with the specified name is in a game.
 	 *
 	 * @param name
@@ -217,6 +196,45 @@ public class Server extends Thread {
 				}
 			}
 			return game;
+		}
+	}
+
+	//@ requires isInvited(name, invited)
+	public void generateBoard(String name, String invited) {
+		synchronized (invites) {
+			Board board = null;
+			for (String[] invite : invites.keySet()) {
+				if (invite[0].equals(name) && invite[1].equals(invited)) {
+					Integer[] boardSize = invites.get(invite);
+					board = new Board(boardSize[0].intValue(),
+							boardSize[1].intValue());
+					break;
+				}
+			}
+			setBoard(name, board);
+			setBoard(invited, board);
+		}
+	}
+
+	/**
+	 * Sends the board to use for the game so both clientHandlers are using the
+	 * same board.
+	 *
+	 * @param name
+	 *            name of the client
+	 * @param board
+	 *            board that is send
+	 */
+	private void setBoard(String name, Board board) {
+		//TODO: echte game maken
+		synchronized (threads) {
+			for (ClientHandler ch : threads) {
+				if (ch.getClientName().equals(name)) {
+					ch.setBoard(board);
+					break;
+				}
+			}
+			mui.addMessage("Server set board for " + name);
 		}
 	}
 
@@ -290,9 +308,10 @@ public class Server extends Thread {
 	 * @param invited
 	 *            name of the invited client
 	 */
-	public void addInvite(String name, String invited) {
+	public void addInvite(String name, String invited, int boardX, int boardY) {
 		synchronized (invites) {
-			invites.add(new String[] { name, invited });
+			invites.put(new String[] { name, invited }, new Integer[] { boardX,
+					boardY });
 		}
 	}
 
@@ -309,7 +328,7 @@ public class Server extends Thread {
 	public boolean isInvited(String name, String invited) {
 		synchronized (invites) {
 			boolean retBool = false;
-			for (String[] invite : invites) {
+			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
 					retBool = true;
 					break;
@@ -327,10 +346,9 @@ public class Server extends Thread {
 	 */
 	public void removeInvite(String name) {
 		synchronized (invites) {
-			for (Iterator<String[]> iter = invites.iterator(); iter.hasNext();) {
-				String[] invite = iter.next();
+			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) || invite[1].equals(name)) {
-					iter.remove();
+					invites.remove(invite);
 				}
 			}
 		}
@@ -346,10 +364,9 @@ public class Server extends Thread {
 	 */
 	public void removeInvite(String name, String invited) {
 		synchronized (invites) {
-			for (Iterator<String[]> iter = invites.iterator(); iter.hasNext();) {
-				String[] invite = iter.next();
+			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
-					iter.remove();
+					invites.remove(invite);
 					break;
 				}
 			}
