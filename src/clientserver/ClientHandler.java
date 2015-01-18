@@ -55,15 +55,16 @@ public class ClientHandler extends Thread {
 	 */
 	private String[] features;
 
-	/** TO BE REMOVED */
+	/** TO BE REMOVED. */
 	private int playerNumber;
 
-	/** TO BE REMOVED */
+	/** TO BE REMOVED. */
 	private String opponentName;
 
 	/** TO BE CHANGED TO GAME. */
 	private Board board;
 
+	/** The move. */
 	private boolean move;
 
 	/**
@@ -121,25 +122,25 @@ public class ClientHandler extends Thread {
 			String[] command = line.split("\\s+");
 			switch (command[0]) {
 			case Client.CONNECT:
-				connect(command);
+				connectChecks(command);
 				break;
 			case Client.QUIT:
 				shutdown();
 				break;
 			case Client.INVITE:
-				invite(command);
+				inviteChecks(command);
 				break;
 			case Client.ACCEPT_INVITE:
-				accept(command);
+				acceptChecks(command);
 				break;
 			case Client.DECLINE_INVITE:
-				decline(command);
+				declineChecks(command);
 				break;
 			case Client.MOVE:
-				move(command);
+				moveChecks(command);
 				break;
 			case Client.CHAT:
-				chat(command);
+				chatChecks(command);
 				break;
 			case Client.REQUEST_BOARD:
 				// TODO: zelf bord bijhouden om op te sturen
@@ -233,27 +234,36 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
-	private void connect(String[] command) {
+	private void connectChecks(String[] command) {
 		// TODO: controleren op naam lengte
-		if (command.length >= 2) {
-			if (!server.nameExists(command[1])) {
-				clientName = command[1];
-				if (command.length > 2) {
-					// TODO: controleren valid features?
-					features = Arrays.copyOfRange(command, 2,
-							command.length - 1);
-				}
-				// TODO: onze features sturen
-				sendMessage(Server.ACCEPT_CONNECT
-						+ " Feature array gescheiden met spaties");
-				server.broadcastLobby();
-				server.print("ClientHandler: " + clientName + " has joined");
-			} else {
-				sendMessage(Server.ERROR + " Name in use");
-			}
-		} else {
+		if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
+		} else if (server.nameExists(command[1])) {
+			sendMessage(Server.ERROR + " Name in use");
+		} else if (command[1].length() > 15) {
+			sendMessage(Server.ERROR + " Name too long");
+		} else {
+			connect(command);
 		}
+	}
+
+	/**
+	 * Connect.
+	 *
+	 * @param command
+	 *            the command
+	 */
+	private void connect(String[] command) {
+		clientName = command[1];
+		if (command.length > 2) {
+			// TODO: controleren valid features
+			features = Arrays.copyOfRange(command, 2, command.length - 1);
+		}
+		// TODO: onze features sturen
+		sendMessage(Server.ACCEPT_CONNECT
+				+ " Feature array gescheiden met spaties");
+		server.broadcastLobby();
+		server.print("ClientHandler: " + clientName + " has joined");
 	}
 
 	// You can invite and play against yourself
@@ -263,55 +273,64 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
-	private void invite(String[] command) {
-		if (command.length >= 2) {
-			if (server.nameExists(command[1])) {
-				if (!inGame()) {
-					if (!server.inGame(command[1])) {
-						if (!server.isInvited(clientName, command[1])) {
-							if (!server.isInvited(command[1], clientName)) {
-								int boardX = 7;
-								int boardY = 6;
-								if (command.length >= 4) {
-									try {
-										boardX = Integer.parseInt(command[2]);
-										boardY = Integer.parseInt(command[3]);
-									} catch (NumberFormatException e) {
-										sendMessage(Server.ERROR
-												+ " could not parse boardsize, using default");
-										boardX = 7;
-										boardY = 6;
-									}
-									server.sendMessage(command[1],
-											Server.INVITE + " " + clientName
-													+ " " + boardX + " "
-													+ boardY);
-								} else {
-									server.sendMessage(command[1],
-											Server.INVITE + " " + clientName);
-								}
-								server.addInvite(clientName, command[1],
-										boardX, boardY);
-							} else {
-								sendMessage(Server.ERROR
-										+ " This client already invited you");
-							}
-						} else {
-							sendMessage(Server.ERROR
-									+ " Already invited this client");
-						}
-					} else {
-						sendMessage(Server.ERROR
-								+ " This client is already in a game");
-					}
-				} else {
-					sendMessage(Server.ERROR + " You are already in a game");
-				}
-			} else {
-				sendMessage(Server.ERROR + " Name doesn't exist");
-			}
-		} else {
+	private void inviteChecks(String[] command) {
+		if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
+		} else if (!server.nameExists(command[1])) {
+			sendMessage(Server.ERROR + " Name doesn't exist");
+		} else if (inGame()) {
+			sendMessage(Server.ERROR + " You are already in a game");
+		} else if (server.inGame(command[1])) {
+			sendMessage(Server.ERROR + " This client is already in a game");
+		} else if (server.isInvited(clientName, command[1])) {
+			sendMessage(Server.ERROR + " Already invited this client");
+		} else if (server.isInvited(command[1], clientName)) {
+			sendMessage(Server.ERROR + " This client already invited you");
+		} else {
+			invite(command);
+		}
+	}
+
+	/**
+	 * Invite.
+	 *
+	 * @param command
+	 *            the command
+	 */
+	private void invite(String[] command) {
+		int boardX = 7;
+		int boardY = 6;
+		if (command.length >= 4) {
+			try {
+				boardX = Integer.parseInt(command[2]);
+				boardY = Integer.parseInt(command[3]);
+			} catch (NumberFormatException e) {
+				sendMessage(Server.ERROR
+						+ " could not parse boardsize, using default");
+				boardX = 7;
+				boardY = 6;
+			}
+			server.sendMessage(command[1], Server.INVITE + " " + clientName
+					+ " " + boardX + " " + boardY);
+		} else {
+			server.sendMessage(command[1], Server.INVITE + " " + clientName);
+		}
+		server.addInvite(clientName, command[1], boardX, boardY);
+	}
+
+	/**
+	 * Accept.
+	 *
+	 * @param command
+	 *            the command
+	 */
+	private void acceptChecks(String[] command) {
+		if (command.length != 2) {
+			sendMessage(Server.ERROR + " Invalid arguments");
+		} else if (!server.isInvited(command[1], clientName)) {
+			sendMessage(Server.ERROR + " Not invited by this client");
+		} else {
+			accept(command);
 		}
 	}
 
@@ -322,20 +341,27 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void accept(String[] command) {
-		if (command.length == 2) {
-			if (server.isInvited(command[1], clientName)) {
-				// TODO: extras verzenden (spectators?)
-				server.generateBoard(command[1], clientName);
-				sendMessage(Server.GAME_START + " " + clientName + " "
-						+ command[1]);
-				server.sendMessage(command[1], Server.GAME_START + " "
-						+ clientName + " " + command[1]);
-				sendMessage(Server.REQUEST_MOVE);
-			} else {
-				sendMessage(Server.ERROR + " Not invited by this client");
-			}
-		} else {
+		// TODO: extras verzenden (spectators?)
+		server.generateBoard(command[1], clientName);
+		sendMessage(Server.GAME_START + " " + clientName + " " + command[1]);
+		server.sendMessage(command[1], Server.GAME_START + " " + clientName
+				+ " " + command[1]);
+		sendMessage(Server.REQUEST_MOVE);
+	}
+
+	/**
+	 * Decline.
+	 *
+	 * @param command
+	 *            the command
+	 */
+	private void declineChecks(String[] command) {
+		if (command.length != 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
+		} else if (!server.isInvited(command[1], clientName)) {
+			sendMessage(Server.ERROR + " Not invited by this client");
+		} else {
+			decline(command);
 		}
 	}
 
@@ -346,17 +372,8 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void decline(String[] command) {
-		if (command.length == 2) {
-			if (server.isInvited(command[1], clientName)) {
-				server.removeInvite(command[1], clientName);
-				server.sendMessage(command[1], Server.ERROR
-						+ " Invite declined");
-			} else {
-				sendMessage(Server.ERROR + " Not invited by this client");
-			}
-		} else {
-			sendMessage(Server.ERROR + " Invalid arguments");
-		}
+		server.removeInvite(command[1], clientName);
+		server.sendMessage(command[1], Server.ERROR + " Invite declined");
 	}
 
 	/**
@@ -365,69 +382,80 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
-	private void move(String[] command) {
+	private void moveChecks(String[] command) {
 		// TODO: mogeljk game met players en spectators?
 		// TODO: check wie aan de beurt is, mogelijk bij request
 		// TODO: zelf bord bijhouden voor nummer en move ok checken
-		if (inGame()) {
-			if (move) {
-				move = false;
-				if (command.length == 2) {
-					try {
-						int col = Integer.parseInt(command[1]);
-						if (board.isField(col)) {
-							if (board.isEmptyField(col)) {
-								if (playerNumber == 0) {
-									board.insertDisc(col, Disc.YELLOW);
-								} else if (playerNumber == 1) {
-									board.insertDisc(col, Disc.RED);
-								}
-								sendMessage(Server.MOVE_OK + " " + playerNumber
-										+ " " + command[1] + " " + clientName);
-								server.sendMessage(opponentName, Server.MOVE_OK
-										+ " " + playerNumber + " " + command[1]
-										+ " " + clientName);
-								if (!board.gameOver()) {
-									server.sendMessage(opponentName,
-											Server.REQUEST_MOVE);
-								} else {
-									if (board.hasWinner()) {
-										//TODO: game end finals
-										server.sendMessage(opponentName,
-												Server.GAME_END + " " + "WIN"
-														+ " " + clientName);
-										sendMessage(Server.GAME_END + " "
-												+ "WIN" + " " + clientName);
-									} else {
-										server.sendMessage(opponentName,
-												Server.GAME_END + " " + "DRAW");
-										sendMessage(Server.GAME_END + " "
-												+ "DRAW");
-									}
-								}
-							} else {
-								sendMessage(Server.ERROR
-										+ " That column is full");
-								sendMessage(Server.REQUEST_MOVE);
-							}
-						} else {
-							sendMessage(Server.ERROR
-									+ " That column doesn't exist");
-							sendMessage(Server.REQUEST_MOVE);
-						}
-					} catch (NumberFormatException e) {
-						sendMessage(Server.ERROR + " Can't parse move");
-						sendMessage(Server.REQUEST_MOVE);
-					}
-				} else {
-					sendMessage(Server.ERROR + " Invalid arguments");
+		if (!inGame()) {
+			sendMessage(Server.ERROR + " You aren't in a game");
+		} else if (!move) {
+			sendMessage(Server.ERROR + " It's not your turn to move");
+		} else {
+			move = false;
+			if (command.length != 2) {
+				sendMessage(Server.ERROR + " Invalid arguments");
+				sendMessage(Server.REQUEST_MOVE);
+			} else {
+				int col = -1;
+				try {
+					col = Integer.parseInt(command[1]);
+				} catch (NumberFormatException e) {
+					sendMessage(Server.ERROR + " Can't parse move");
 					sendMessage(Server.REQUEST_MOVE);
 				}
-			} else {
-				sendMessage(Server.ERROR + " It's not your turn to move");
+				if (!board.isField(col)) {
+					sendMessage(Server.ERROR + " That column doesn't exist");
+					sendMessage(Server.REQUEST_MOVE);
+				} else if (!board.isEmptyField(col)) {
+					sendMessage(Server.ERROR + " That column is full");
+					sendMessage(Server.REQUEST_MOVE);
+				} else {
+					move(col);
+				}
 			}
+		}
+	}
+
+	/**
+	 * Move.
+	 *
+	 * @param col
+	 *            the col
+	 */
+	private void move(int col) {
+		if (playerNumber == 0) {
+			board.insertDisc(col, Disc.YELLOW);
+		} else if (playerNumber == 1) {
+			board.insertDisc(col, Disc.RED);
+		}
+		sendMessage(Server.MOVE_OK + " " + playerNumber + " " + col + " "
+				+ clientName);
+		server.sendMessage(opponentName, Server.MOVE_OK + " " + playerNumber
+				+ " " + col + " " + clientName);
+		if (!board.gameOver()) {
+			server.sendMessage(opponentName, Server.REQUEST_MOVE);
+		} else if (board.hasWinner()) {
+			//TODO: game end finals
+			server.sendMessage(opponentName, Server.GAME_END + " " + "WIN"
+					+ " " + clientName);
+			sendMessage(Server.GAME_END + " " + "WIN" + " " + clientName);
 		} else {
-			sendMessage(Server.ERROR + " You aren't in a game");
+			server.sendMessage(opponentName, Server.GAME_END + " " + "DRAW");
+			sendMessage(Server.GAME_END + " " + "DRAW");
+		}
+	}
+
+	/**
+	 * Chat.
+	 *
+	 * @param command
+	 *            the command
+	 */
+	private void chatChecks(String[] command) {
+		if (command.length < 2) {
+			sendMessage(Server.ERROR + " Invalid arguments");
+		} else {
+			chat(command);
 		}
 	}
 
@@ -438,15 +466,11 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void chat(String[] command) {
-		if (command.length >= 2) {
-			String chat = "";
-			for (int i = 1; i < command.length; i++) {
-				chat += " " + command[i];
-			}
-			server.broadcast(Server.CHAT + " " + clientName + ":" + chat);
-		} else {
-			sendMessage(Server.ERROR + " Invalid arguments");
+		String chat = "";
+		for (int i = 1; i < command.length; i++) {
+			chat += " " + command[i];
 		}
+		server.broadcast(Server.CHAT + " " + clientName + ":" + chat);
 	}
 
 	/**

@@ -7,7 +7,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -166,6 +165,13 @@ public class Server extends Thread {
 		mui.addMessage(msg);
 	}
 
+	/**
+	 * Gets the client.
+	 *
+	 * @param name
+	 *            the name
+	 * @return the client
+	 */
 	public ClientHandler getClient(String name) {
 		synchronized (threads) {
 			ClientHandler client = null;
@@ -200,6 +206,14 @@ public class Server extends Thread {
 	}
 
 	//@ requires isInvited(name, invited)
+	/**
+	 * Generate board.
+	 *
+	 * @param name
+	 *            the name
+	 * @param invited
+	 *            the invited
+	 */
 	public void generateBoard(String name, String invited) {
 		synchronized (invites) {
 			Board board = null;
@@ -307,6 +321,10 @@ public class Server extends Thread {
 	 *            name of the inviting client
 	 * @param invited
 	 *            name of the invited client
+	 * @param boardX
+	 *            the board x
+	 * @param boardY
+	 *            the board y
 	 */
 	public void addInvite(String name, String invited, int boardX, int boardY) {
 		synchronized (invites) {
