@@ -143,16 +143,19 @@ public class ClientHandler extends Thread {
 				chatChecks(command);
 				break;
 			case Client.REQUEST_BOARD:
+				sendMessage(Server.ERROR + " Not implemented");
 				// TODO: zelf bord bijhouden om op te sturen
 				break;
 			case Client.REQUEST_LOBBY:
 				sendMessage(Server.LOBBY + server.getLobby());
 				break;
 			case Client.REQUEST_LEADERBOARD:
+				sendMessage(Server.ERROR + " Not implemented");
 				// TODO: leaderbords opslaan
 				break;
 			default:
 				sendMessage(Server.ERROR + " Invalid command");
+				break;
 			}
 
 		}
@@ -235,13 +238,13 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void connectChecks(String[] command) {
-		// TODO: controleren op naam lengte
+		// TODO: eerst connecten voor andere commando's kunnen
 		if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
-		} else if (server.nameExists(command[1])) {
-			sendMessage(Server.ERROR + " Name in use");
 		} else if (command[1].length() > 15) {
 			sendMessage(Server.ERROR + " Name too long");
+		} else if (server.nameExists(command[1])) {
+			sendMessage(Server.ERROR + " Name in use");
 		} else {
 			connect(command);
 		}
@@ -383,9 +386,7 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void moveChecks(String[] command) {
-		// TODO: mogeljk game met players en spectators?
-		// TODO: check wie aan de beurt is, mogelijk bij request
-		// TODO: zelf bord bijhouden voor nummer en move ok checken
+		// TODO: game met meer dan 2 players of spectators
 		if (!inGame()) {
 			sendMessage(Server.ERROR + " You aren't in a game");
 		} else if (!move) {
@@ -435,7 +436,7 @@ public class ClientHandler extends Thread {
 		if (!board.gameOver()) {
 			server.sendMessage(opponentName, Server.REQUEST_MOVE);
 		} else if (board.hasWinner()) {
-			//TODO: game end finals
+			// TODO: game end final strings
 			server.sendMessage(opponentName, Server.GAME_END + " " + "WIN"
 					+ " " + clientName);
 			sendMessage(Server.GAME_END + " " + "WIN" + " " + clientName);
@@ -466,6 +467,7 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void chat(String[] command) {
+		// TODO: line sturen zonder eerste woord
 		String chat = "";
 		for (int i = 1; i < command.length; i++) {
 			chat += " " + command[i];
@@ -480,7 +482,7 @@ public class ClientHandler extends Thread {
 	 *            the command
 	 */
 	private void startGame(String[] command) {
-		// TODO: echte game maken
+		// TODO: game maken inplaats bord
 		server.removeInvite(clientName);
 		if (clientName.equals(command[1])) {
 			playerNumber = 0;

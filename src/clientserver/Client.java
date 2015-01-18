@@ -117,6 +117,8 @@ public class Client extends Thread {
 	 * for it.
 	 */
 	public void run() {
+		// TODO: naam vragen inlpaats bij arguments
+		// TODO: bij error nog een keer proberen met andere naam
 		sendMessage(CONNECT + " " + getClientName());
 		while (loop) {
 			String line = "";
@@ -236,6 +238,7 @@ public class Client extends Thread {
 		currPlayer = -1; // Not set yet.
 		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
 		// 1 > Disc.RED
+		// TODO: board size
 		board = new Board();
 	}
 
@@ -282,6 +285,9 @@ public class Client extends Thread {
 		}
 		int move = -1;
 		// TODO: if else?
+		// TODO: checken of move ook kan in bord
+		// TODO: betere error handing met request bord
+		// TODO: board printen op clientTUI
 		switch (currPlayer) {
 		case FIRST_PLAYER:
 			try {
@@ -349,7 +355,7 @@ public class Client extends Thread {
 		System.exit(0);
 	}
 
-	/** 
+	/**
 	 * This method returns the name of this <code>Client</code>.
 	 */
 	public String getClientName() {

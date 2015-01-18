@@ -58,7 +58,7 @@ public class Server extends Thread {
 
 	/** The mui. */
 	private MessageUI mui;
-	//TODO: feature lijst
+	// TODO: feature lijst
 
 	/** The threads. */
 	private HashSet<ClientHandler> threads;
@@ -97,7 +97,7 @@ public class Server extends Thread {
 				ch.start();
 			}
 		} catch (IOException e) {
-			//TODO: betere error handling
+			// TODO: betere error handling
 			e.printStackTrace();
 
 		}
@@ -172,6 +172,7 @@ public class Server extends Thread {
 	 *            the name
 	 * @return the client
 	 */
+	// TODO: aanpassen voor Game of weghalen
 	public ClientHandler getClient(String name) {
 		synchronized (threads) {
 			ClientHandler client = null;
@@ -205,7 +206,6 @@ public class Server extends Thread {
 		}
 	}
 
-	//@ requires isInvited(name, invited)
 	/**
 	 * Generate board.
 	 *
@@ -214,6 +214,7 @@ public class Server extends Thread {
 	 * @param invited
 	 *            the invited
 	 */
+	//@ requires isInvited(name, invited);
 	public void generateBoard(String name, String invited) {
 		synchronized (invites) {
 			Board board = null;
@@ -240,7 +241,7 @@ public class Server extends Thread {
 	 *            board that is send
 	 */
 	private void setBoard(String name, Board board) {
-		//TODO: echte game maken
+		// TODO: Game maken inplaats van bord
 		synchronized (threads) {
 			for (ClientHandler ch : threads) {
 				if (ch.getClientName().equals(name)) {
