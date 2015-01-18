@@ -142,13 +142,7 @@ public class Board {
 	 * @return the disc on the field
 	 */
 	/*@pure*/public Disc getField(int row, int col) {
-		if (isField(row, col)) {
-			return fields[row][col];
-		} else {
-			// TODO: Discuss if we want to return null here, or do it
-			// otherwise...
-			return null;
-		}
+		return fields[row][col];
 	}
 
 	//TODO: Discuss whether to rename this method to hasEmptyField(col).
@@ -375,7 +369,7 @@ public class Board {
 	}
 
 	/*@
-		requires this.isField(col);
+		requires this.isField(col) & this.isEmptyField(col);
 		ensures (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) == d));
 	 */
 	/**
@@ -387,9 +381,7 @@ public class Board {
 	 *            the disc to be placed
 	 */
 	public void insertDisc(int col, Disc d) {
-		if (isField(col) && isEmptyField(col)) {
-			fields[emptyRow(col)][col] = d;
-		}
+		fields[emptyRow(col)][col] = d;
 	}
 
 	/*@
@@ -408,9 +400,7 @@ public class Board {
 	 *            the disc to be placed
 	 */
 	public void setField(int row, int col, Disc d) {
-		if (isField(row, col)) {
-			fields[row][col] = d;
-		}
+		fields[row][col] = d;
 	}
 
 }
