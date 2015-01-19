@@ -108,7 +108,7 @@ public class Client extends Thread {
 		this.loop = true;
 		this.isIngame = false;
 		this.invites = new ArrayList<String>();
-		System.out.println("Your name is: " + name);
+		mui.addMessage("Your name is: " + name);
 	}
 
 	/**
@@ -177,11 +177,9 @@ public class Client extends Thread {
 				+ ":" + sock.getPort()); // Port of the server
 		String listOfFeatures = "";
 		for (int i = 1; i < serverMessage.length; i++) {
-			// TODO: Print dit beter?
-			listOfFeatures = listOfFeatures + serverMessage[i] + " ";
+			listOfFeatures += " " + serverMessage[i];
 		}
-		mui.addMessage("The features of this server are: " + listOfFeatures);
-		// TODO: Discuss if the lobby should be asked for here.
+		mui.addMessage("The features of this server are:" + listOfFeatures);
 	}
 
 	/**
@@ -194,11 +192,10 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	private void lobby(String[] serverMessage) {
-		mui.addMessage("The people that are currently in the lobby are: ");
+		mui.addMessage("The people that are currently in the lobby are:");
 		String listOfPeople = "";
 		for (int i = 1; i < serverMessage.length; i++) {
-			// TODO: Print dit beter?
-			listOfPeople = listOfPeople + serverMessage[i] + " ";
+			listOfPeople += " " + serverMessage[i];
 		}
 		mui.addMessage(listOfPeople);
 	}
