@@ -1,6 +1,7 @@
 package game;
 
 import java.util.Arrays;
+import java.util.Observable;
 
 /**
  * Board for the connect4 game.
@@ -8,8 +9,7 @@ import java.util.Arrays;
  * @author Sven Konings en Michael Koopman
  * @version $Revision: 1.0 $
  */
-public class Board {
-	//TODO: support meerdere grotes
+public class Board extends Observable {
 	// Constants:
 	public static final int CONNECT = 4;
 
@@ -17,8 +17,8 @@ public class Board {
 	public int rows;
 	public int columns;
 	/*@
-		private invariant fields.length == rows * columns;
-		invariant (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) == Disc.EMPTY || this.getField(i, j) == Disc.YELLOW || this.getField(i, j) == Disc.RED));
+		private invariant fields.length == getRows() * getColumns();
+		invariant (\forall int i; 0 <= i & i < getRows(); (\forall int j; 0 <= j & j < getColumns(); this.getField(i, j) == Disc.EMPTY || this.getField(i, j) == Disc.YELLOW || this.getField(i, j) == Disc.RED));
 	 */
 	/**
 	 * The rows by columns board of the connect4 game.
@@ -147,8 +147,8 @@ public class Board {
 
 	//TODO: Discuss whether to rename this method to hasEmptyField(col).
 	/*@
-	requires this.isField(row,col);
-	ensures \result == (this.getField(row,col) == Disc.EMPTY);
+	requires this.isField(col);
+	ensures \result == (this.getField(emptyRow(col), col) == Disc.EMPTY);
 	*/
 	/**
 	 * Returns true if there is an empty field in the row.
@@ -159,7 +159,7 @@ public class Board {
 	 */
 	/*@pure*/public boolean isEmptyField(int col) {
 		for (int row = 0; row < rows; row++) {
-			if (getField(row, col) == Disc.EMPTY) {
+			if (isEmptyField(row, col)) {
 				return true;
 			}
 		}
@@ -180,7 +180,7 @@ public class Board {
 	 * @return true if the field is empty
 	 */
 	/*@pure*/public boolean isEmptyField(int row, int col) {
-		return isField(row, col) && getField(row, col) == Disc.EMPTY;
+		return getField(row, col) == Disc.EMPTY;
 	}
 
 	/*@ensures \result == (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) != Disc.EMPTY));*/
@@ -381,7 +381,8 @@ public class Board {
 	 *            the disc to be placed
 	 */
 	public void insertDisc(int col, Disc d) {
-		fields[emptyRow(col)][col] = d;
+		int row = emptyRow(col);
+		setField(row, col, d);
 	}
 
 	/*@
@@ -401,6 +402,8 @@ public class Board {
 	 */
 	public void setField(int row, int col, Disc d) {
 		fields[row][col] = d;
+		super.setChanged();
+		super.notifyObservers(new int[] { col, row });
 	}
 
 }

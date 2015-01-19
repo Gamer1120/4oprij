@@ -73,7 +73,12 @@ public class ClientHandler extends Thread {
 	 */
 	private boolean loop;
 
-	// @requires server != null && sock != null;
+	//@ private invariant server != null;
+	//@ private invariant sock != null;
+	//@ private invariant in != null;
+	//@ private invariant out != null;
+	//@ private invariant playerNumber == -1 || playerNumber == 0 || playerNumber == 1;
+
 	/**
 	 * Constructs a <code>ClientHandler</code> object. Initialises both the
 	 * <code>BufferedReader</code> and the <code>BufferedWriter</code>.
@@ -86,9 +91,10 @@ public class ClientHandler extends Thread {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	public ClientHandler(Server serverArg, Socket sockArg) throws IOException {
-		this.server = serverArg;
-		this.sock = sockArg;
+	//@ requires server != null && sock != null;
+	public ClientHandler(Server server, Socket sock) throws IOException {
+		this.server = server;
+		this.sock = sock;
 		this.in = new BufferedReader(new InputStreamReader(
 				sock.getInputStream()));
 		this.out = new BufferedWriter(new OutputStreamWriter(
@@ -112,14 +118,15 @@ public class ClientHandler extends Thread {
 	public void run() {
 		while (loop) {
 			String line = "";
+			String[] command = null;
 			try {
 				line = in.readLine();
+				command = line.split("\\s+");
 			} catch (IOException | NullPointerException e) {
 				if (loop) {
 					shutdown();
 				}
 			}
-			String[] command = line.split("\\s+");
 			switch (command[0]) {
 			case Client.CONNECT:
 				connectChecks(command);
@@ -169,6 +176,7 @@ public class ClientHandler extends Thread {
 	 * @param msg
 	 *            the msg
 	 */
+	//@ requires msg != null;
 	public synchronized void sendMessage(String msg) {
 		String[] command = msg.split("\\s+");
 		switch (command[0]) {
@@ -186,12 +194,12 @@ public class ClientHandler extends Thread {
 			out.write(msg);
 			out.newLine();
 			out.flush();
-			server.print("ClientHandler to " + clientName + ": " + msg);
-		} catch (IOException | NullPointerException e) {
+		} catch (IOException e) {
 			if (loop) {
 				shutdown();
 			}
 		}
+		server.print("ClientHandler to " + clientName + ": " + msg);
 	}
 
 	/**
@@ -199,7 +207,7 @@ public class ClientHandler extends Thread {
 	 *
 	 * @return the name of the client
 	 */
-	public String getClientName() {
+	/*@ pure */public String getClientName() {
 		return clientName;
 	}
 
@@ -208,7 +216,7 @@ public class ClientHandler extends Thread {
 	 *
 	 * @return the features of the client
 	 */
-	public String[] getClientFeatures() {
+	/*@ pure */public String[] getClientFeatures() {
 		return features;
 	}
 
@@ -217,7 +225,7 @@ public class ClientHandler extends Thread {
 	 *
 	 * @return true, if successful
 	 */
-	public boolean inGame() {
+	/*@ pure */public boolean inGame() {
 		return board != null;
 	}
 
@@ -227,6 +235,7 @@ public class ClientHandler extends Thread {
 	 * @param b
 	 *            the new board
 	 */
+	//@ requires getClientName() != null;
 	public void setBoard(Board b) {
 		board = b;
 	}
@@ -237,6 +246,7 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires command[0].equals(Client.CONNECT);
 	private void connectChecks(String[] command) {
 		// TODO: eerst connecten voor andere commando's kunnen
 		if (command.length < 2) {
@@ -256,6 +266,11 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires command.length >= 2;
+	//@ requires command[1].length <= 15;
+	//@ requires server.nameExists(command[1]);
+	//@ ensures clientName != null;
+	//@ ensures command.length > 2 ==> features != null;
 	private void connect(String[] command) {
 		clientName = command[1];
 		if (command.length > 2) {
@@ -276,8 +291,11 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires command[0].equals(Client.INVITE);
 	private void inviteChecks(String[] command) {
-		if (command.length < 2) {
+		if (clientName == null) {
+			sendMessage(Server.ERROR + " You have to connect first");
+		} else if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
 		} else if (!server.nameExists(command[1])) {
 			sendMessage(Server.ERROR + " Name doesn't exist");
@@ -300,6 +318,14 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires clientName != null;
+	//@ requires command.length >= 2;
+	//@ requires server.nameExists(command[1]);
+	//@ requires !inGame();
+	//@ requires !server.inGame(command[1]);
+	//@ requires !server.isInvited(clientName, command[1]);
+	//@ requires !server.isInvited(command[1], clientName);
+	//@ ensures server.isInvited(clientName, command[1]);
 	private void invite(String[] command) {
 		int boardX = 7;
 		int boardY = 6;
@@ -327,9 +353,14 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires command[0].equals(Client.ACCEPT_INVITE);
 	private void acceptChecks(String[] command) {
-		if (command.length != 2) {
+		if (clientName == null) {
+			sendMessage(Server.ERROR + " You have to connect first");
+		} else if (command.length != 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
+		} else if (!server.nameExists(command[1])) {
+			sendMessage(Server.ERROR + " Name doesn't exist");
 		} else if (!server.isInvited(command[1], clientName)) {
 			sendMessage(Server.ERROR + " Not invited by this client");
 		} else {
@@ -343,6 +374,11 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires clientName != null;
+	//@ requires command.length == 2;
+	//@ requires server.nameExists(command[1]);
+	// TODO: result true betekent naam bestaat
+	//@ requires server.isInvited(command[1], clientName);
 	private void accept(String[] command) {
 		// TODO: extras verzenden (spectators?)
 		server.generateBoard(command[1], clientName);
@@ -358,9 +394,14 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires command[0].equals(Client.DECLINE_INVITE);
 	private void declineChecks(String[] command) {
-		if (command.length != 2) {
+		if (clientName == null) {
+			sendMessage(Server.ERROR + " You have to connect first");
+		} else if (command.length != 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
+		} else if (!server.nameExists(command[1])) {
+			sendMessage(Server.ERROR + " Name doesn't exist");
 		} else if (!server.isInvited(command[1], clientName)) {
 			sendMessage(Server.ERROR + " Not invited by this client");
 		} else {
@@ -374,6 +415,11 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires clientName != null;
+	//@ requires command.length == 2;
+	//@ requires server.nameExists(command[1]);
+	//@ requires server.isInvited(command[1], clientName);
+	//@ ensures !server.isInvited(command[1], clientName);
 	private void decline(String[] command) {
 		server.removeInvite(command[1], clientName);
 		server.sendMessage(command[1], Server.ERROR + " Invite declined");
@@ -385,6 +431,8 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//TODO: wel geconnect maar impliciet
+	//@ requires command[0].equals(Client.MOVE);
 	private void moveChecks(String[] command) {
 		// TODO: game met meer dan 2 players of spectators
 		if (!inGame()) {
@@ -423,6 +471,12 @@ public class ClientHandler extends Thread {
 	 * @param col
 	 *            the col
 	 */
+	//@ requires clientName != null;
+	//@ requires opponentName != null;
+	//@ requires playerNumber == 0 || playerNumber == 1;
+	//@ requires inGame();
+	//@ requires board.isField(col);
+	//@ requires board.isEmptyField(col);
 	private void move(int col) {
 		if (playerNumber == 0) {
 			board.insertDisc(col, Disc.YELLOW);
@@ -452,8 +506,11 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires command[0].equals(Client.CHAT);
 	private void chatChecks(String[] command) {
-		if (command.length < 2) {
+		if (clientName == null) {
+			sendMessage(Server.ERROR + " You have to connect first");
+		} else if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
 		} else {
 			chat(command);
@@ -466,6 +523,8 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ requires clientName != null;
+	//@ requires command.length >= 2;
 	private void chat(String[] command) {
 		// TODO: line sturen zonder eerste woord
 		String chat = "";
@@ -481,6 +540,8 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
+	//@ ensures playerNumber == 0 || playerNumber == 1;
+	//@ ensures opponentName != null;
 	private void startGame(String[] command) {
 		// TODO: game maken inplaats bord
 		server.removeInvite(clientName);
@@ -497,6 +558,9 @@ public class ClientHandler extends Thread {
 	/**
 	 * End game.
 	 */
+	//@ ensures playerNumber == -1;
+	//@ ensures opponentName == null;
+	//@ ensures !inGame();
 	private void endGame() {
 		playerNumber = -1;
 		board = null;
@@ -506,8 +570,9 @@ public class ClientHandler extends Thread {
 	/**
 	 * This ClientHandler signs off from the Server and subsequently sends a
 	 * last broadcast to the Server to inform that the Client is no longer
-	 * participating in the lobby.
+	 * participati ng in the lobby.
 	 */
+	//@ ensures loop == false;
 	private void shutdown() {
 		// TODO: clients moeten kunnen reconnecten na dc
 		this.loop = false;
@@ -520,15 +585,10 @@ public class ClientHandler extends Thread {
 			server.broadcastLobby();
 		}
 		server.print("ClientHandler: " + clientName + " has left");
-		this.server = null;
-		this.sock = null;
-		this.in = null;
-		this.out = null;
-		this.clientName = null;
-		this.features = null;
-		this.playerNumber = -1;
-		this.opponentName = null;
-		this.board = null;
-		this.move = false;
+		try {
+			sock.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 } // end of class ClientHandler

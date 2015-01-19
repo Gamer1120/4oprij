@@ -64,6 +64,7 @@ public class Server extends Thread {
 	private HashSet<ClientHandler> threads;
 
 	/** The invites. */
+	// TODO: Observable class
 	private HashMap<String[], Integer[]> invites;
 
 	/**
@@ -173,7 +174,7 @@ public class Server extends Thread {
 	 * @return the client
 	 */
 	// TODO: aanpassen voor Game of weghalen
-	public ClientHandler getClient(String name) {
+	/*@ pure */public ClientHandler getClient(String name) {
 		synchronized (threads) {
 			ClientHandler client = null;
 			for (ClientHandler ch : threads) {
@@ -193,7 +194,7 @@ public class Server extends Thread {
 	 *            name of the client
 	 * @return true, if successful
 	 */
-	public boolean inGame(String name) {
+	/*@ pure */public boolean inGame(String name) {
 		synchronized (threads) {
 			boolean game = false;
 			for (ClientHandler ch : threads) {
@@ -260,7 +261,7 @@ public class Server extends Thread {
 	 *            the name
 	 * @return true, if successful
 	 */
-	public boolean nameExists(String name) {
+	/*@ pure */public boolean nameExists(String name) {
 		synchronized (threads) {
 			boolean available = false;
 			for (ClientHandler ch : threads) {
@@ -279,11 +280,11 @@ public class Server extends Thread {
 	 *
 	 * @return the lobby
 	 */
-	public String getLobby() {
+	/*@ pure */public String getLobby() {
 		synchronized (threads) {
 			String clients = "";
 			for (ClientHandler ch : threads) {
-				if (!ch.inGame()) {
+				if (!ch.inGame() && ch.getClientName() != null) {
 					clients += " " + ch.getClientName();
 				}
 			}
@@ -344,7 +345,7 @@ public class Server extends Thread {
 	 *            the name of the client that received the invite
 	 * @return true, if is invited
 	 */
-	public boolean isInvited(String name, String invited) {
+	/*@ pure */public boolean isInvited(String name, String invited) {
 		synchronized (invites) {
 			boolean retBool = false;
 			for (String[] invite : invites.keySet()) {
