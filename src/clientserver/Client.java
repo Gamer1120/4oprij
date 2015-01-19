@@ -119,8 +119,6 @@ public class Client {
 	 * for it.
 	 */
 	public void readInput() {
-		// TODO: naam vragen inlpaats bij arguments
-		// TODO: bij error nog een keer proberen met andere naam
 		while (loop) {
 			String line = "";
 			try {
@@ -155,11 +153,13 @@ public class Client {
 				moveOK(serverMessage);
 				break;
 			case Server.ERROR:
-				error(line);
+				mui.addMessage(line);
 				if (!isConnected) {
 					mui.askName();
 				}
 				break;
+			case Server.BOARD:
+				toBoard(line);
 			}
 
 		}
@@ -243,6 +243,8 @@ public class Client {
 		// 1 > Disc.RED
 		// TODO: board size
 		board = new Board();
+		mui.addMessage(board.toString());
+		mui.addMessage("You are YELLOW");
 	}
 
 	/**
@@ -287,43 +289,39 @@ public class Client {
 			currPlayer = SECOND_PLAYER;
 		}
 		int move = -1;
-		// TODO: if else?
-		// TODO: checken of move ook kan in bord
 		// TODO: betere error handing met request bord
 		// TODO: board printen op clientTUI
-		switch (currPlayer) {
-		case FIRST_PLAYER:
+		if (currPlayer == FIRST_PLAYER) {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
 				mui.addMessage("Server did not send a valid move. TERMINATING.");
 				shutdown();
 			}
-			board.insertDisc(move, Disc.YELLOW);
-			break;
-		case SECOND_PLAYER:
+			if (board.isField(move) && board.isEmptyField(move)) {
+				board.insertDisc(move, Disc.YELLOW);
+				currPlayer = SECOND_PLAYER;
+			} else {
+				//TODO: Add toBoard method
+				mui.addMessage("Server sent an invalid move. TERMINATING.");
+			}
+			
+		} else if (currPlayer == SECOND_PLAYER) {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
 				mui.addMessage("Server did not send a valid move. TERMINATING.");
 				shutdown();
 			}
-			board.insertDisc(move, Disc.RED);
-			break;
+			if (board.isField(move) && board.isEmptyField(move)) {
+				board.insertDisc(move, Disc.RED);
+				currPlayer = FIRST_PLAYER;
+			} else {
+				//TODO: Add toBoard method
+				mui.addMessage("Server sent an invalid move. TERMINATING.");
+			}
 		}
-	}
-
-	/**
-	 * This method accepts the <code>Server.ERROR</code> packet sent by the
-	 * <code>Server</code>. When this method is called, it shows the
-	 * <code>Client</code> the error.
-	 * 
-	 * @param line
-	 *            The raw error the server sent.
-	 */
-	// TODO: vervangen met mui.addMessage
-	private void error(String line) {
-		mui.addMessage(line);
+		mui.addMessage(board.toString());
 	}
 
 	/**
@@ -364,6 +362,11 @@ public class Client {
 	 */
 	public String getClientName() {
 		return clientName;
+	}
+
+	public Board toBoard(String line) {
+		//TODO: Wait for Matthias to Protocol, then implement this method.
+		return null;
 	}
 
 } // end of class Client
