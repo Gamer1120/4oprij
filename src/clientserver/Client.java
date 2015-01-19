@@ -19,7 +19,7 @@ import java.util.ArrayList;
  * 
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
-public class Client extends Thread {
+public class Client {
 	// The protocol, as discussed in our TI-2 group. For further explanation,
 	// you can look at the protocol documentation.
 	public static final String CONNECT = "CONNECT";
@@ -40,10 +40,12 @@ public class Client extends Thread {
 	 * The name of this <code>Client</code>.
 	 */
 	private String clientName;
+
+	//TODO: Make this ClientView compatable
 	/**
 	 * The User Interface of this <code>Client</code>.
 	 */
-	private MessageUI mui;
+	private ClientTUI mui;
 	/**
 	 * The <code>Socket</code> of this <code>Client</code>.
 	 */
@@ -82,6 +84,7 @@ public class Client extends Thread {
 	 * An integer to determine which <code>Player</code>'s turn it is.
 	 */
 	private int currPlayer;
+	private boolean isConnected;
 
 	/**
 	 * Constructs a <code>Client</code> object and tries to make a
@@ -96,9 +99,8 @@ public class Client extends Thread {
 	 * @param muiArg
 	 *            The <code>MessageUI</code> for this <code>Client</code>
 	 */
-	public Client(String name, InetAddress host, int port, MessageUI muiArg)
+	public Client(InetAddress host, int port, ClientTUI muiArg)
 			throws IOException {
-		this.clientName = name;
 		this.sock = new Socket(host, port);
 		this.mui = muiArg;
 		this.in = new BufferedReader(new InputStreamReader(
@@ -108,7 +110,7 @@ public class Client extends Thread {
 		this.loop = true;
 		this.isIngame = false;
 		this.invites = new ArrayList<String>();
-		mui.addMessage("Your name is: " + name);
+		this.isConnected = false;
 	}
 
 	/**
@@ -116,10 +118,9 @@ public class Client extends Thread {
 	 * command was sent, and executes this command by calling the method created
 	 * for it.
 	 */
-	public void run() {
+	public void readInput() {
 		// TODO: naam vragen inlpaats bij arguments
 		// TODO: bij error nog een keer proberen met andere naam
-		sendMessage(CONNECT + " " + getClientName());
 		while (loop) {
 			String line = "";
 			try {
@@ -131,7 +132,9 @@ public class Client extends Thread {
 			String[] serverMessage = line.split("\\s+");
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
+				isConnected = true;
 				connect(serverMessage);
+				mui.start();
 				break;
 			case Server.LOBBY:
 				lobby(serverMessage);
@@ -153,6 +156,9 @@ public class Client extends Thread {
 				break;
 			case Server.ERROR:
 				error(line);
+				if (!isConnected) {
+					mui.askName();
+				}
 				break;
 			}
 
@@ -192,12 +198,12 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	private void lobby(String[] serverMessage) {
-		mui.addMessage("The people that are currently in the lobby are:");
 		String listOfPeople = "";
 		for (int i = 1; i < serverMessage.length; i++) {
 			listOfPeople += " " + serverMessage[i];
 		}
-		mui.addMessage(listOfPeople);
+		mui.addMessage("The people that are currently in the lobby are:"
+				+ listOfPeople);
 	}
 
 	/**
@@ -315,6 +321,7 @@ public class Client extends Thread {
 	 * @param line
 	 *            The raw error the server sent.
 	 */
+	// TODO: vervangen met mui.addMessage
 	private void error(String line) {
 		mui.addMessage(line);
 	}

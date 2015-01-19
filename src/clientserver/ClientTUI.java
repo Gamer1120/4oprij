@@ -6,25 +6,25 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-public class ClientTUI implements MessageUI {
+public class ClientTUI extends Thread implements ClientView {
 	private Client client;
+	private BufferedReader reader;
 
-	public ClientTUI(String name, InetAddress inet, int port) {
+	public ClientTUI(InetAddress inet, int port) {
 		try {
-			this.client = new Client(name, inet, port, this);
-			client.start();
+			this.client = new Client(inet, port, this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.reader = new BufferedReader(new InputStreamReader(
+				System.in));
 	}
 
 	public void addMessage(String msg) {
 		System.out.println(msg);
 	}
 
-	public void readInput() {
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				System.in));
+	public void run() {
 		while (true) {
 			try {
 				String input = reader.readLine();
@@ -47,12 +47,19 @@ public class ClientTUI implements MessageUI {
 			e.printStackTrace();
 		}
 		int port = 2727;
-		if (args.length == 1) {
-			ClientTUI c = new ClientTUI(args[0], addr, port);
-			c.readInput();
-		}else{
-			System.out.println("Use ClientTUI <name>");
-			System.exit(0);
+		ClientTUI c = new ClientTUI(addr, port);
+		c.askName();
+	}
+
+	@Override
+	public void askName() {
+		String name = null;
+		try {
+			name = reader.readLine();
+		} catch (IOException e) {
+			client.shutdown();
 		}
+		client.sendMessage(Client.CONNECT + " " + name);
+		client.readInput();
 	}
 }
