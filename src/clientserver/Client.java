@@ -132,7 +132,7 @@ public class Client {
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
 				isConnected = true;
-				connectChecks(serverMessage);
+				connect(serverMessage);
 				mui.start();
 				break;
 			case Server.LOBBY:
@@ -167,40 +167,6 @@ public class Client {
 	}
 
 	/**
-	 * This method checks whether the information in the Server.CONNECT packet
-	 * is valid. If the server has features, for each feature is made sure that
-	 * the length of that feature isn't over 15 characters. If it passes the
-	 * test, or the server has no features, the connect method is called.
-	 * 
-	 * @param serverMessage
-	 *            The full message the server sent.
-	 */
-	private void connectChecks(String[] serverMessage) {
-		// TODO: Check the list of features as specified in the Protocol.
-		// If the server has features.
-		if (!(serverMessage.length == 1)) {
-			// For serverMessage[1] - serverMessage[serverMessage.length - 1]:
-			// check that the feature isn't longer than 15 characters.
-			boolean validFeatures = true;
-			for (int i = 1; i < serverMessage.length; i++) {
-				if (serverMessage[i].length() > 15) {
-					validFeatures = false;
-				}
-			}
-			if (!validFeatures) {
-				mui.addMessage("Server has a feature that has a length of over 15 characters. This is against the protocol. TERMINATING.");
-				shutdown();
-			} else {
-				// Connect to a server with features.
-				connect(serverMessage);
-			}
-		} else {
-			// Connect to a server without features.
-			connect(serverMessage);
-		}
-	}
-
-	/**
 	 * This method accepts the Server.CONNECT packet sent by the Server. When
 	 * this method is called, it prints that a connection has been established
 	 * with the Server, as well as the IP adress and port of the Server. After
@@ -215,11 +181,8 @@ public class Client {
 															// the
 															// server
 				+ ":" + sock.getPort()); // Port of the server
-		String listOfFeatures = "";
-		for (int i = 1; i < serverMessage.length; i++) {
-			listOfFeatures += " " + serverMessage[i];
-		}
-		mui.addMessage("The features of this server are:" + listOfFeatures);
+		mui.addMessage("The features of this server are:"
+				+ arrayToLine(serverMessage));
 	}
 
 	/**
@@ -231,12 +194,8 @@ public class Client {
 	 *            The full message the server sent.
 	 */
 	private void lobby(String[] serverMessage) {
-		String listOfPeople = "";
-		for (int i = 1; i < serverMessage.length; i++) {
-			listOfPeople += " " + serverMessage[i];
-		}
 		mui.addMessage("The people that are currently in the lobby are:"
-				+ listOfPeople);
+				+ arrayToLine(serverMessage));
 	}
 
 	/**
@@ -289,8 +248,8 @@ public class Client {
 		this.isIngame = false;
 		if (serverMessage.length > 2) {
 			mui.addMessage("The winner is: " + serverMessage[2]);
-		} else if (serverMessage.length == 2){
-			if(serverMessage[1].equals(Game.DRAW)){
+		} else if (serverMessage.length == 2) {
+			if (serverMessage[1].equals(Game.DRAW)) {
 				mui.addMessage("The game was a draw!");
 			} else {
 				mui.addMessage(serverMessage.toString());
@@ -405,4 +364,11 @@ public class Client {
 		return null;
 	}
 
+	public String arrayToLine(String[] array) {
+		String retLine = "";
+		for (int i = 1; i < array.length; i++) {
+			retLine += " " + array[i];
+		}
+		return retLine;
+	}
 } // end of class Client
