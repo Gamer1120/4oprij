@@ -105,12 +105,14 @@ public class Board extends Observable {
 	 */
 	//@requires isField(col);
 	/*@pure*/public int emptyRow(int col) {
+		int emptyRow = -1;
 		for (int row = rows - 1; row >= 0; row--) {
 			if (getField(row, col) == Disc.EMPTY) {
-				return row;
+				emptyRow = row;
+				break;
 			}
 		}
-		return -1;
+		return emptyRow;
 	}
 
 	/**
@@ -122,12 +124,14 @@ public class Board extends Observable {
 	 */
 	//@requires isField(col);
 	/*@pure*/public int fullRow(int col) {
+		int fullRow = -1;
 		for (int row = 0; row < rows; row++) {
 			if (getField(row, col) != Disc.EMPTY) {
-				return row;
+				fullRow = row;
+				break;
 			}
 		}
-		return -1;
+		return fullRow;
 	}
 
 	/**
@@ -183,12 +187,14 @@ public class Board extends Observable {
 		ensures \result == (this.getField(emptyRow(col), col) == Disc.EMPTY);
 	*/
 	/*@pure*/public boolean isEmptyField(int col) {
+		boolean hasEmpty = false;
 		for (int row = 0; row < rows; row++) {
 			if (isEmptyField(row, col)) {
-				return true;
+				hasEmpty = true;
+				break;
 			}
 		}
-		return false;
+		return hasEmpty;
 	}
 
 	/**
@@ -214,14 +220,16 @@ public class Board extends Observable {
 	 */
 	//@ensures \result == (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) != Disc.EMPTY));
 	/*@pure*/public boolean isFull() {
-		for (int row = 0; row < rows; row++) {
+		boolean isFull = true;
+		loop: for (int row = 0; row < rows; row++) {
 			for (int col = 0; col < columns; col++) {
 				if (getField(row, col) == Disc.EMPTY) {
-					return false;
+					isFull = false;
+					break loop;
 				}
 			}
 		}
-		return true;
+		return isFull;
 	}
 
 	/**
@@ -244,19 +252,21 @@ public class Board extends Observable {
 	 */
 	//@ requires d == Disc.YELLOW | d == Disc.RED;
 	/*@pure*/public boolean hasRow(Disc d) {
-		for (int row = 0; row < rows; row++) {
+		boolean hasRow = false;
+		loop: for (int row = 0; row < rows; row++) {
 			int count = 0;
 			for (int col = 0; columns + count - col >= CONNECT; col++) {
 				if (getField(row, col) == d) {
 					if (++count >= CONNECT) {
-						return true;
+						hasRow = true;
+						break loop;
 					}
 				} else {
 					count = 0;
 				}
 			}
 		}
-		return false;
+		return hasRow;
 	}
 
 	/**
@@ -268,19 +278,21 @@ public class Board extends Observable {
 	 */
 	//@ requires d == Disc.YELLOW | d == Disc.RED;
 	/*@pure*/public boolean hasColumn(Disc d) {
-		for (int col = 0; col < columns; col++) {
+		boolean hasColumn = false;
+		loop: for (int col = 0; col < columns; col++) {
 			int count = 0;
 			for (int row = 0; rows + count - row >= CONNECT; row++) {
 				if (getField(row, col) == d) {
 					if (++count >= CONNECT) {
-						return true;
+						hasColumn = true;
+						break loop;
 					}
 				} else {
 					count = 0;
 				}
 			}
 		}
-		return false;
+		return hasColumn;
 	}
 
 	/**
@@ -292,9 +304,10 @@ public class Board extends Observable {
 	 */
 	//@ requires d == Disc.YELLOW | d == Disc.RED;
 	/*@pure*/public boolean hasDiagonal(Disc d) {
+		boolean hasDiagonal = false;
 		int r = rows - CONNECT;
 		int c = 0;
-		while (c < columns) {
+		loop: while (c < columns) {
 			int row = r;
 			int col = c;
 			int count1 = 0;
@@ -307,7 +320,8 @@ public class Board extends Observable {
 				if (diag1) {
 					if (getField(row, col) == d) {
 						if (++count1 >= CONNECT) {
-							return true;
+							hasDiagonal = true;
+							break loop;
 						}
 					} else {
 						count1 = 0;
@@ -316,7 +330,8 @@ public class Board extends Observable {
 				if (diag2) {
 					if (getField(rows - 1 - row, col) == d) {
 						if (++count2 >= CONNECT) {
-							return true;
+							hasDiagonal = true;
+							break loop;
 						}
 					} else {
 						count2 = 0;
@@ -335,7 +350,7 @@ public class Board extends Observable {
 				c++;
 			}
 		}
-		return false;
+		return hasDiagonal;
 	}
 
 	/**
