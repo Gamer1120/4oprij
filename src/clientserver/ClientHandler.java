@@ -578,12 +578,12 @@ public class ClientHandler extends Thread {
 			server.sendMessage(opponentName, Server.REQUEST_MOVE);
 		} else if (board.hasWinner()) {
 			// TODO: game end final strings
-			server.sendMessage(opponentName, Server.GAME_END + " " + WIN + " "
-					+ clientName);
-			sendMessage(Server.GAME_END + " " + WIN + " " + clientName);
+			server.sendMessage(opponentName, Server.GAME_END + " " + Game.WIN
+					+ " " + clientName);
+			sendMessage(Server.GAME_END + " " + Game.WIN + " " + clientName);
 		} else {
-			server.sendMessage(opponentName, Server.GAME_END + " " + DRAW);
-			sendMessage(Server.GAME_END + " " + DRAW);
+			server.sendMessage(opponentName, Server.GAME_END + " " + Game.DRAW);
+			sendMessage(Server.GAME_END + " " + Game.DRAW);
 		}
 	}
 
@@ -714,7 +714,8 @@ public class ClientHandler extends Thread {
 		server.removeInvite(clientName);
 		server.removeHandler(this);
 		if (inGame()) {
-			server.sendMessage(opponentName, Server.GAME_END + " " + DISCONNECT);
+			server.sendMessage(opponentName, Server.GAME_END + " "
+					+ Game.DISCONNECT);
 		} else if (clientName != null) {
 			server.broadcastLobby();
 		}
