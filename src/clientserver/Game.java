@@ -6,6 +6,17 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 public class Game {
+	//PROTOCOL
+	/** The Constant WIN. */
+	public static final String WIN = "WIN";
+
+	/** The Constant DRAW. */
+	public static final String DRAW = "DRAW";
+
+	/** The Constant DISCONECT. */
+	public static final String DISCONNECT = "DISCONNECT";
+	//END PROTOCOL
+
 	private ClientHandler[] team0;
 	private ClientHandler[] team1;
 	private int currPlayer0;

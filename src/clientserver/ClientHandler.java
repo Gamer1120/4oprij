@@ -9,7 +9,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -20,14 +21,7 @@ import java.util.Arrays;
  * @version 1.0 $
  */
 public class ClientHandler extends Thread {
-	/** The Constant WIN. */
-	public static final String WIN = "WIN";
 
-	/** The Constant DRAW. */
-	public static final String DRAW = "DRAW";
-
-	/** The Constant DISCONECT. */
-	public static final String DISCONNECT = "DISCONNECT";
 	/**
 	 * The Server for this ClientHandler.
 	 */
@@ -54,10 +48,10 @@ public class ClientHandler extends Thread {
 	private String clientName;
 
 	/**
-	 * The list of the features of the Client this ClientHandler is associated
-	 * with.
+	 * The list of the clientFeatures of the Client this ClientHandler is
+	 * associated with.
 	 */
-	private String[] features;
+	private HashSet<String> clientFeatures;
 
 	/**
 	 * The playerNumber of this client when this client is in a game.
@@ -113,7 +107,7 @@ public class ClientHandler extends Thread {
 		this.out = new BufferedWriter(new OutputStreamWriter(
 				sock.getOutputStream()));
 		this.clientName = null;
-		this.features = null;
+		this.clientFeatures = new HashSet<String>();
 		this.playerNumber = -1;
 		this.opponentName = null;
 		this.board = null;
@@ -226,12 +220,12 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * returns the features of the client.
+	 * returns the clientFeatures of the client.
 	 *
-	 * @return the features of the client
+	 * @return the clientFeatures of the client
 	 */
-	/*@ pure */public String[] getClientFeatures() {
-		return features;
+	/*@ pure */public Set<String> getClientFeatures() {
+		return clientFeatures;
 	}
 
 	/**
@@ -250,6 +244,26 @@ public class ClientHandler extends Thread {
 	 */
 	/*@ pure */public boolean inGame() {
 		return board != null;
+	}
+
+	/**
+	 * returns wheter this cliens has a chat feature.
+	 *
+	 * @return true if the client has a chat feature.
+	 */
+	//@ requires connected();
+	/*@ pure */public boolean hasChat() {
+		return clientFeatures.contains(Features.CHAT);
+	}
+
+	/**
+	 * returns wheter this cliens has connected.
+	 *
+	 * @return true if the client has a name
+	 */
+	//@ requires connected();
+	/*@ pure */public boolean hasCustomBoardSize() {
+		return clientFeatures.contains(Features.CUSTOM_BOARD_SIZE);
 	}
 
 	/**
@@ -287,8 +301,8 @@ public class ClientHandler extends Thread {
 
 	/**
 	 * Connects the clients by assigning the name specified in the command and
-	 * storing the features. Then it send an ACCEPT_CONNECT with the features of
-	 * the client
+	 * storing the clientFeatures. Then it send an ACCEPT_CONNECT with the
+	 * clientFeatures of the client
 	 *
 	 * @param command
 	 *            the command send by the client
@@ -297,17 +311,23 @@ public class ClientHandler extends Thread {
 		requires command[1].length <= 15;
 		requires server.nameExists(command[1]);
 		ensures connected();
-		ensures command.length > 2 ==> features != null;
+		ensures command.length > 2 ==> clientFeatures != null;
 	 */
 	private void connect(String[] command) {
 		clientName = command[1];
 		if (command.length > 2) {
-			// TODO: controleren valid features
-			features = Arrays.copyOfRange(command, 2, command.length - 1);
+			features: for (int i = 2; i < command.length; i++) {
+				for (int j = 0; j < Features.FEATURES.length; j++) {
+					if (Features.FEATURES[j].equals(command[i])) {
+						clientFeatures.add(Features.FEATURES[j]);
+						continue features;
+					}
+				}
+				sendMessage(Server.ERROR + " Feature " + command[i]
+						+ " unknown, not added to the feature list");
+			}
 		}
-		// TODO: onze features sturen
-		sendMessage(Server.ACCEPT_CONNECT
-				+ " Feature array gescheiden met spaties");
+		sendMessage(Server.ACCEPT_CONNECT + " " + Server.FEATURES);
 		server.print("ClientHandler: " + clientName + " has joined");
 		server.broadcastLobby();
 	}
@@ -338,6 +358,9 @@ public class ClientHandler extends Thread {
 			sendMessage(Server.ERROR + " Already invited this client");
 		} else if (server.isInvited(command[1], clientName)) {
 			sendMessage(Server.ERROR + " This client already invited you");
+		} else if (command.length >= 4
+				&& !server.hasCustomBoardSize(command[1])) {
+			sendMessage(Server.ERROR + " This client doesn't support extras");
 		} else {
 			invite(command);
 		}
@@ -596,7 +619,7 @@ public class ClientHandler extends Thread {
 		for (int i = 1; i < command.length; i++) {
 			chat += " " + command[i];
 		}
-		server.broadcast(Server.CHAT + " " + clientName + ":" + chat);
+		server.broadcastChat(Server.CHAT + " " + clientName + ":" + chat);
 	}
 
 	/**

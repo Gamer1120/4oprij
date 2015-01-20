@@ -7,5 +7,7 @@ public class Features {
 	public static final String CUSTOM_BOARD_SIZE = "CUSTOM_BOARD_SIZE";
 	public static final String SECURITY = "SECURITY";
 	public static final String MULTIPLAYER = "MULTIPLAYER";
+	public static final String[] FEATURES = new String[] { CHAT, LEADERBOARD,
+			CUSTOM_BOARD_SIZE, SECURITY, MULTIPLAYER };
 	//END OF PROTOCOL
 }

@@ -54,7 +54,8 @@ public class Server extends Thread {
 	public static final String LEADERBOARD = "LEADERBOARD";
 	// END OF PROTOCOL
 
-	public static final String FEATURES = Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE;
+	public static final String FEATURES = Features.CHAT + " "
+			+ Features.CUSTOM_BOARD_SIZE;
 	/** The port. */
 	private int port;
 
@@ -116,7 +117,9 @@ public class Server extends Thread {
 	public void broadcast(String msg) {
 		synchronized (threads) {
 			for (ClientHandler ch : threads) {
-				ch.sendMessage(msg);
+				if (ch.connected()) {
+					ch.sendMessage(msg);
+				}
 			}
 			mui.addMessage("Broadcast: " + msg);
 		}
@@ -134,6 +137,24 @@ public class Server extends Thread {
 				}
 			}
 			mui.addMessage("Lobby:" + getLobby());
+		}
+	}
+
+	/**
+	 * Sends a message using the collection of connected ClientHandlers to all
+	 * connected Clients with the chat feature.
+	 * 
+	 * @param msg
+	 *            message that is send
+	 */
+	public void broadcastChat(String msg) {
+		synchronized (threads) {
+			for (ClientHandler ch : threads) {
+				if (ch.connected() && ch.hasChat()) {
+					ch.sendMessage(msg);
+				}
+			}
+			mui.addMessage("Broadcast: " + msg);
 		}
 	}
 
@@ -196,6 +217,7 @@ public class Server extends Thread {
 	 *            name of the client
 	 * @return true, if successful
 	 */
+	//@ requires nameExists(name);
 	/*@ pure */public boolean inGame(String name) {
 		synchronized (threads) {
 			boolean game = false;
@@ -277,6 +299,27 @@ public class Server extends Thread {
 	}
 
 	/**
+	 * Checks if the name isn't already in use.
+	 *
+	 * @param name
+	 *            the name
+	 * @return true, if successful
+	 */
+	//@ requires nameExists(name);
+	/*@ pure */public boolean hasCustomBoardSize(String name) {
+		synchronized (threads) {
+			boolean available = false;
+			for (ClientHandler ch : threads) {
+				if (name.equals(ch.getClientName()) && ch.hasCustomBoardSize()) {
+					available = true;
+					break;
+				}
+			}
+			return available;
+		}
+	}
+
+	/**
 	 * Sends an string with the connected client names that aren't playing a
 	 * game.
 	 *
@@ -286,7 +329,7 @@ public class Server extends Thread {
 		synchronized (threads) {
 			String clients = "";
 			for (ClientHandler ch : threads) {
-				if (!ch.inGame() && ch.getClientName() != null) {
+				if (!ch.inGame() && ch.connected()) {
 					clients += " " + ch.getClientName();
 				}
 			}
