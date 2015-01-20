@@ -39,68 +39,64 @@ public class Client {
 	// END OF PROTOCOL
 
 	/**
-	 * The name of this <code>Client</code>.
+	 * The name of this Client.
 	 */
 	private String clientName;
 
 	//TODO: Make this ClientView compatable
 	/**
-	 * The User Interface of this <code>Client</code>.
+	 * The User Interface of this Client.
 	 */
 	private ClientTUI mui;
 	/**
-	 * The <code>Socket</code> of this <code>Client</code>.
+	 * The Socket of this Client.
 	 */
 	private Socket sock;
 	/**
-	 * The <code>BufferedReader</code> that will be used to communicate over the
-	 * <code>Socket</code>.
+	 * The BufferedReader that will be used to communicate over the Socket.
 	 */
 	private BufferedReader in;
 	/**
-	 * The <code>BufferedWriter</code> that will be used to communicate over the
-	 * <code>Socket</code>.
+	 * The BufferedWriter that will be used to communicate over the Socket.
 	 */
 	private BufferedWriter out;
 	/**
 	 * While this boolean is true, it makes sure that commands are continuously
-	 * read from the <code>BufferedReader</code>.
+	 * read from the BufferedReader.
 	 */
 	private boolean loop;
 	/**
-	 * A variable to test if a <code>Player</code> is in-game. If they are, they
-	 * won't receive any invite messages.
+	 * A variable to test if a Player is in-game. If they are, they won't
+	 * receive any invite messages.
 	 */
 	private boolean isIngame;
 	/**
-	 * An <code>ArrayList</code> in which all the invites that are sent by this
-	 * client are kept.
+	 * An ArrayList in which all the invites that are sent by this client are
+	 * kept.
 	 */
 	private ArrayList<String> invites;
 	/**
-	 * The <code>Board</code> this <code>Client</code> uses for determining
-	 * their move.
+	 * The Board this Client uses for determining their move.
 	 */
 	private Board board;
 	/**
-	 * An integer to determine which <code>Player</code>'s turn it is.
+	 * An integer to determine which Player's turn it is.
 	 */
 	private int currPlayer;
 	private boolean isConnected;
 	private Player localPlayer;
 
 	/**
-	 * Constructs a <code>Client</code> object and tries to make a
-	 * <code>Socket</code> connection
+	 * Constructs a Client object and tries to make a Socket connection
 	 * 
 	 * @param name
-	 *            The name of this <code>Client</code> object.
+	 *            The name of this Client object.
 	 * @param host
-	 *            The IP-adress of this <code>Client</code>
+	 *            The IP-adress of this Client
 	 * @param port
-	 *            The port of this <code>Client</code>
+	 *            The port of this Client
 	 * @param muiArg
-	 *            The <code>MessageUI</code> for this <code>Client</code>
+	 *            The MessageUI for this Client
 	 */
 	public Client(InetAddress host, int port, ClientTUI muiArg)
 			throws IOException {
@@ -136,7 +132,7 @@ public class Client {
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
 				isConnected = true;
-				connect(serverMessage);
+				connectChecks(serverMessage);
 				mui.start();
 				break;
 			case Server.LOBBY:
@@ -171,11 +167,44 @@ public class Client {
 	}
 
 	/**
-	 * This method accepts the <code>Server.CONNECT</code> packet sent by the
-	 * <code>Server</code>. When this method is called, it prints that a
-	 * connection has been established with the <code>Server</code>, as well as
-	 * the IP adress and port of the <code>Server</code>. After this, it lists
-	 * the features the <code>Server</code> has.
+	 * This method checks whether the information in the Server.CONNECT packet
+	 * is valid. If the server has features, for each feature is made sure that
+	 * the length of that feature isn't over 15 characters. If it passes the
+	 * test, or the server has no features, the connect method is called.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	private void connectChecks(String[] serverMessage) {
+		// TODO: Check the list of features as specified in the Protocol.
+		// If the server has features.
+		if (!(serverMessage.length == 1)) {
+			// For serverMessage[1] - serverMessage[serverMessage.length - 1]:
+			// check that the feature isn't longer than 15 characters.
+			boolean validFeatures = true;
+			for (int i = 1; i < serverMessage.length; i++) {
+				if (serverMessage[i].length() > 15) {
+					validFeatures = false;
+				}
+			}
+			if (!validFeatures) {
+				mui.addMessage("Server has a feature that has a length of over 15 characters. This is against the protocol. TERMINATING.");
+				shutdown();
+			} else {
+				// Connect to a server with features.
+				connect(serverMessage);
+			}
+		} else {
+			// Connect to a server without features.
+			connect(serverMessage);
+		}
+	}
+
+	/**
+	 * This method accepts the Server.CONNECT packet sent by the Server. When
+	 * this method is called, it prints that a connection has been established
+	 * with the Server, as well as the IP adress and port of the Server. After
+	 * this, it lists the features the Server has.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -194,10 +223,9 @@ public class Client {
 	}
 
 	/**
-	 * This method accepts the <code>Server.LOBBY</code> packet sent by the
-	 * <code>Server</code>. When this method is called, it shows the
-	 * <code>Client</code> the other <code>Client</code>s that are currently in
-	 * the lobby.
+	 * This method accepts the Server.LOBBY packet sent by the Server. When this
+	 * method is called, it shows the Client the other Clients that are
+	 * currently in the lobby.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -212,11 +240,10 @@ public class Client {
 	}
 
 	/**
-	 * This method accepts the <code>Server.INVITE</code> packet sent by the
-	 * <code>Server</code>. When this method is called, it adds the inviter to
-	 * an inviterlist, and, if the player isn't ingame, it will also show the
-	 * <code>Client</code> that they have been invited by that
-	 * <code>Client</code>.
+	 * This method accepts the Server.INVITE packet sent by the Server. When
+	 * this method is called, it adds the inviter to an inviterlist, and, if the
+	 * player isn't ingame, it will also show the Client that they have been
+	 * invited by that Client.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -231,10 +258,9 @@ public class Client {
 	}
 
 	/**
-	 * This method accepts the <code>Server.GAME_START</code> packet sent by the
-	 * <code>Server</code>. When this method is called, it will show the
-	 * <code>Client</code> that a the game is started. The <code>Client</code>
-	 * is set to being in-game, and a new <code>Board</code> is created.
+	 * This method accepts the Server.GAME_START packet sent by the Server. When
+	 * this method is called, it will show the Client that a the game is
+	 * started. The Client is set to being in-game, and a new Board is created.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -253,9 +279,8 @@ public class Client {
 	}
 
 	/**
-	 * This method accepts the <code>Server.GAME_END</code> packet sent by the
-	 * <code>Server</code>. When this method is called, it will set the
-	 * <code>Client</code> to no longer being in-game.
+	 * This method accepts the Server.GAME_END packet sent by the Server. When
+	 * this method is called, it will set the Client to no longer being in-game.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -266,9 +291,8 @@ public class Client {
 	}
 
 	/**
-	 * This method accepts the <code>Server.MOVE</code> packet sent by the
-	 * <code>Server</code>. When this method is called, it will request a move
-	 * from the <code>Player</code>.
+	 * This method accepts the Server.MOVE packet sent by the Server. When this
+	 * method is called, it will request a move from the Player.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -281,10 +305,9 @@ public class Client {
 	}
 
 	/**
-	 * This method accepts the <code>Server.MOVE_OK</code> packet sent by the
-	 * <code>Server</code>. When this method is called, it will update the
-	 * <code>Board</code> by inserting the <code>Disc</code> for the
-	 * <code>Player</code> that was given in the packet.
+	 * This method accepts the Server.MOVE_OK packet sent by the Server. When
+	 * this method is called, it will update the Board by inserting the Disc for
+	 * the Player that was given in the packet.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -330,8 +353,8 @@ public class Client {
 	}
 
 	/**
-	 * This method sends a message to the <code>ClientHandler</code> using the
-	 * <code>OutputStream</code> out.
+	 * This method sends a message to the ClientHandler using the OutputStream
+	 * out.
 	 * 
 	 * @param msg
 	 *            The message to be sent.
@@ -347,9 +370,9 @@ public class Client {
 	}
 
 	/**
-	 * This method closes the <code>Socket</code> connection and exits the
-	 * program. On a side note, before it does this, it also sets the loop and
-	 * isIngame variables for this <code>Client</code> to false.
+	 * This method closes the Socket connection and exits the program. On a side
+	 * note, before it does this, it also sets the loop and isIngame variables
+	 * for this Client to false.
 	 */
 	public void shutdown() {
 		loop = false;
@@ -363,7 +386,7 @@ public class Client {
 	}
 
 	/**
-	 * This method returns the name of this <code>Client</code>.
+	 * This method returns the name of this Client.
 	 */
 	public String getClientName() {
 		return clientName;
