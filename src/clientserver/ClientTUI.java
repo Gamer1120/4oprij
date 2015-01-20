@@ -11,6 +11,7 @@ public class ClientTUI extends Thread implements ClientView {
 	private BufferedReader reader;
 	private boolean moveRequested;
 	private int move;
+	private Object waiter = new Object();
 
 	public ClientTUI(InetAddress inet, int port) {
 		this.moveRequested = false;
@@ -42,21 +43,26 @@ public class ClientTUI extends Thread implements ClientView {
 				client.shutdown();
 				break;
 			} else if (splitInput[0].equals("MOVE")) {
-				if (moveRequested) {
-					moveRequested = false;
-					client.sendMessage(input);
-					if (splitInput.length == 2) {
-						try {
-							move = Integer.parseInt(splitInput[1]);
-						} catch (NumberFormatException
-								| ArrayIndexOutOfBoundsException e) {
+				synchronized (waiter) {
+					if (moveRequested) {
+						moveRequested = false;
+						client.sendMessage(input);
+						if (splitInput.length == 2) {
+							try {
+								addMessage("DEBUG TEST");
+								move = Integer.parseInt(splitInput[1]);
+								waiter.notify();
+								addMessage("DEBUG TEST 2 " + move);
+							} catch (NumberFormatException
+									| ArrayIndexOutOfBoundsException e) {
+								addMessage("Please enter a valid move after MOVE.");
+							}
+						} else {
 							addMessage("Please enter a valid move after MOVE.");
 						}
 					} else {
-						addMessage("Please enter a valid move after MOVE.");
+						addMessage("There was no move requested.");
 					}
-				} else {
-					addMessage("There was move requested.");
 				}
 			} else {
 				client.sendMessage(input);
@@ -91,11 +97,16 @@ public class ClientTUI extends Thread implements ClientView {
 	}
 
 	public int makeMove() {
-		this.move = -1;
-		this.moveRequested = true;
-		addMessage("Please enter a move...");
-		while (move == -1) {
+		synchronized (waiter) {
+			this.move = -1;
+			this.moveRequested = true;
+			addMessage("Please enter a move...");
+			try {
+				waiter.wait();
+			} catch (InterruptedException e) {
+			}
+			addMessage("DEBUG TEST 3");
+			return move;
 		}
-		return move;
 	}
 }
