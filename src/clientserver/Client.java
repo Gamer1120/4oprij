@@ -287,7 +287,15 @@ public class Client {
 	 */
 	private void gameEnd(String[] serverMessage) {
 		this.isIngame = false;
-		// TODO: Maybe add something here? IDKLOL.
+		if (serverMessage.length > 2) {
+			mui.addMessage("The winner is: " + serverMessage[2]);
+		} else if (serverMessage.length == 2){
+			if(serverMessage[1].equals(Game.DRAW)){
+				mui.addMessage("The game was a draw!");
+			} else {
+				mui.addMessage(serverMessage.toString());
+			}
+		}
 	}
 
 	/**

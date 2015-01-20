@@ -18,12 +18,12 @@ import org.junit.Test;
  */
 public class BoardTest {
 	/**
-	 * Test variable for a <code>Board</code> object.
+	 * Test variable for a Board object.
 	 */
 	private Board b;
 
 	/**
-	 * This method creates a new <code>Board</code> before each test.
+	 * This method creates a new Board before each test.
 	 * 
 	 * @throws Exception
 	 *             Any general exception.
@@ -34,9 +34,9 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests if a new <code>Board</code> is actually empty, by calling
-	 * <code>b.getField(row, col)</code> for every valid field in the
-	 * <code>Board</code>, and checking if that returns <code>Disc.EMPTY.</code>
+	 * Tests if a new Board is actually empty, by calling b.getField(row, col)
+	 * for every valid field in the Board, and checking if that returns
+	 * Disc.EMPTY.
 	 */
 	@Test
 	public void testEmptyBoard() {
@@ -49,10 +49,9 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>deepCopy()</code>. It inserts some
-	 * <code>Disc</code>s in the original <code>Board</code>, then creates a
-	 * copy of it (using <code>b.deepCopy()</code>). After that it makes sure
-	 * that every <code>Disc</code> is the same in both <code>Board</code>s.
+	 * Tests the method deepCopy(). It inserts some Discs in the original Board,
+	 * then creates a copy of it (using b.deepCopy()). After that it makes sure
+	 * that every Disc is the same in both Boards.
 	 */
 	@Test
 	public void testDeepCopy() {
@@ -69,15 +68,13 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>emptyRow(col)</code>. First it assures that
-	 * emptyRow returns 5 for all columns on an empty <code>Board</code>, since
-	 * 5 is the lowest row on the <code>Board</code>. It then inserts a
-	 * <code>Disc</code> into column 2, and assures that for all columns, except
-	 * for 2, the <code>emptyRow</code> still returns 5. For column 2, this
-	 * should now return 4 instead. After this, some more <code>Disc</code>s are
-	 * inserted, and a similar test is executed. The final test tests whether
-	 * <code>emptyRow</code> returns -1 when the specified column is full, as
-	 * it's supposed to do.
+	 * Tests the method emptyRow(col). First it assures that emptyRow returns 5
+	 * for all columns on an empty Board, since 5 is the lowest row on the
+	 * Board. It then inserts a Disc into column 2, and assures that for all
+	 * columns, except for 2, the emptyRow still returns 5. For column 2, this
+	 * should now return 4 instead. After this, some more Discs are inserted,
+	 * and a similar test is executed. The final test tests whether emptyRow
+	 * returns -1 when the specified column is full, as it's supposed to do.
 	 */
 	@Test
 	public void testEmptyRow() {
@@ -126,11 +123,10 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>fullRow(col)</code>. First, it assures that the
-	 * method returns -1 for every column on an empty <code>Board</code>, since
-	 * there's no <code>Disc</code>s in any column. After that, some
-	 * <code>Disc</code>s are inserted, and it's assured that for the columns
-	 * those were inserted into, <code>b.fullRow(col)</code> returns the values
+	 * Tests the method fullRow(col). First, it assures that the method returns
+	 * -1 for every column on an empty Board, since there's no Discs in any
+	 * column. After that, some Discs are inserted, and it's assured that for
+	 * the columns those were inserted into, b.fullRow(col) returns the values
 	 * it's supposed to.
 	 */
 	@Test
@@ -153,13 +149,13 @@ public class BoardTest {
 	}
 
 	/**
-	 * Firstly tests the method <code>isField(col)</code>. First, it tests for
-	 * every valid column, that it's a valid column. Afterwards, it tests the
-	 * same for some invalid columns.
+	 * Firstly tests the method isField(col). First, it tests for every valid
+	 * column, that it's a valid column. Afterwards, it tests the same for some
+	 * invalid columns.
 	 * 
-	 * Secondly tests the method <code>isField(row, col)</code>. First, it tests
-	 * for every valid column and row, that they're valid. Afterwards, it tests
-	 * the same for some invalid ones.
+	 * Secondly tests the method isField(row, col). First, it tests for every
+	 * valid column and row, that they're valid. Afterwards, it tests the same
+	 * for some invalid ones.
 	 */
 	@Test
 	public void testIsField() {
@@ -193,14 +189,10 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>getField(row, col)</code>. First, it assures that
-	 * on an empty <code>Board</code>, <code>b.getField(row, col)</code> returns
-	 * <code>Disc.EMPTY</code> for every row and column. After that, the
-	 * <code>Board</code> is filled with some <code>Disc</code>s. Then, it's
-	 * tested that <code>b.getField(row, col)</code> returns the
-	 * <code>Disc</code>s it's intended to return. Finally, it's tested, that
-	 * <code>null</code> is returned for the fields outside of the
-	 * <code>Board</code>.
+	 * Tests the method getField(row, col). First, it assures that on an empty
+	 * Board, b.getField(row, col) returns Disc.EMPTY for every row and column.
+	 * After that, the Board is filled with some Discs. Then, it's tested that
+	 * b.getField(row, col) returns the Discs it's intended to return.
 	 */
 	@Test
 	public void testGetField() {
@@ -238,27 +230,19 @@ public class BoardTest {
 				b.getField(4, 1));
 		assertEquals("In (5,1) there's now a RED Disc", Disc.RED,
 				b.getField(5, 1));
-		// Tests some fields outside the board
-		for (int row = b.getRows(); row < b.getRows() * 2; row++) {
-			for (int col = b.getColumns(); col < b.getColumns() * 2; col++) {
-				assertEquals(
-						"For these invalid fields: b.getField(row, col) == null",
-						null, b.getField(row, col));
-			}
-		}
 	}
 
 	/**
-	 * Firstly, it tests the method <code>isEmptyField(col)</code>. It tests
-	 * that for every column on an empty <code>Board</code> there's at least 1
-	 * empty field in each of those columns. Then, a column is filled, and after
-	 * each <code>Disc</code>, it's checked whether the column still has empty
-	 * fields. Once the column is full, it should no longer have empty fields.
+	 * Firstly, it tests the method isEmptyField(col). It tests that for every
+	 * column on an empty Board there's at least 1 empty field in each of those
+	 * columns. Then, a column is filled, and after each Disc, it's checked
+	 * whether the column still has empty fields. Once the column is full, it
+	 * should no longer have empty fields.
 	 * 
-	 * Secondly, it tests the method <code>isEmptyField(row, col)</code>. First,
-	 * it assures that every field on an empty <code>Board</code> is empty.
-	 * After that it inserts some <code>Disc</code>s, and assures that the
-	 * fields those <code>Disc</code>s got inserted into are no longer empty.
+	 * Secondly, it tests the method isEmptyField(row, col). First, it assures
+	 * that every field on an empty Board is empty. After that it inserts some
+	 * Discs, and assures that the fields those Discs got inserted into are no
+	 * longer empty.
 	 */
 	@Test
 	public void testIsEmptyField() {
@@ -305,11 +289,9 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>isFull()</code>. It puts a random
-	 * <code>Disc</code> on every position of the <code>Board</code>. After each
-	 * placement, a check is made to see that the <code>Board</code> is not full
-	 * yet. After every <code>Disc</code> has been placed, the
-	 * <code>Board</code> should be full.
+	 * Tests the method isFull(). It puts a random Disc on every position of the
+	 * Board. After each placement, a check is made to see that the Board is not
+	 * full yet. After every Disc has been placed, the Board should be full.
 	 */
 
 	@Test
@@ -333,33 +315,29 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>gameOver()</code>. It wasn't necessary to
-	 * implement a test for this method, since it only returns whether the
-	 * <code>Board</code> <code>isFull()</code> or <code>hasWinner()</code>.
-	 * These methods have been tested already.
+	 * Tests the method gameOver(). It wasn't necessary to implement a test for
+	 * this method, since it only returns whether the Board isFull() or
+	 * hasWinner(). These methods have been tested already.
 	 */
 	@Test
 	public void testIsGameOver() {
 	}
 
 	/**
-	 * Tests the method <code>hasRow(Disc)</code>. It basically creates every
-	 * possible situation, in which there's a row on the <code>Board</code>. At
-	 * every boardrow, there are 4 potential rows, namely on the positions 0-3,
-	 * 1-4, 2-5 and 3-6. To make every possible combination, the algorithm works
-	 * as follows: Reset the <code>Board</code> before every test, then for
-	 * every single boardrow, put 4 discs in that boardrow, such that there's 4
-	 * <code>Disc</code>s connected. Then, check whether
-	 * <code>b.hasRow(Disc)</code> is true for the <code>Disc</code> you
-	 * inserted, and make sure (because why not) that for the <code>Disc</code>
-	 * you didn't insert, <code>b.hasRow(otherDisc)</code> is false. After this,
-	 * the same test is done, but with 3 <code>Disc</code>s connected at a time.
-	 * None of these should make <code>b.hasRow(Disc)</code> or
-	 * <code>b.hasRow(otherDisc)</code> return true. After this, a pre-defined
-	 * realistic situation is created, in which there's no 4 connected
-	 * <code>Disc</code>s for either of the players in a row, and it's made
-	 * sure, that <code>b.hasRow(Disc)</code> and
-	 * <code>b.hasRow(otherDisc)</code> are false.
+	 * Tests the method hasRow(Disc). It basically creates every possible
+	 * situation, in which there's a row on the Board. At every boardrow, there
+	 * are 4 potential rows, namely on the positions 0-3, 1-4, 2-5 and 3-6. To
+	 * make every possible combination, the algorithm works as follows: Reset
+	 * the Board before every test, then for every single boardrow, put 4 discs
+	 * in that boardrow, such that there's 4 Discs connected. Then, check
+	 * whether b.hasRow(Disc) is true for the Disc you inserted, and make sure
+	 * (because why not) that for the Disc you didn't insert,
+	 * b.hasRow(otherDisc) is false. After this, the same test is done, but with
+	 * 3 Discs connected at a time. None of these should make b.hasRow(Disc) or
+	 * b.hasRow(otherDisc) return true. After this, a pre-defined realistic
+	 * situation is created, in which there's no 4 connected Discs for either of
+	 * the players in a row, and it's made sure, that b.hasRow(Disc) and
+	 * b.hasRow(otherDisc) are false.
 	 */
 	@Test
 	public void testHasRow() {
@@ -408,23 +386,20 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>hasColumn(Disc)</code>. It basically creates every
-	 * possible situation, in which there's a column on the <code>Board</code>.
-	 * At every boardcolumn, there are 3 potential columns, namely on the
-	 * positions 0-3, 1-4 and 2-5. To make every possible combination, the
-	 * algorithm works as follows: Reset the <code>Board</code> before every
-	 * test, then for every single boardcolumn, put 4 discs in that boardcolumn,
-	 * such that there's 4 <code>Disc</code>s connected. Then, check whether
-	 * <code>b.hasColumn(Disc)</code> is true for the <code>Disc</code> you
-	 * inserted, and make sure (because why not) that for the <code>Disc</code>
-	 * you didn't insert, <code>b.hasColumn(otherDisc)</code> is false. After
-	 * this, the same test is done, but with 3 <code>Disc</code>s connected at a
-	 * time. None of these should make <code>b.hasColumn(Disc)</code> or
-	 * <code>b.hasColumn(otherDisc)</code> return true. After this, a
+	 * Tests the method hasColumn(Disc). It basically creates every possible
+	 * situation, in which there's a column on the Board. At every boardcolumn,
+	 * there are 3 potential columns, namely on the positions 0-3, 1-4 and 2-5.
+	 * To make every possible combination, the algorithm works as follows: Reset
+	 * the Board before every test, then for every single boardcolumn, put 4
+	 * discs in that boardcolumn, such that there's 4 Discs connected. Then,
+	 * check whether b.hasColumn(Disc) is true for the Disc you inserted, and
+	 * make sure (because why not) that for the Disc you didn't insert,
+	 * b.hasColumn(otherDisc) is false. After this, the same test is done, but
+	 * with 3 Discs connected at a time. None of these should make
+	 * b.hasColumn(Disc) or b.hasColumn(otherDisc) return true. After this, a
 	 * pre-defined realistic situation is created, in which there's no 4
-	 * connected <code>Disc</code>s for either of the players in a column, and
-	 * it's made sure, that <code>b.hasColumn(Disc)</code> and
-	 * <code>b.hasColumn(otherDisc)</code> are false.
+	 * connected Discs for either of the players in a column, and it's made
+	 * sure, that b.hasColumn(Disc) and b.hasColumn(otherDisc) are false.
 	 */
 	@Test
 	public void testHasColumn() {
@@ -472,19 +447,17 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>hasDiagonal()</code>. It basically creates every
-	 * possible situation, in which there's a diagonal on the <code>Board</code>
-	 * . The way it does the test, is as follows: it inserts 4 <code>Disc</code>
-	 * s into the Board, which make the <code>Board</code> have a diagonal.
-	 * After each <code>Disc</code> is inserted, a check is made, to see whether
-	 * the <code>Board</code> has a diagonal. After each of the first three
-	 * <code>Disc</code>s, the <code>Board</code> should not have a diagonal,
-	 * but after the fourth <code>Disc</code>, the <code>Board</code> should
-	 * have one. Since there were only 24 options, each option was coded
-	 * manually. This was humanly faster, than writing an algorithm for it. All
-	 * possible diagonals can be found in the Excel-speadsheet located in
-	 * /doc/PossibleDiagonals.xlsx. The numbers of the options in the code
-	 * represent the numbers of options in the spreadsheet.
+	 * Tests the method hasDiagonal(). It basically creates every possible
+	 * situation, in which there's a diagonal on the Board . The way it does the
+	 * test, is as follows: it inserts 4 Disc s into the Board, which make the
+	 * Board have a diagonal. After each Disc is inserted, a check is made, to
+	 * see whether the Board has a diagonal. After each of the first three
+	 * Discs, the Board should not have a diagonal, but after the fourth Disc,
+	 * the Board should have one. Since there were only 24 options, each option
+	 * was coded manually. This was humanly faster, than writing an algorithm
+	 * for it. All possible diagonals can be found in the Excel-speadsheet
+	 * located in /doc/PossibleDiagonals.xlsx. The numbers of the options in the
+	 * code represent the numbers of options in the spreadsheet.
 	 */
 	@Test
 	public void testHasDiagonal() {
@@ -828,38 +801,35 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>isWinner(Disc)</code>. It wasn't necessary to
-	 * implement a test for this method, since it only returns whether the
-	 * <code>Board</code> <code>hasRow(d)</code> or <code>hasColumn(d)</code> or
-	 * <code>hasDiagonal(d)</code>. These methods have been tested already.
+	 * Tests the method isWinner(Disc). It wasn't necessary to implement a test
+	 * for this method, since it only returns whether the Board hasRow(d) or
+	 * hasColumn(d) or hasDiagonal(d). These methods have been tested already.
 	 */
 	@Test
 	public void testIsWinner() {
 	}
 
 	/**
-	 * Tests the method <code>hasWinner(Disc)</code>. It wasn't necessary to
-	 * implement a test for this method, since it only returns whether
-	 * <code>isWinner(Disc.YELLOW)</code> or <code>isWinner(Disc.RED)</code>.
-	 * This method has been tested already.
+	 * Tests the method hasWinner(Disc). It wasn't necessary to implement a test
+	 * for this method, since it only returns whether isWinner(Disc.YELLOW) or
+	 * isWinner(Disc.RED). This method has been tested already.
 	 */
 	@Test
 	public void testHasWinner() {
 	}
 
 	/**
-	 * Tests the method <code>hasWinner(Disc)</code>. It wasn't necessary to
-	 * implement a test for this method, since it's implicitly tested.
+	 * Tests the method hasWinner(Disc). It wasn't necessary to implement a test
+	 * for this method, since it's implicitly tested.
 	 */
 	@Test
 	public void testToString() {
 	}
 
 	/**
-	 * Tests the method <code>reset()</code>. It basically fills the board with
-	 * random <code>Disc</code>s, it calls the method <code>b.reset()</code> and
-	 * it tests if all the fields on the board are <code>Disc.EMPTY</code>
-	 * afterwards.
+	 * Tests the method reset(). It basically fills the board with random Discs,
+	 * it calls the method b.reset() and it tests if all the fields on the board
+	 * are Disc.EMPTY afterwards.
 	 */
 	@Test
 	public void testReset() {
@@ -885,9 +855,9 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>insertDisc(col)</code>. It fills a column with a
-	 * couple of <code>Disc</code>s, and then makes sure that the inserted
-	 * <code>Disc</code>s are now in the places they should be.
+	 * Tests the method insertDisc(col). It fills a column with a couple of
+	 * Discs, and then makes sure that the inserted Discs are now in the places
+	 * they should be.
 	 */
 	@Test
 	public void testInsertDisc() {
@@ -899,9 +869,9 @@ public class BoardTest {
 	}
 
 	/**
-	 * Tests the method <code>setField(Disc)</code>. It basically places some
-	 * <code>Disc</code>s on the <code>Board</code>, and then checks whether the
-	 * field it just placed it on has the proper <code>Disc</code> in it.
+	 * Tests the method setField(Disc). It basically places some Discs on the
+	 * Board, and then checks whether the field it just placed it on has the
+	 * proper Disc in it.
 	 */
 	@Test
 	public void testSetField() {
