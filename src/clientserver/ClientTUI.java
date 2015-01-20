@@ -90,7 +90,7 @@ public class ClientTUI extends Thread implements ClientView {
 		} catch (IOException e) {
 			client.shutdown();
 		}
-		client.sendMessage(Client.CONNECT + " " + name);
+		client.sendMessage(Client.CONNECT + " " + name + " CUSTOM_BOARD_SIZE CHAT");
 		client.readInput();
 	}
 
