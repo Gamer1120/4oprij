@@ -46,6 +46,7 @@ public class Game {
 		currTeam = 0;
 	}
 
+	@SuppressWarnings("unused")
 	private void requestMove() {
 		if (currTeam == 0) {
 			team0[currPlayer0].sendMessage("");

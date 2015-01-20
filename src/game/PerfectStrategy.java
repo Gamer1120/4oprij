@@ -73,6 +73,7 @@ public class PerfectStrategy extends Thread implements Strategy {
 		}
 	}
 
+	@SuppressWarnings("null")
 	private LinkedList<Integer> instantWin(Board b, Disc d) {
 		LinkedList<Integer> winColumns = null;
 		for (int col = 0; col < board.getColumns(); col++) {
