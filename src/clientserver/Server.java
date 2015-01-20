@@ -78,6 +78,9 @@ public class Server extends Thread {
 	 * @param muiArg
 	 *            the mui arg
 	 */
+	/*@ requires portArg >= 1 & portArg <= 65535;
+		requires muiArg != null;
+	 */
 	public Server(int portArg, MessageUI muiArg) {
 		this.port = portArg;
 		this.mui = muiArg;
@@ -114,6 +117,7 @@ public class Server extends Thread {
 	 * @param msg
 	 *            message that is send
 	 */
+	//@ requires msg != null;
 	public void broadcast(String msg) {
 		synchronized (threads) {
 			for (ClientHandler ch : threads) {
@@ -147,6 +151,9 @@ public class Server extends Thread {
 	 * @param msg
 	 *            message that is send
 	 */
+	/*@ requires msg != null;
+		requires msg.startsWith(CHAT);
+	 */
 	public void broadcastChat(String msg) {
 		synchronized (threads) {
 			for (ClientHandler ch : threads) {
@@ -159,34 +166,35 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Sends a message using the collection of connected ClientHandlers to the
-	 * Client with the specified name.
-	 *
-	 * @param name
-	 *            name of the client
-	 * @param msg
-	 *            message that is send
-	 */
-	public void sendMessage(String name, String msg) {
-		synchronized (threads) {
-			for (ClientHandler ch : threads) {
-				if (ch.getClientName().equals(name)) {
-					ch.sendMessage(msg);
-					break;
-				}
-			}
-			mui.addMessage("Server send message to " + name + ": " + msg);
-		}
-	}
-
-	/**
 	 * Print the message on the server gui.
 	 *
 	 * @param msg
 	 *            message that is send
 	 */
+
+	//@ requires msg != null;
 	public void print(String msg) {
 		mui.addMessage(msg);
+	}
+
+	/**
+	 * Checks if the name isn't already in use.
+	 *
+	 * @param name
+	 *            the name
+	 * @return true, if successful
+	 */
+	/*@ pure */public boolean nameExists(String name) {
+		synchronized (threads) {
+			boolean available = false;
+			for (ClientHandler ch : threads) {
+				if (name.equals(ch.getClientName())) {
+					available = true;
+					break;
+				}
+			}
+			return available;
+		}
 	}
 
 	/**
@@ -197,6 +205,9 @@ public class Server extends Thread {
 	 * @return the client
 	 */
 	// TODO: aanpassen voor Game of weghalen
+	/*@ requires name != null;
+		requires nameExists(name);
+	 */
 	/*@ pure */public ClientHandler getClient(String name) {
 		synchronized (threads) {
 			ClientHandler client = null;
@@ -211,24 +222,35 @@ public class Server extends Thread {
 	}
 
 	/**
+	 * Sends a message using the collection of connected ClientHandlers to the
+	 * Client with the specified name.
+	 *
+	 * @param name
+	 *            name of the client
+	 * @param msg
+	 *            message that is send
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires msg != null;
+	 */
+	public void sendMessage(String name, String msg) {
+		getClient(name).sendMessage(msg);
+		mui.addMessage("Server send message to " + name + ": " + msg);
+	}
+
+	/**
 	 * Checks wether the client with the specified name is in a game.
 	 *
 	 * @param name
 	 *            name of the client
 	 * @return true, if successful
 	 */
-	//@ requires nameExists(name);
+	/*@ requires name != null;
+		requires nameExists(name);
+	*/
 	/*@ pure */public boolean inGame(String name) {
-		synchronized (threads) {
-			boolean game = false;
-			for (ClientHandler ch : threads) {
-				if (ch.getClientName().equals(name) && ch.inGame()) {
-					game = true;
-					break;
-				}
-			}
-			return game;
-		}
+		return getClient(name).inGame();
 	}
 
 	/**
@@ -239,7 +261,10 @@ public class Server extends Thread {
 	 * @param invited
 	 *            the invited
 	 */
-	//@ requires isInvited(name, invited);
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires isInvited(name, invited);
+	*/
 	public void generateBoard(String name, String invited) {
 		synchronized (invites) {
 			Board board = null;
@@ -265,17 +290,13 @@ public class Server extends Thread {
 	 * @param board
 	 *            board that is send
 	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+	*/
 	private void setBoard(String name, Board board) {
 		// TODO: Game maken inplaats van bord
-		synchronized (threads) {
-			for (ClientHandler ch : threads) {
-				if (ch.getClientName().equals(name)) {
-					ch.setBoard(board);
-					break;
-				}
-			}
-			mui.addMessage("Server set board for " + name);
-		}
+		getClient(name).setBoard(board);
+		mui.addMessage("Server set board for " + name);
 	}
 
 	/**
@@ -285,27 +306,9 @@ public class Server extends Thread {
 	 *            the name
 	 * @return true, if successful
 	 */
-	/*@ pure */public boolean nameExists(String name) {
-		synchronized (threads) {
-			boolean available = false;
-			for (ClientHandler ch : threads) {
-				if (name.equals(ch.getClientName())) {
-					available = true;
-					break;
-				}
-			}
-			return available;
-		}
-	}
-
-	/**
-	 * Checks if the name isn't already in use.
-	 *
-	 * @param name
-	 *            the name
-	 * @return true, if successful
-	 */
-	//@ requires nameExists(name);
+	/*@ requires name != null;
+		requires nameExists(name);
+	*/
 	/*@ pure */public boolean hasCustomBoardSize(String name) {
 		synchronized (threads) {
 			boolean available = false;
@@ -343,6 +346,9 @@ public class Server extends Thread {
 	 * @param handler
 	 *            ClientHandler that will be added
 	 */
+	/*@ requires handler != null;
+	 */
+	// TODO: ensure de privates
 	public void addHandler(ClientHandler handler) {
 		synchronized (threads) {
 			threads.add(handler);
@@ -355,6 +361,7 @@ public class Server extends Thread {
 	 * @param handler
 	 *            ClientHandler that will be removed
 	 */
+	//@ requires handler != null;
 	public void removeHandler(ClientHandler handler) {
 		synchronized (threads) {
 			threads.remove(handler);
@@ -373,6 +380,13 @@ public class Server extends Thread {
 	 * @param boardY
 	 *            the board y
 	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires invited != null;
+		requires nameExists(invited);
+		requires boardX > 0;
+		requires boardY > 0;
+	*/
 	public void addInvite(String name, String invited, int boardX, int boardY) {
 		synchronized (invites) {
 			invites.put(new String[] { name, invited }, new Integer[] { boardX,
@@ -390,6 +404,11 @@ public class Server extends Thread {
 	 *            the name of the client that received the invite
 	 * @return true, if is invited
 	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires invited != null;
+		requires nameExists(invited);;
+	*/
 	/*@ pure */public boolean isInvited(String name, String invited) {
 		synchronized (invites) {
 			boolean retBool = false;
@@ -409,6 +428,9 @@ public class Server extends Thread {
 	 * @param name
 	 *            the name of the client
 	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+	*/
 	public void removeInvite(String name) {
 		synchronized (invites) {
 			for (String[] invite : invites.keySet()) {
@@ -427,6 +449,11 @@ public class Server extends Thread {
 	 * @param invited
 	 *            the name of the invited client
 	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires invited != null;
+		requires nameExists(invited);;
+	*/
 	public void removeInvite(String name, String invited) {
 		synchronized (invites) {
 			for (String[] invite : invites.keySet()) {

@@ -272,8 +272,10 @@ public class ClientHandler extends Thread {
 	 * @param b
 	 *            the new board
 	 */
-	//@ requires connected();
-	//@ requires b != null;
+	/*@ requires connected();
+		requires b != null;
+	 */
+	//TODO: board ensures !NULL
 	public void setBoard(Board b) {
 		board = b;
 	}
@@ -286,7 +288,9 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	//@ requires command[0].equals(Client.CONNECT);
+	/*@ requires command != null;
+		requires command[0].equals(Client.CONNECT);
+	 */
 	private void connectChecks(String[] command) {
 		if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
@@ -307,8 +311,10 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires command.length >= 2;
-		requires command[1].length <= 15;
+	/*@ requires command != null;
+		requires command.length >= 2;
+		requires command[0].equals(Client.CONNECT);
+		requires command[1].length() <= 15;
 		requires server.nameExists(command[1]);
 		ensures connected();
 		ensures command.length > 2 ==> clientFeatures != null;
@@ -342,7 +348,9 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	//@ requires command[0].equals(Client.INVITE);
+	/*@ requires command != null;
+		requires command[0].equals(Client.INVITE);
+	 */
 	private void inviteChecks(String[] command) {
 		if (!connected()) {
 			sendMessage(Server.ERROR + " You have to connect first");
@@ -373,8 +381,10 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires connected();
+	/*@ requires command != null;
+		requires connected();
 		requires command.length >= 2;
+		requires command[0].equals(Client.INVITE);
 		requires server.nameExists(command[1]);
 		requires !inGame();
 		requires !server.inGame(command[1]);
@@ -412,7 +422,9 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	//@ requires command[0].equals(Client.ACCEPT_INVITE);
+	/*@ requires command != null;
+		requires command[0].equals(Client.ACCEPT_INVITE);
+	*/
 	private void acceptChecks(String[] command) {
 		if (!connected()) {
 			sendMessage(Server.ERROR + " You have to connect first");
@@ -435,8 +447,10 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires connected();
+	/*@ requires command != null;
+		requires connected();
 		requires command.length == 2;
+		requires command[0].equals(Client.ACCEPT_INVITE);
 		requires server.nameExists(command[1]);
 		requires server.isInvited(command[1], clientName);
 	 */
@@ -458,7 +472,9 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	//@ requires command[0].equals(Client.DECLINE_INVITE);
+	/*@ requires command != null;
+		requires command[0].equals(Client.DECLINE_INVITE);
+	*/
 	private void declineChecks(String[] command) {
 		if (!connected()) {
 			sendMessage(Server.ERROR + " You have to connect first");
@@ -480,8 +496,10 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires connected;
+	/*@ requires command != null;
+		requires connected();
 		requires command.length == 2;
+		requires command[0].equals(Client.DECLINE_INVITE);
 		requires server.nameExists(command[1]);
 		requires server.isInvited(command[1], clientName);
 		ensures !server.isInvited(command[1], clientName);
@@ -501,7 +519,9 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	//@ requires command[0].equals(Client.MOVE);
+	/*@ requires command != null;
+		requires command[0].equals(Client.MOVE);
+	*/
 	private void moveChecks(String[] command) {
 		// TODO: game met meer dan 2 players of spectators
 		if (!connected()) {
@@ -524,6 +544,13 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
+	/*@ requires command != null;
+		requires command[0].equals(Client.MOVE);
+		requires connected();
+		requires opponentName != null;
+		requires playerNumber == 0 || playerNumber == 1;
+		requires inGame();
+	*/
 	private void validMove(String[] command) {
 		move = false;
 		if (command.length != 2) {
@@ -594,7 +621,9 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	//@ requires command[0].equals(Client.CHAT);
+	/*@ requires command != null;
+		requires command[0].equals(Client.CHAT);
+	*/
 	private void chatChecks(String[] command) {
 		if (!connected()) {
 			sendMessage(Server.ERROR + " You have to connect first");
@@ -611,8 +640,11 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	//@ requires connected();
-	//@ requires command.length >= 2;
+	/*@ requires command != null;
+		requires connected();
+		requires command.length >= 2;
+		requires command[0].equals(Client.CHAT);
+	 */
 	private void chat(String[] command) {
 		// TODO: line sturen zonder eerste woord
 		String chat = "";
