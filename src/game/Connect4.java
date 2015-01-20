@@ -18,7 +18,8 @@ public class Connect4 {
 			} else if (MINMAX_PLAYER.equalsIgnoreCase(args[i])) {
 				player[i] = new ComputerPlayer(d, new MinMaxStrategy());
 			} else {
-				player[i] = new HumanPlayer(args[i], d, view);
+				// player[i] = new HumanPlayer(args[i], d, view);
+				// TODO: Fix this.
 			}
 			d = d.other();
 		}
