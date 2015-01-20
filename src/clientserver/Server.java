@@ -53,6 +53,9 @@ public class Server extends Thread {
 	/** The Constant LEADERBOARD. */
 	public static final String LEADERBOARD = "LEADERBOARD";
 	// END OF PROTOCOL
+
+	public static final String[] FEATURES = new String[] { "CHAT",
+			"CUSTOM_BOARD_SIZE" };
 	/** The port. */
 	private int port;
 
