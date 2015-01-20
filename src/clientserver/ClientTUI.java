@@ -49,10 +49,8 @@ public class ClientTUI extends Thread implements ClientView {
 						client.sendMessage(input);
 						if (splitInput.length == 2) {
 							try {
-								addMessage("DEBUG TEST");
 								move = Integer.parseInt(splitInput[1]);
 								waiter.notify();
-								addMessage("DEBUG TEST 2 " + move);
 							} catch (NumberFormatException
 									| ArrayIndexOutOfBoundsException e) {
 								addMessage("Please enter a valid move after MOVE.");
@@ -105,7 +103,6 @@ public class ClientTUI extends Thread implements ClientView {
 				waiter.wait();
 			} catch (InterruptedException e) {
 			}
-			addMessage("DEBUG TEST 3");
 			return move;
 		}
 	}
