@@ -9,15 +9,18 @@ import java.net.UnknownHostException;
 public class ClientTUI extends Thread implements ClientView {
 	private Client client;
 	private BufferedReader reader;
+	private boolean moveRequested;
+	private int move;
 
 	public ClientTUI(InetAddress inet, int port) {
+		this.moveRequested = false;
+		this.move = -1;
 		try {
 			this.client = new Client(inet, port, this);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		this.reader = new BufferedReader(new InputStreamReader(
-				System.in));
+		this.reader = new BufferedReader(new InputStreamReader(System.in));
 	}
 
 	public void addMessage(String msg) {
@@ -26,15 +29,39 @@ public class ClientTUI extends Thread implements ClientView {
 
 	public void run() {
 		while (true) {
+			String input = null;
+			String[] splitInput = null;
 			try {
-				String input = reader.readLine();
-				if (input.equals("EXIT")) {
-					client.shutdown();
-				}
-				client.sendMessage(input);
-			} catch (IOException e) {
+				input = reader.readLine();
+				splitInput = input.split("\\s+");
+			} catch (IOException | NullPointerException e) {
 				client.shutdown();
+				break;
 			}
+			if (input.equals("EXIT")) {
+				client.shutdown();
+				break;
+			} else if (splitInput[0].equals("MOVE")) {
+				if (moveRequested) {
+					moveRequested = false;
+					client.sendMessage(input);
+					if (splitInput.length == 2) {
+						try {
+							move = Integer.parseInt(splitInput[1]);
+						} catch (NumberFormatException
+								| ArrayIndexOutOfBoundsException e) {
+							addMessage("Please enter a valid move after MOVE.");
+						}
+					} else {
+						addMessage("Please enter a valid move after MOVE.");
+					}
+				} else {
+					addMessage("There was move requested.");
+				}
+			} else {
+				client.sendMessage(input);
+			}
+
 		}
 	}
 
@@ -61,5 +88,14 @@ public class ClientTUI extends Thread implements ClientView {
 		}
 		client.sendMessage(Client.CONNECT + " " + name);
 		client.readInput();
+	}
+
+	public int makeMove() {
+		this.move = -1;
+		this.moveRequested = true;
+		addMessage("Please enter a move...");
+		while (move == -1) {
+		}
+		return move;
 	}
 }

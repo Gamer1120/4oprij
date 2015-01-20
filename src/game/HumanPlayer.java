@@ -1,4 +1,7 @@
 package game;
+
+import clientserver.ClientView;
+
 /**
  * Class for maintaining a human player in Tic Tac Toe.
  * 
@@ -9,7 +12,7 @@ public class HumanPlayer extends Player {
 	/**
 	 * View of the game
 	 */
-	private GameView view;
+	private ClientView view;
 
 	// Constructors:
 	/*@
@@ -21,7 +24,7 @@ public class HumanPlayer extends Player {
 	/**
 	 * Creates a new human player object.
 	 */
-	public HumanPlayer(String name, Disc disc, GameView viewArg) {
+	public HumanPlayer(String name, Disc disc, ClientView viewArg) {
 		super(name, disc);
 		view = viewArg;
 	}
@@ -41,14 +44,6 @@ public class HumanPlayer extends Player {
 	 * @return the player's chosen field
 	 */
 	public int determineMove(Board board) {
-		int choice = view.makeMove(getName());
-		boolean valid = board.isField(choice) && board.isEmptyField(choice);
-		while (!valid) {
-			super.setChanged();
-			super.notifyObservers("This column doesn't exist or is full");
-			choice = view.makeMove(getName());
-			valid = board.isField(choice) && board.isEmptyField(choice);
-		}
-		return choice;
+		return view.makeMove();
 	}
 }

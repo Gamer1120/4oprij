@@ -2,6 +2,8 @@ package clientserver;
 
 import game.Board;
 import game.Disc;
+import game.HumanPlayer;
+import game.Player;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -85,6 +87,7 @@ public class Client {
 	 */
 	private int currPlayer;
 	private boolean isConnected;
+	private Player localPlayer;
 
 	/**
 	 * Constructs a <code>Client</code> object and tries to make a
@@ -111,6 +114,8 @@ public class Client {
 		this.isIngame = false;
 		this.invites = new ArrayList<String>();
 		this.isConnected = false;
+		//TODO: Needs to be any player.
+		this.localPlayer = new HumanPlayer(getClientName(), Disc.YELLOW, muiArg);
 	}
 
 	/**
@@ -272,7 +277,7 @@ public class Client {
 		if (currPlayer == -1) {
 			currPlayer = FIRST_PLAYER;
 		}
-		// TODO: Actually request a move
+		localPlayer.determineMove(board);
 	}
 
 	/**
@@ -305,7 +310,7 @@ public class Client {
 				//TODO: Add toBoard method
 				mui.addMessage("Server sent an invalid move. TERMINATING.");
 			}
-			
+
 		} else if (currPlayer == SECOND_PLAYER) {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
