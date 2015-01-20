@@ -10,13 +10,12 @@ import java.util.HashSet;
 
 // TODO: Auto-generated Javadoc
 /**
- * P2 prac wk5. <br>
  * Server. A Thread class that listens to a socket connection on a specified
  * port. For every socket connection with a Client, a new ClientHandler thread
  * is started.
  * 
- * @author Theo Ruys
- * @version 2005.02.21
+ * @author Sven Konings en Michael Koopman
+ * @version 1.0 $
  */
 public class Server extends Thread {
 	// PROTOCOL
@@ -56,10 +55,14 @@ public class Server extends Thread {
 
 	public static final String FEATURES = Features.CHAT + " "
 			+ Features.CUSTOM_BOARD_SIZE;
-	/** The port. */
+	/**
+	 * The port of the server.
+	 */
 	private int port;
 
-	/** The mui. */
+	/**
+	 * The User Interface of the server.
+	 */
 	private MessageUI mui;
 	// TODO: feature lijst
 
@@ -67,16 +70,15 @@ public class Server extends Thread {
 	private HashSet<ClientHandler> threads;
 
 	/** The invites. */
-	// TODO: Observable class
 	private HashMap<String[], Integer[]> invites;
 
 	/**
 	 * Constructs a new Server object.
 	 *
 	 * @param portArg
-	 *            the port arg
+	 *            the port of the server
 	 * @param muiArg
-	 *            the mui arg
+	 *            the view of the server
 	 */
 	/*@ requires portArg >= 1 & portArg <= 65535;
 		requires muiArg != null;
@@ -166,10 +168,10 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Print the message on the server gui.
+	 * Print the message on the server ui.
 	 *
 	 * @param msg
-	 *            message that is send
+	 *            message that is printed
 	 */
 
 	//@ requires msg != null;
@@ -178,27 +180,27 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Checks if the name isn't already in use.
+	 * Checks if the name exists.
 	 *
 	 * @param name
 	 *            the name
-	 * @return true, if successful
+	 * @return true, if the name is found
 	 */
 	/*@ pure */public boolean nameExists(String name) {
 		synchronized (threads) {
-			boolean available = false;
+			boolean exists = false;
 			for (ClientHandler ch : threads) {
 				if (name.equals(ch.getClientName())) {
-					available = true;
+					exists = true;
 					break;
 				}
 			}
-			return available;
+			return exists;
 		}
 	}
 
 	/**
-	 * Gets the client.
+	 * Returns the client with the specified name.
 	 *
 	 * @param name
 	 *            the name
@@ -222,8 +224,7 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Sends a message using the collection of connected ClientHandlers to the
-	 * Client with the specified name.
+	 * Sends a message to the Client with the specified name.
 	 *
 	 * @param name
 	 *            name of the client
@@ -254,12 +255,13 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Generate board.
+	 * Looks up the specified invite, generates a board with the boardsize
+	 * specified in the invite and assignes the board to both clients.
 	 *
 	 * @param name
-	 *            the name
+	 *            the name of the client
 	 * @param invited
-	 *            the invited
+	 *            the invited client
 	 */
 	/*@ requires name != null;
 		requires nameExists(name);
@@ -268,6 +270,7 @@ public class Server extends Thread {
 	public void generateBoard(String name, String invited) {
 		synchronized (invites) {
 			Board board = null;
+			//TODO: getInvite
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
 					Integer[] boardSize = invites.get(invite);
@@ -282,8 +285,7 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Sends the board to use for the game so both clientHandlers are using the
-	 * same board.
+	 * Sets the board for the clientHandler with the specified name.
 	 *
 	 * @param name
 	 *            name of the client
@@ -300,7 +302,8 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Checks if the name isn't already in use.
+	 * Checks if the client with the specified name has the custom board size
+	 * feature.
 	 *
 	 * @param name
 	 *            the name
@@ -310,16 +313,7 @@ public class Server extends Thread {
 		requires nameExists(name);
 	*/
 	/*@ pure */public boolean hasCustomBoardSize(String name) {
-		synchronized (threads) {
-			boolean available = false;
-			for (ClientHandler ch : threads) {
-				if (name.equals(ch.getClientName()) && ch.hasCustomBoardSize()) {
-					available = true;
-					break;
-				}
-			}
-			return available;
-		}
+		return getClient(name).hasCustomBoardSize();
 	}
 
 	/**
@@ -332,7 +326,7 @@ public class Server extends Thread {
 		synchronized (threads) {
 			String clients = "";
 			for (ClientHandler ch : threads) {
-				if (!ch.inGame() && ch.connected()) {
+				if (ch.connected() && !ch.inGame()) {
 					clients += " " + ch.getClientName();
 				}
 			}
@@ -369,7 +363,8 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Add the names of the inviting and the invited client in a list.
+	 * Add the names of the inviting and the invited client in a map with the
+	 * specified boardsize.
 	 *
 	 * @param name
 	 *            name of the inviting client
