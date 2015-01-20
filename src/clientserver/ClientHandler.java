@@ -19,7 +19,14 @@ import java.util.Arrays;
  * @version 2005.02.21
  */
 public class ClientHandler extends Thread {
+	/** The Constant WIN. */
+	public static final String WIN = "WIN";
 
+	/** The Constant DRAW. */
+	public static final String DRAW = "DRAW";
+
+	/** The Constant DISCONECT. */
+	public static final String DISCONNECT = "DISCONNECT";
 	/**
 	 * The <code>Server</code> for this <code>ClientHandler</code>.
 	 */
@@ -73,11 +80,12 @@ public class ClientHandler extends Thread {
 	 */
 	private boolean loop;
 
-	//@ private invariant server != null;
-	//@ private invariant sock != null;
-	//@ private invariant in != null;
-	//@ private invariant out != null;
-	//@ private invariant playerNumber == -1 || playerNumber == 0 || playerNumber == 1;
+	/*@ private invariant server != null;
+		private invariant sock != null;
+		private invariant in != null;
+		private invariant out != null;
+		private invariant playerNumber == -1 || playerNumber == 0 || playerNumber == 1;
+	 */
 
 	/**
 	 * Constructs a <code>ClientHandler</code> object. Initialises both the
@@ -126,6 +134,7 @@ public class ClientHandler extends Thread {
 				if (loop) {
 					shutdown();
 				}
+				break;
 			}
 			switch (command[0]) {
 			case Client.CONNECT:
@@ -150,11 +159,10 @@ public class ClientHandler extends Thread {
 				chatChecks(command);
 				break;
 			case Client.REQUEST_BOARD:
-				sendMessage(Server.ERROR + " Not implemented");
-				// TODO: zelf bord bijhouden om op te sturen
+				requestBoardChecks();
 				break;
 			case Client.REQUEST_LOBBY:
-				sendMessage(Server.LOBBY + server.getLobby());
+				requestLobbyChecks();
 				break;
 			case Client.REQUEST_LEADERBOARD:
 				sendMessage(Server.ERROR + " Not implemented");
@@ -225,6 +233,15 @@ public class ClientHandler extends Thread {
 	 *
 	 * @return true, if successful
 	 */
+	/*@ pure */public boolean connected() {
+		return clientName != null;
+	}
+
+	/**
+	 * returns wheter the client is playing a game.
+	 *
+	 * @return true, if successful
+	 */
 	/*@ pure */public boolean inGame() {
 		return board != null;
 	}
@@ -266,11 +283,12 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
-	//@ requires command.length >= 2;
-	//@ requires command[1].length <= 15;
-	//@ requires server.nameExists(command[1]);
-	//@ ensures clientName != null;
-	//@ ensures command.length > 2 ==> features != null;
+	/*@ requires command.length >= 2;
+		requires command[1].length <= 15;
+		requires server.nameExists(command[1]);
+		ensures connected();
+		ensures command.length > 2 ==> features != null;
+	 */
 	private void connect(String[] command) {
 		clientName = command[1];
 		if (command.length > 2) {
@@ -293,7 +311,7 @@ public class ClientHandler extends Thread {
 	 */
 	//@ requires command[0].equals(Client.INVITE);
 	private void inviteChecks(String[] command) {
-		if (clientName == null) {
+		if (!connected()) {
 			sendMessage(Server.ERROR + " You have to connect first");
 		} else if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
@@ -318,14 +336,15 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
-	//@ requires clientName != null;
-	//@ requires command.length >= 2;
-	//@ requires server.nameExists(command[1]);
-	//@ requires !inGame();
-	//@ requires !server.inGame(command[1]);
-	//@ requires !server.isInvited(clientName, command[1]);
-	//@ requires !server.isInvited(command[1], clientName);
-	//@ ensures server.isInvited(clientName, command[1]);
+	/*@ requires connected();
+		requires command.length >= 2;
+		requires server.nameExists(command[1]);
+		requires !inGame();
+		requires !server.inGame(command[1]);
+		requires !server.isInvited(clientName, command[1]);
+		requires !server.isInvited(command[1], clientName);
+		ensures server.isInvited(clientName, command[1]);
+	 */
 	private void invite(String[] command) {
 		int boardX = 7;
 		int boardY = 6;
@@ -355,7 +374,7 @@ public class ClientHandler extends Thread {
 	 */
 	//@ requires command[0].equals(Client.ACCEPT_INVITE);
 	private void acceptChecks(String[] command) {
-		if (clientName == null) {
+		if (!connected()) {
 			sendMessage(Server.ERROR + " You have to connect first");
 		} else if (command.length != 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
@@ -374,11 +393,11 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
-	//@ requires clientName != null;
-	//@ requires command.length == 2;
-	//@ requires server.nameExists(command[1]);
-	// TODO: result true betekent naam bestaat
-	//@ requires server.isInvited(command[1], clientName);
+	/*@ requires connected();
+		requires command.length == 2;
+		requires server.nameExists(command[1]);
+		requires server.isInvited(command[1], clientName);
+	 */
 	private void accept(String[] command) {
 		// TODO: extras verzenden (spectators?)
 		server.generateBoard(command[1], clientName);
@@ -396,7 +415,7 @@ public class ClientHandler extends Thread {
 	 */
 	//@ requires command[0].equals(Client.DECLINE_INVITE);
 	private void declineChecks(String[] command) {
-		if (clientName == null) {
+		if (!connected()) {
 			sendMessage(Server.ERROR + " You have to connect first");
 		} else if (command.length != 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
@@ -415,11 +434,12 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
-	//@ requires clientName != null;
-	//@ requires command.length == 2;
-	//@ requires server.nameExists(command[1]);
-	//@ requires server.isInvited(command[1], clientName);
-	//@ ensures !server.isInvited(command[1], clientName);
+	/*@ requires connected;
+		requires command.length == 2;
+		requires server.nameExists(command[1]);
+		requires server.isInvited(command[1], clientName);
+		ensures !server.isInvited(command[1], clientName);
+	 */
 	private void decline(String[] command) {
 		server.removeInvite(command[1], clientName);
 		server.sendMessage(command[1], Server.ERROR + " Invite declined");
@@ -435,7 +455,9 @@ public class ClientHandler extends Thread {
 	//@ requires command[0].equals(Client.MOVE);
 	private void moveChecks(String[] command) {
 		// TODO: game met meer dan 2 players of spectators
-		if (!inGame()) {
+		if (!connected()) {
+			sendMessage(Server.ERROR + " You have to connect first");
+		} else if (!inGame()) {
 			sendMessage(Server.ERROR + " You aren't in a game");
 		} else if (!move) {
 			sendMessage(Server.ERROR + " It's not your turn to move");
@@ -471,12 +493,13 @@ public class ClientHandler extends Thread {
 	 * @param col
 	 *            the col
 	 */
-	//@ requires clientName != null;
-	//@ requires opponentName != null;
-	//@ requires playerNumber == 0 || playerNumber == 1;
-	//@ requires inGame();
-	//@ requires board.isField(col);
-	//@ requires board.isEmptyField(col);
+	/*@ requires connected();
+		requires opponentName != null;
+		requires playerNumber == 0 || playerNumber == 1;
+		requires inGame();
+		requires board.isField(col);
+		requires board.isEmptyField(col);
+	 */
 	private void move(int col) {
 		if (playerNumber == 0) {
 			board.insertDisc(col, Disc.YELLOW);
@@ -491,12 +514,12 @@ public class ClientHandler extends Thread {
 			server.sendMessage(opponentName, Server.REQUEST_MOVE);
 		} else if (board.hasWinner()) {
 			// TODO: game end final strings
-			server.sendMessage(opponentName, Server.GAME_END + " " + "WIN"
-					+ " " + clientName);
-			sendMessage(Server.GAME_END + " " + "WIN" + " " + clientName);
+			server.sendMessage(opponentName, Server.GAME_END + " " + WIN + " "
+					+ clientName);
+			sendMessage(Server.GAME_END + " " + WIN + " " + clientName);
 		} else {
-			server.sendMessage(opponentName, Server.GAME_END + " " + "DRAW");
-			sendMessage(Server.GAME_END + " " + "DRAW");
+			server.sendMessage(opponentName, Server.GAME_END + " " + DRAW);
+			sendMessage(Server.GAME_END + " " + DRAW);
 		}
 	}
 
@@ -508,7 +531,7 @@ public class ClientHandler extends Thread {
 	 */
 	//@ requires command[0].equals(Client.CHAT);
 	private void chatChecks(String[] command) {
-		if (clientName == null) {
+		if (!connected()) {
 			sendMessage(Server.ERROR + " You have to connect first");
 		} else if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
@@ -523,7 +546,7 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command
 	 */
-	//@ requires clientName != null;
+	//@ requires connected();
 	//@ requires command.length >= 2;
 	private void chat(String[] command) {
 		// TODO: line sturen zonder eerste woord
@@ -532,6 +555,59 @@ public class ClientHandler extends Thread {
 			chat += " " + command[i];
 		}
 		server.broadcast(Server.CHAT + " " + clientName + ":" + chat);
+	}
+
+	/**
+	 * Chat.
+	 *
+	 * @param command
+	 *            the command
+	 */
+	private void requestBoardChecks() {
+		if (!connected()) {
+			sendMessage(Server.ERROR + " You have to connect first");
+		} else if (!inGame()) {
+			sendMessage(Server.ERROR + " You aren't in a game");
+		} else {
+			requestBoard();
+		}
+	}
+
+	/**
+	 * Chat.
+	 *
+	 * @param command
+	 *            the command
+	 */
+	//@ requires connected();
+	//@ requires inGame();
+	private void requestBoard() {
+		sendMessage(Server.BOARD + " " + board.toProtocol());
+	}
+
+	/**
+	 * Chat.
+	 *
+	 * @param command
+	 *            the command
+	 */
+	private void requestLobbyChecks() {
+		if (!connected()) {
+			sendMessage(Server.ERROR + " You have to connect first");
+		} else {
+			requestLobby();
+		}
+	}
+
+	/**
+	 * Chat.
+	 *
+	 * @param command
+	 *            the command
+	 */
+	//@ requires connected();
+	private void requestLobby() {
+		sendMessage(Server.LOBBY + server.getLobby());
 	}
 
 	/**
@@ -579,9 +655,8 @@ public class ClientHandler extends Thread {
 		server.removeInvite(clientName);
 		server.removeHandler(this);
 		if (inGame()) {
-			server.sendMessage(opponentName, Server.GAME_END + " "
-					+ "DISCONNECT");
-		} else {
+			server.sendMessage(opponentName, Server.GAME_END + " " + DISCONNECT);
+		} else if (clientName != null) {
 			server.broadcastLobby();
 		}
 		server.print("ClientHandler: " + clientName + " has left");
