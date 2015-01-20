@@ -368,16 +368,15 @@ public class ClientHandler extends Thread {
 		} else if (server.isInvited(command[1], clientName)) {
 			sendMessage(Server.ERROR
 					+ " the invited client already invited you");
-		} else if (command.length >= 4) {
-			if (hasCustomBoardSize()) {
-				sendMessage(Server.ERROR
-						+ " Your client doesn't support the "
-						+ Features.CUSTOM_BOARD_SIZE
-						+ " feature. Please add this feature if you want to use extras");
-			} else if (!server.hasCustomBoardSize(command[1])) {
-				sendMessage(Server.ERROR
-						+ " the invited client doesn't support extras");
-			}
+		} else if (command.length >= 4 && !hasCustomBoardSize()) {
+			sendMessage(Server.ERROR
+					+ " Your client doesn't support the "
+					+ Features.CUSTOM_BOARD_SIZE
+					+ " feature. Please add this feature if you want to use extras");
+		} else if (command.length >= 4
+				&& !server.hasCustomBoardSize(command[1])) {
+			sendMessage(Server.ERROR
+					+ " the invited client doesn't support extras");
 		} else {
 			invite(command);
 		}
