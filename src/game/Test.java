@@ -1,4 +1,7 @@
 package game;
+
+import java.util.Arrays;
+
 public class Test {
 	public final static int N = 0;
 	public final static Disc D = Disc.YELLOW;
@@ -8,7 +11,8 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		Board board = new Board();
-		printAll(board);
+		//printAll(board);
+		michaelTest(board);
 	}
 
 	public static void printAll(Board b) {
@@ -35,4 +39,33 @@ public class Test {
 		b.reset();
 		System.out.println(b);
 	}
+
+	public static void michaelTest(Board b) {
+		b.insertDisc(0, Disc.YELLOW);
+		b.insertDisc(0, Disc.YELLOW);
+		b.insertDisc(0, Disc.YELLOW);
+		b.insertDisc(0, Disc.YELLOW);
+		b.insertDisc(0, Disc.YELLOW);
+		b.insertDisc(0, Disc.YELLOW);
+		System.out.println(b.getColumns());
+		System.out.println(b.getRows());
+
+		b.insertDisc(1, Disc.YELLOW);
+		b.insertDisc(2, Disc.YELLOW);
+		b.insertDisc(3, Disc.RED);
+		b.insertDisc(4, Disc.YELLOW);
+		b.insertDisc(5, Disc.YELLOW);
+		b.insertDisc(6, Disc.YELLOW);
+		b.insertDisc(6, Disc.YELLOW);
+		b.insertDisc(6, Disc.YELLOW);
+		b.insertDisc(6, Disc.YELLOW);
+		b.insertDisc(6, Disc.YELLOW);
+		b.insertDisc(6, Disc.YELLOW);
+
+		System.out.println(b.toProtocol());
+		System.out.println("The board has " + b.getColumns() + " columns and "
+				+ b.getRows() + " rows.");
+		
+	}
+
 }

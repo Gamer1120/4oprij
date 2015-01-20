@@ -34,8 +34,8 @@ public class Client {
 	public static final String REQUEST_BOARD = "REQUEST";
 	public static final String REQUEST_LOBBY = "LOBBY";
 	public static final String REQUEST_LEADERBOARD = "LEADERBOARD";
-	public static final int FIRST_PLAYER = 0;
-	public static final int SECOND_PLAYER = 1;
+	public String firstPlayer;
+	public String secondPlayer;
 	// END OF PROTOCOL
 
 	/**
@@ -82,9 +82,10 @@ public class Client {
 	/**
 	 * An integer to determine which Player's turn it is.
 	 */
-	private int currPlayer;
+	private String currPlayer;
 	private boolean isConnected;
 	private Player localPlayer;
+	private boolean requestedBoard;
 
 	/*@	private invariant sock != null;
 	 	private invariant mui != null;
@@ -123,6 +124,7 @@ public class Client {
 		this.isConnected = false;
 		//TODO: Needs to be any player.
 		this.localPlayer = new HumanPlayer(getClientName(), Disc.YELLOW, muiArg);
+		this.requestedBoard = false;
 	}
 
 	/**
@@ -171,7 +173,8 @@ public class Client {
 				}
 				break;
 			case Server.BOARD:
-				toBoard(line);
+				board = toBoard(line);
+				notifyAll();
 			}
 
 		}
@@ -244,10 +247,18 @@ public class Client {
 	 	ensures currPlayer == -1;
 	 */
 	private void gameStart(String[] serverMessage) {
-		mui.addMessage("A game between you and " + serverMessage[2]
-				+ " has started!");
+		firstPlayer = serverMessage[1];
+		secondPlayer = serverMessage[2];
+		if (firstPlayer.equals(getClientName())) {
+			mui.addMessage("A game between you and " + secondPlayer
+					+ " has started!");
+		} else {
+			mui.addMessage("A game between you and " + firstPlayer
+					+ " has started!");
+		}
+
 		this.isIngame = true;
-		currPlayer = -1; // Not set yet.
+		currPlayer = null; // Not set yet.
 		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
 		// 1 > Disc.RED
 		// TODO: board size
@@ -288,8 +299,8 @@ public class Client {
 	 */
 	//@ requires serverMessage[0].equals(Server.REQUEST_MOVE);
 	private void requestMove(String[] serverMessage) {
-		if (currPlayer == -1) {
-			currPlayer = FIRST_PLAYER;
+		if (currPlayer == null) {
+			currPlayer = firstPlayer;
 		}
 		localPlayer.determineMove(board);
 	}
@@ -303,14 +314,14 @@ public class Client {
 	 *            The full message the server sent.
 	 */
 	//@ requires serverMessage[0].equals(Server.MOVE_OK);
-	private void moveOK(String[] serverMessage) {
-		if (currPlayer == -1) {
-			currPlayer = SECOND_PLAYER;
+	private synchronized void moveOK(String[] serverMessage) {
+		if (currPlayer == null) {
+			currPlayer = secondPlayer;
 		}
 		int move = -1;
 		// TODO: betere error handing met request bord
 		// TODO: board printen op clientTUI
-		if (currPlayer == FIRST_PLAYER) {
+		if (currPlayer.equals(firstPlayer)) {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
@@ -319,13 +330,25 @@ public class Client {
 			}
 			if (board.isField(move) && board.isEmptyField(move)) {
 				board.insertDisc(move, Disc.YELLOW);
-				currPlayer = SECOND_PLAYER;
+				currPlayer = secondPlayer;
 			} else {
-				//TODO: Add toBoard method
-				mui.addMessage("Server sent an invalid move. TERMINATING.");
+				if (!requestedBoard) {
+					requestBoard();
+					requestedBoard = true;
+					try {
+						wait();
+						moveOK(serverMessage);
+					} catch (InterruptedException e) {
+						mui.addMessage("Interrupted.");
+						shutdown();
+					}
+				} else {
+					mui.addMessage("Can't make the move on both the local board, and the board on the server. TERMINATING.");
+					shutdown();
+				}
 			}
 
-		} else if (currPlayer == SECOND_PLAYER) {
+		} else if (currPlayer.equals(secondPlayer)) {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
@@ -334,9 +357,23 @@ public class Client {
 			}
 			if (board.isField(move) && board.isEmptyField(move)) {
 				board.insertDisc(move, Disc.RED);
-				currPlayer = FIRST_PLAYER;
+				currPlayer = firstPlayer;
 			} else {
-				//TODO: Add toBoard method
+				if (!requestedBoard) {
+					requestBoard();
+					requestedBoard = true;
+					try {
+						wait();
+						moveOK(serverMessage);
+					} catch (InterruptedException e) {
+						mui.addMessage("Interrupted.");
+						shutdown();
+					}
+				} else {
+					mui.addMessage("Can't make the move on both the local board, and the board on the server. TERMINATING.");
+					shutdown();
+				}
+
 				mui.addMessage("Server sent an invalid move. TERMINATING.");
 			}
 		}
@@ -388,8 +425,27 @@ public class Client {
 
 	//@ requires line != null;
 	public Board toBoard(String line) {
-		//TODO: Wait for Matthias to Protocol, then implement this method.
-		return null;
+		String[] protocol = line.split(" ");
+		int boardColumns = Integer.parseInt(protocol[1]);
+		int boardRows = Integer.parseInt(protocol[2]);
+		Board test = new Board(boardRows, boardColumns);
+		int i = 3;
+		for (int row = boardRows - 1; row >= 0; row--) {
+			for (int col = 0; col < boardColumns; col++) {
+				if (Integer.parseInt(protocol[i]) == 0) {
+					//Disc.EMPTY
+					test.setField(row, col, Disc.EMPTY);
+				} else if (Integer.parseInt(protocol[i]) == 1) {
+					//Disc.YELLOW
+					test.setField(row, col, Disc.YELLOW);
+				} else if (Integer.parseInt(protocol[i]) == 2) {
+					//Disc.RED
+					test.setField(row, col, Disc.RED);
+				}
+				i++;
+			}
+		}
+		return test;
 	}
 
 	//@ requires array != null;
@@ -399,5 +455,9 @@ public class Client {
 			retLine += " " + array[i];
 		}
 		return retLine;
+	}
+
+	private void requestBoard() {
+		sendMessage(REQUEST_BOARD);
 	}
 } // end of class Client
