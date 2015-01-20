@@ -361,14 +361,23 @@ public class ClientHandler extends Thread {
 		} else if (inGame()) {
 			sendMessage(Server.ERROR + " You are already in a game");
 		} else if (server.inGame(command[1])) {
-			sendMessage(Server.ERROR + " This client is already in a game");
+			sendMessage(Server.ERROR
+					+ " the invited client is already in a game");
 		} else if (server.isInvited(clientName, command[1])) {
 			sendMessage(Server.ERROR + " Already invited this client");
 		} else if (server.isInvited(command[1], clientName)) {
-			sendMessage(Server.ERROR + " This client already invited you");
-		} else if (command.length >= 4
-				&& !server.hasCustomBoardSize(command[1])) {
-			sendMessage(Server.ERROR + " This client doesn't support extras");
+			sendMessage(Server.ERROR
+					+ " the invited client already invited you");
+		} else if (command.length >= 4) {
+			if (hasCustomBoardSize()) {
+				sendMessage(Server.ERROR
+						+ " Your client doesn't support the "
+						+ Features.CUSTOM_BOARD_SIZE
+						+ " feature. Please add this feature if you want to use extras");
+			} else if (!server.hasCustomBoardSize(command[1])) {
+				sendMessage(Server.ERROR
+						+ " the invited client doesn't support extras");
+			}
 		} else {
 			invite(command);
 		}
@@ -508,7 +517,7 @@ public class ClientHandler extends Thread {
 		//TODO: decline je eigen invite
 		server.removeInvite(command[1], clientName);
 		server.sendMessage(command[1], Server.ERROR + " " + clientName
-				+ " Declined your invite");
+				+ " declined your invite");
 	}
 
 	/**
@@ -629,6 +638,10 @@ public class ClientHandler extends Thread {
 			sendMessage(Server.ERROR + " You have to connect first");
 		} else if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
+		} else if (hasChat()) {
+			sendMessage(Server.ERROR + " Your client doesn't support the "
+					+ Features.CHAT
+					+ " feature. Please add this feature if you want to use it");
 		} else {
 			chat(command);
 		}
