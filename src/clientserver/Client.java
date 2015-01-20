@@ -86,6 +86,13 @@ public class Client {
 	private boolean isConnected;
 	private Player localPlayer;
 
+	/*@	private invariant sock != null;
+	 	private invariant mui != null;
+	 	private invariant in != null;
+	 	private invariant out != null;
+	  	private invariant invites != null;
+	 */
+
 	/**
 	 * Constructs a Client object and tries to make a Socket connection
 	 * 
@@ -97,6 +104,10 @@ public class Client {
 	 *            The port of this Client
 	 * @param muiArg
 	 *            The MessageUI for this Client
+	 */
+	/*@ requires host != null;
+	 	requires port >= 1 & port <= 65535;
+	 	requires muiArg != null;
 	 */
 	public Client(InetAddress host, int port, ClientTUI muiArg)
 			throws IOException {
@@ -175,6 +186,7 @@ public class Client {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
+	//@	requires serverMessage[0].equals(Server.ACCEPT_CONNECT);
 	private void connect(String[] serverMessage) {
 		mui.addMessage("Successfully established connection to server: "
 				+ sock.getRemoteSocketAddress().toString() // IP of
@@ -193,6 +205,7 @@ public class Client {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
+	//@ requires serverMessage[0].equals(Server.LOBBY);
 	private void lobby(String[] serverMessage) {
 		mui.addMessage("The people that are currently in the lobby are:"
 				+ arrayToLine(serverMessage));
@@ -207,6 +220,7 @@ public class Client {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
+	//@ requires serverMessage[0].equals(Server.INVITE);
 	private void invite(String[] serverMessage) {
 		String opponentName = serverMessage[1];
 		invites.add(opponentName);
@@ -223,6 +237,11 @@ public class Client {
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
+	 */
+	/*@ requires serverMessage[0].equals(Server.GAME_START);
+	 	ensures board != null;
+	 	ensures this.isIngame;
+	 	ensures currPlayer == -1;
 	 */
 	private void gameStart(String[] serverMessage) {
 		mui.addMessage("A game between you and " + serverMessage[2]
@@ -244,6 +263,9 @@ public class Client {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
+	/*@	requires serverMessage[0].equals(Server.GAME_END);
+	 	ensures !this.isIngame;
+	 */
 	private void gameEnd(String[] serverMessage) {
 		this.isIngame = false;
 		if (serverMessage.length > 2) {
@@ -264,6 +286,7 @@ public class Client {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
+	//@ requires serverMessage[0].equals(Server.REQUEST_MOVE);
 	private void requestMove(String[] serverMessage) {
 		if (currPlayer == -1) {
 			currPlayer = FIRST_PLAYER;
@@ -279,6 +302,7 @@ public class Client {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
+	//@ requires serverMessage[0].equals(Server.MOVE_OK);
 	private void moveOK(String[] serverMessage) {
 		if (currPlayer == -1) {
 			currPlayer = SECOND_PLAYER;
@@ -326,6 +350,7 @@ public class Client {
 	 * @param msg
 	 *            The message to be sent.
 	 */
+	//@ requires msg != null;
 	public void sendMessage(String msg) {
 		try {
 			out.write(msg);
@@ -341,6 +366,9 @@ public class Client {
 	 * note, before it does this, it also sets the loop and isIngame variables
 	 * for this Client to false.
 	 */
+	/*@	ensures !loop;
+	 	ensures !isIngame;
+	 */
 	public void shutdown() {
 		loop = false;
 		isIngame = false;
@@ -349,21 +377,22 @@ public class Client {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.exit(0);
 	}
 
 	/**
 	 * This method returns the name of this Client.
 	 */
-	public String getClientName() {
+	/*@ pure */public String getClientName() {
 		return clientName;
 	}
 
+	//@ requires line != null;
 	public Board toBoard(String line) {
 		//TODO: Wait for Matthias to Protocol, then implement this method.
 		return null;
 	}
 
+	//@ requires array != null;
 	public String arrayToLine(String[] array) {
 		String retLine = "";
 		for (int i = 1; i < array.length; i++) {
