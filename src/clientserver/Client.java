@@ -13,6 +13,8 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Client program for the Connect4 according to the protocol of the TI-2 group.<br>
@@ -71,11 +73,6 @@ public class Client {
 	 */
 	private boolean isIngame;
 	/**
-	 * An ArrayList in which all the invites that are sent by this client are
-	 * kept.
-	 */
-	private ArrayList<String> invites;
-	/**
 	 * The Board this Client uses for determining their move.
 	 */
 	private Board board;
@@ -86,6 +83,7 @@ public class Client {
 	private boolean isConnected;
 	private Player localPlayer;
 	private boolean requestedBoard;
+	private Map<String, Integer[]> invites;
 
 	/*@	private invariant sock != null;
 	 	private invariant mui != null;
@@ -120,7 +118,7 @@ public class Client {
 				sock.getOutputStream()));
 		this.loop = true;
 		this.isIngame = false;
-		this.invites = new ArrayList<String>();
+		this.invites = new HashMap<String, Integer[]>();
 		this.isConnected = false;
 		//TODO: Needs to be any player.
 		this.localPlayer = new HumanPlayer(getClientName(), Disc.YELLOW, muiArg);
@@ -226,10 +224,17 @@ public class Client {
 	//@ requires serverMessage[0].equals(Server.INVITE);
 	private void invite(String[] serverMessage) {
 		String opponentName = serverMessage[1];
-		invites.add(opponentName);
-		if (!isIngame) {
-			mui.addMessage("Player: " + opponentName
-					+ " has invited you to a game of Connect4!");
+		if (serverMessage.length == 2) {
+			invites.put(opponentName, null);
+			if (!isIngame) {
+				mui.addMessage("Player: " + opponentName
+						+ " has invited you to a game of Connect4!");
+			}
+		} else if (serverMessage.length >= 4) {
+			invites.put(
+					opponentName,
+					new Integer[] { Integer.parseInt(serverMessage[2]),
+							Integer.parseInt(serverMessage[3]) });
 		}
 	}
 
@@ -249,12 +254,25 @@ public class Client {
 	private void gameStart(String[] serverMessage) {
 		firstPlayer = serverMessage[1];
 		secondPlayer = serverMessage[2];
+
 		if (firstPlayer.equals(getClientName())) {
 			mui.addMessage("A game between you and " + secondPlayer
 					+ " has started!");
+			Integer[] boardSize = invites.get(secondPlayer);
+			if (boardSize != null) {
+				board = new Board(boardSize[1], boardSize[2]);
+			} else{
+				board= new Board();
+			}
 		} else {
 			mui.addMessage("A game between you and " + firstPlayer
 					+ " has started!");
+			Integer[] boardSize = invites.get(firstPlayer);
+			if (boardSize != null) {
+				board = new Board(boardSize[1], boardSize[2]);
+			} else{
+				board= new Board();
+			}
 		}
 
 		this.isIngame = true;
@@ -262,7 +280,8 @@ public class Client {
 		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
 		// 1 > Disc.RED
 		// TODO: board size
-		board = new Board();
+
+		invites.clear();
 		mui.addMessage(board.toString());
 		mui.addMessage("You are YELLOW");
 	}
