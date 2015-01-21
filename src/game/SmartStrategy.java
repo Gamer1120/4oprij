@@ -24,9 +24,6 @@ public class SmartStrategy implements Strategy {
 				empty.add(i);
 			}
 		}
-		if (empty.contains(b.getColumns() / 2)) {
-			return b.getColumns() / 2;
-		}
 		for (Integer i : empty) {
 			Board board = b.deepCopy();
 			board.insertDisc(i, d);
@@ -39,6 +36,26 @@ public class SmartStrategy implements Strategy {
 			board.insertDisc(i, d.other());
 			if (board.gameOver()) {
 				return i;
+			}
+		}
+		for (Integer i : empty) {
+			Board board = b.deepCopy();
+			board.insertDisc(i, d);
+			for (Integer j : empty) {
+				board.insertDisc(j, d);
+				if (board.gameOver()) {
+					return j;
+				}
+			}
+		}
+		for (Integer i : empty) {
+			Board board = b.deepCopy();
+			board.insertDisc(i, d.other());
+			for (Integer j : empty) {
+				board.insertDisc(j, d.other());
+				if (board.gameOver()) {
+					return j;
+				}
 			}
 		}
 		return (int) empty.toArray()[((int) (Math.random() * empty.size()))];
