@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -251,9 +252,15 @@ public class Client {
 			}
 		} else if (serverMessage.length >= 4) {
 			try {
-				addServerInvite(opponentName,
-						Integer.parseInt(serverMessage[2]),
-						Integer.parseInt(serverMessage[3]));
+				int boardX = Integer.parseInt(serverMessage[2]);
+				int boardY = Integer.parseInt(serverMessage[3]);
+				addServerInvite(opponentName, boardX, boardY);
+				if (!isIngame) {
+					mui.addMessage("Player: "
+							+ opponentName
+							+ " has invited you to a game of Connect4 with a custom Board size of "
+							+ boardX + " x " + boardY + "!");
+				}
 			} catch (NumberFormatException e) {
 				mui.addMessage("The server just sent an invite with an invalid custom board size.");
 			}
@@ -286,7 +293,6 @@ public class Client {
 			if (boardSize != null) {
 				board = new Board(boardSize[1], boardSize[0]);
 			} else {
-				mui.addMessage("Using default boardsize.");
 				board = new Board();
 			}
 		} else {
@@ -296,7 +302,6 @@ public class Client {
 			if (boardSize != null) {
 				board = new Board(boardSize[0], boardSize[1]);
 			} else {
-				mui.addMessage("Using default boardsize.");
 				board = new Board();
 			}
 		}
@@ -331,7 +336,7 @@ public class Client {
 			if (serverMessage[1].equals(Game.DRAW)) {
 				mui.addMessage("The game was a draw!");
 			} else {
-				mui.addMessage(serverMessage.toString());
+				mui.addMessage("The game has ended. Reason: " + Arrays.toString(serverMessage));
 			}
 		}
 	}

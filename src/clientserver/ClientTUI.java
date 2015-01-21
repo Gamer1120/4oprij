@@ -17,7 +17,6 @@ public class ClientTUI extends Thread implements ClientView {
 	private BufferedReader reader;
 	private boolean moveRequested;
 	private int move;
-	private Object waiter = new Object();
 	private InetAddress inet;
 	private int port;
 	private static final String DEFAULT_INET = "localhost";
@@ -50,24 +49,24 @@ public class ClientTUI extends Thread implements ClientView {
 				client.shutdown();
 				break;
 			} else if (splitInput[0].equals("MOVE")) {
-				synchronized (waiter) {
-					if (moveRequested) {
-						moveRequested = false;
-						client.sendMessage(input);
-						if (splitInput.length == 2) {
-							try {
-								move = Integer.parseInt(splitInput[1]);
-								waiter.notify();
-							} catch (NumberFormatException
-									| ArrayIndexOutOfBoundsException e) {
-								addMessage("Please enter a valid move after MOVE.");
-							}
-						} else {
+
+				if (moveRequested) {
+					moveRequested = false;
+					client.sendMessage(input);
+					if (splitInput.length == 2) {
+						try {
+							move = Integer.parseInt(splitInput[1]);
+
+						} catch (NumberFormatException
+								| ArrayIndexOutOfBoundsException e) {
 							addMessage("Please enter a valid move after MOVE.");
 						}
 					} else {
-						addMessage("There was no move requested.");
+						addMessage("Please enter a valid move after MOVE.");
 					}
+				} else {
+					addMessage("There was no move requested.");
+
 				}
 			} else if (splitInput[0].equals("INVITE")) {
 				if (splitInput.length == 1) {
@@ -127,7 +126,7 @@ public class ClientTUI extends Thread implements ClientView {
 						Disc.YELLOW, this));
 			}
 		} catch (IOException e) {
-			//TODO: Handle this error.
+			client.shutdown();
 		}
 		client.sendMessage(Client.CONNECT + " " + name
 				+ " CUSTOM_BOARD_SIZE CHAT");
@@ -136,15 +135,10 @@ public class ClientTUI extends Thread implements ClientView {
 	}
 
 	public int makeMove() {
-		synchronized (waiter) {
-			this.move = -1;
-			this.moveRequested = true;
-			addMessage("Please enter a move...");
-			try {
-				waiter.wait();
-			} catch (InterruptedException e) {
-			}
-			return move;
-		}
+		this.move = -1;
+		this.moveRequested = true;
+		addMessage("Please enter a move...");
+		return move;
+
 	}
 }
