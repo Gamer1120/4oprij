@@ -2,10 +2,11 @@ package game;
 import java.util.Observable;
 
 /**
- * Abstract class for keeping a player in the Connect4 game.
+ * Abstract class for keeping a player in the Connect4 game.<br>
+ * <br>
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 
- * @author Sven Konings en Michael Koopman
- * @version $Revision: 1.0 $
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
 public abstract class Player extends Observable {
 

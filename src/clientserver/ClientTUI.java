@@ -12,6 +12,14 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+/**
+ * ClientTUI program for the Connect4 according to the protocol of the TI-2
+ * group.<br>
+ * <br>
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
 public class ClientTUI extends Thread implements ClientView {
 	/**
 	 * The Client this ClientTUI is made for.
@@ -186,6 +194,7 @@ public class ClientTUI extends Thread implements ClientView {
 		client.setClientName(name);
 		client.readInput();
 	}
+
 	/**
 	 * Asks the player to make a move.
 	 */

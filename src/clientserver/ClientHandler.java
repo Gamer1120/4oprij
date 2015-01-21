@@ -14,11 +14,12 @@ import java.util.Set;
 
 // TODO: Auto-generated Javadoc
 /**
- * The clientHandler that reads all the input from the clients and send messages
- * from the server to the clients.
+ * The ClientHandler that reads all the input from the Clients and send messages
+ * from the Server to the Clients.<br>
+ * <br>
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 
- * @author Sven Konings en Michael Koopman
- * @version 1.0 $
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
 public class ClientHandler extends Thread {
 

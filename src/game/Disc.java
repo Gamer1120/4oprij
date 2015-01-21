@@ -1,10 +1,12 @@
 package game;
+
 /**
- * Represents a disc in the connect4 game. There three possible values:
- * Disc.YELLOW, Disc.RED and Disc.EMPTY.
+ * Represents a disc in the Connect4 game. There are three possible values:
+ * Disc.YELLOW, Disc.RED and Disc.EMPTY.<br>
+ * <br>
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 
  * @author Sven Konings en Michael Koopman
- * @version $Revision: 1.0 $
  */
 public enum Disc {
 

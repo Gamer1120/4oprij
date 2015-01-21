@@ -3,7 +3,9 @@ package game;
 import clientserver.ClientView;
 
 /**
- * Class for maintaining a HumanPlayer in Connect4.
+ * Class for maintaining a HumanPlayer in Connect4.<br>
+ * <br>
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */

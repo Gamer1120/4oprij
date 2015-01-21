@@ -1,9 +1,10 @@
 package game;
 /**
- * Class for maintaining the Tic Tac Toe game.
+ * Game class for maintaining the Tic Tac Toe game.<br>
+ * <br>
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 
- * @author Sven Konings en Michael Koopman
- * @version $Revision: 1.0 $
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
 public class Game {
 	// Instance variables:

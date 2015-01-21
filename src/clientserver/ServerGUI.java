@@ -19,7 +19,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 /**
- * ServerGui. A GUI for the Server.
+ * A GUI for the server, as provided in the files in week 7 for the Multiclient chat.
  * @author  Theo Ruys
  * @version 2005.02.21
  */
