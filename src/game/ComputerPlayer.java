@@ -22,6 +22,7 @@ public class ComputerPlayer extends Player {
 	}
 
 	public int determineMove(Board b) {
+		
 		return s.determineMove(b, d);
 	}
 }

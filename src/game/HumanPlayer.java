@@ -24,8 +24,8 @@ public class HumanPlayer extends Player {
 	/**
 	 * Creates a new human player object.
 	 */
-	public HumanPlayer(String name, Disc disc, ClientView viewArg) {
-		super(name, disc);
+	public HumanPlayer(Disc disc, ClientView viewArg) {
+		super("HumanPlayer", disc);
 		view = viewArg;
 	}
 

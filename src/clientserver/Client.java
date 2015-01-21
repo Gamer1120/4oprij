@@ -109,8 +109,8 @@ public class Client {
 	 	requires port >= 1 & port <= 65535;
 	 	requires muiArg != null;
 	 */
-	public Client(InetAddress host, int port, ClientTUI muiArg)
-			throws IOException {
+	public Client(InetAddress host, int port, ClientTUI muiArg,
+			Player localPlayer) throws IOException {
 		this.sock = new Socket(host, port);
 		this.mui = muiArg;
 		this.in = new BufferedReader(new InputStreamReader(
@@ -122,7 +122,7 @@ public class Client {
 		this.invitedBy = new HashMap<String, Integer[]>();
 		this.isConnected = false;
 		//TODO: Needs to be any player.
-		this.localPlayer = new HumanPlayer(getClientName(), Disc.YELLOW, muiArg);
+		this.localPlayer = localPlayer;
 		this.requestedBoard = false;
 		this.invited = new HashMap<String, Integer[]>();
 	}
@@ -192,10 +192,8 @@ public class Client {
 	//@	requires serverMessage[0].equals(Server.ACCEPT_CONNECT);
 	private void connect(String[] serverMessage) {
 		mui.addMessage("Successfully established connection to server: "
-				+ sock.getRemoteSocketAddress().toString() // IP of
-															// the
-															// server
-				+ ":" + sock.getPort()); // Port of the server
+		// IP of the server
+				+ sock.getRemoteSocketAddress().toString());
 		mui.addMessage("The features of this server are:"
 				+ arrayToLine(serverMessage));
 	}
@@ -330,7 +328,12 @@ public class Client {
 		if (currPlayer == null) {
 			currPlayer = firstPlayer;
 		}
-		localPlayer.determineMove(board);
+		if (localPlayer instanceof HumanPlayer) {
+			localPlayer.determineMove(board);
+		} else{
+			int move = localPlayer.determineMove(board);
+			sendMessage(MOVE + " " + move);
+		}
 	}
 
 	/**
@@ -462,25 +465,25 @@ public class Client {
 		try {
 			int boardColumns = Integer.parseInt(protocol[1]);
 			int boardRows = Integer.parseInt(protocol[2]);
-		
-		test = new Board(boardRows, boardColumns);
-		int i = 3;
-		for (int row = boardRows - 1; row >= 0; row--) {
-			for (int col = 0; col < boardColumns; col++) {
-				if (Integer.parseInt(protocol[i]) == 0) {
-					//Disc.EMPTY
-					test.setField(row, col, Disc.EMPTY);
-				} else if (Integer.parseInt(protocol[i]) == 1) {
-					//Disc.YELLOW
-					test.setField(row, col, Disc.YELLOW);
-				} else if (Integer.parseInt(protocol[i]) == 2) {
-					//Disc.RED
-					test.setField(row, col, Disc.RED);
+
+			test = new Board(boardRows, boardColumns);
+			int i = 3;
+			for (int row = boardRows - 1; row >= 0; row--) {
+				for (int col = 0; col < boardColumns; col++) {
+					if (Integer.parseInt(protocol[i]) == 0) {
+						//Disc.EMPTY
+						test.setField(row, col, Disc.EMPTY);
+					} else if (Integer.parseInt(protocol[i]) == 1) {
+						//Disc.YELLOW
+						test.setField(row, col, Disc.YELLOW);
+					} else if (Integer.parseInt(protocol[i]) == 2) {
+						//Disc.RED
+						test.setField(row, col, Disc.RED);
+					}
+					i++;
 				}
-				i++;
 			}
-		}
-		
+
 		} catch (NumberFormatException e) {
 			mui.addMessage("Server sent a wrong board. TERMINATING.");
 			shutdown();

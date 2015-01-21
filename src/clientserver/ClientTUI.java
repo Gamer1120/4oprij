@@ -1,5 +1,11 @@
 package clientserver;
 
+import game.ComputerPlayer;
+import game.Disc;
+import game.HumanPlayer;
+import game.NaiveStrategy;
+import game.SmartStrategy;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,16 +18,16 @@ public class ClientTUI extends Thread implements ClientView {
 	private boolean moveRequested;
 	private int move;
 	private Object waiter = new Object();
+	private InetAddress inet;
+	private int port;
 
 	public ClientTUI(InetAddress inet, int port) {
+		this.inet = inet;
+		this.port = port;
 		this.moveRequested = false;
 		this.move = -1;
-		try {
-			this.client = new Client(inet, port, this);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		this.reader = new BufferedReader(new InputStreamReader(System.in));
+		askName();
 	}
 
 	public void addMessage(String msg) {
@@ -104,10 +110,23 @@ public class ClientTUI extends Thread implements ClientView {
 	@Override
 	public void askName() {
 		String name = null;
+		addMessage("Please enter your name (or -N for a ComputerPlayer with a NaiveStrategy or -S for a ComputerPlayer with a SmartStrategy): ");
 		try {
 			name = reader.readLine();
+			if (name.equals("-N")) {
+				name = "NaivePlayer";
+				this.client = new Client(inet, port, this, new ComputerPlayer(
+						Disc.YELLOW, new NaiveStrategy()));
+			} else if (name.equals("-S")) {
+				name = "SmartPlayer";
+				this.client = new Client(inet, port, this, new ComputerPlayer(
+						Disc.YELLOW, new SmartStrategy()));
+			} else {
+				this.client = new Client(inet, port, this, new HumanPlayer(
+						Disc.YELLOW, this));
+			}
 		} catch (IOException e) {
-			client.shutdown();
+			//TODO: Handle this error.
 		}
 		client.sendMessage(Client.CONNECT + " " + name
 				+ " CUSTOM_BOARD_SIZE CHAT");
