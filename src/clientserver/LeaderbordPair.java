@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class LeaderbordPair implements Comparable<LeaderbordPair>, Serializable {
 
 	/**
-	 * 
+	 * Auto generated serial UID for Serializable.
 	 */
 	private static final long serialVersionUID = 4797121270035180883L;
 	private String name;

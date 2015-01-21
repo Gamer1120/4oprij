@@ -106,14 +106,17 @@ public class Server extends Thread {
 			ObjectInput in = new ObjectInputStream(
 					new FileInputStream(FILENAME));
 			/*
-			 * We weten zeker dat als het bestand bestaat het een
-			 * TreeSet<LeaderbordPair> is. Het is niet mogelijk om instanceof
-			 * TreeSet<CustomClass> te doen dus is altijd ongecheckt.
-			 * Vandaar de supress.
+			 * It is not possible to use instanceof on a TreeSet<CustomClass>,
+			 * so the cast will always be unchecked. But we assume the file is
+			 * created and written by this server, so it is a instance of
+			 * TreeSet<LeaderboardPair>. But even if it isn't (maybe written by
+			 * another program) we also catch a ClassCastException and create a
+			 * new leaderboard, so it should be fine, that's why the unchecked
+			 * warning is supressed
 			 */
 			this.leaderbord = (TreeSet<LeaderbordPair>) in.readObject();
 			in.close();
-		} catch (IOException | ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException | ClassCastException e) {
 			this.leaderbord = new TreeSet<LeaderbordPair>();
 		}
 	}

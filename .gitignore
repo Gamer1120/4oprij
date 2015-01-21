@@ -3,5 +3,5 @@
 *.classpath
 *.project
 *.checkstyle
+*.obj
 ~$*
-leaderboard.obj

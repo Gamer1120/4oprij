@@ -94,7 +94,6 @@ public class Game {
 		printResult();
 	}
 
-	/*@requires this.board.gameOver();*/
 	/**
 	 * Prints the result of the last game.
 	 */
