@@ -62,6 +62,22 @@ public class ClientTUI extends Thread implements ClientView {
 						addMessage("There was no move requested.");
 					}
 				}
+			} else if (splitInput[0].equals("INVITE")) {
+				if (splitInput.length == 1) {
+					addMessage("Please add a player to invite.");
+				} else if (splitInput.length == 2) {
+					addMessage(splitInput[1]);
+					client.addInvite(splitInput[1]);
+					client.sendMessage(input);
+				} else if (splitInput.length == 3) {
+					addMessage("For a custom board size you need to specify both the BoardX and BoardY");
+				} else if (splitInput.length >= 4){
+					addMessage(splitInput[1]);
+					addMessage(splitInput[2]);
+					addMessage(splitInput[3]);
+					client.addInvite(splitInput[1], Integer.parseInt(splitInput[2]), Integer.parseInt(splitInput[3]));
+					client.sendMessage(input);
+				}
 			} else {
 				client.sendMessage(input);
 			}
@@ -90,7 +106,9 @@ public class ClientTUI extends Thread implements ClientView {
 		} catch (IOException e) {
 			client.shutdown();
 		}
-		client.sendMessage(Client.CONNECT + " " + name + " CUSTOM_BOARD_SIZE CHAT");
+		client.sendMessage(Client.CONNECT + " " + name
+				+ " CUSTOM_BOARD_SIZE CHAT");
+		client.setClientName(name);
 		client.readInput();
 	}
 

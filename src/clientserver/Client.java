@@ -12,7 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,7 +83,8 @@ public class Client {
 	private boolean isConnected;
 	private Player localPlayer;
 	private boolean requestedBoard;
-	private Map<String, Integer[]> invites;
+	private Map<String, Integer[]> invitedBy;
+	private Map<String, Integer[]> invited;
 
 	/*@	private invariant sock != null;
 	 	private invariant mui != null;
@@ -118,11 +119,12 @@ public class Client {
 				sock.getOutputStream()));
 		this.loop = true;
 		this.isIngame = false;
-		this.invites = new HashMap<String, Integer[]>();
+		this.invitedBy = new HashMap<String, Integer[]>();
 		this.isConnected = false;
 		//TODO: Needs to be any player.
 		this.localPlayer = new HumanPlayer(getClientName(), Disc.YELLOW, muiArg);
 		this.requestedBoard = false;
+		this.invited = new HashMap<String, Integer[]>();
 	}
 
 	/**
@@ -225,16 +227,22 @@ public class Client {
 	private void invite(String[] serverMessage) {
 		String opponentName = serverMessage[1];
 		if (serverMessage.length == 2) {
-			invites.put(opponentName, null);
+			invitedBy.put(opponentName, new Integer[] { 6, 7 });
 			if (!isIngame) {
-				mui.addMessage("Player: " + opponentName
-						+ " has invited you to a game of Connect4!");
+				mui.addMessage("Player: "
+						+ opponentName
+						+ " has invited you to a game of Connect4 (default boardsize)!");
 			}
 		} else if (serverMessage.length >= 4) {
-			invites.put(
+			mui.addMessage("Got invited with custom board size, namely "
+					+ Integer.parseInt(serverMessage[2]) + " x "
+					+ Integer.parseInt(serverMessage[3]));
+			invitedBy.put(
 					opponentName,
 					new Integer[] { Integer.parseInt(serverMessage[2]),
 							Integer.parseInt(serverMessage[3]) });
+			mui.addMessage("The value I just put in the map is: "
+					+ Arrays.toString(invitedBy.get(opponentName)));
 		}
 	}
 
@@ -256,22 +264,31 @@ public class Client {
 		secondPlayer = serverMessage[2];
 
 		if (firstPlayer.equals(getClientName())) {
+			mui.addMessage("DEBUG1");
 			mui.addMessage("A game between you and " + secondPlayer
 					+ " has started!");
-			Integer[] boardSize = invites.get(secondPlayer);
+			Integer[] boardSize = invitedBy.get(secondPlayer);
+			mui.addMessage("The boardsize I have stored for the invite from player "
+					+ secondPlayer + " equals " + Arrays.toString(boardSize));
 			if (boardSize != null) {
-				board = new Board(boardSize[1], boardSize[2]);
-			} else{
-				board= new Board();
+				board = new Board(boardSize[0], boardSize[1]);
+			} else {
+				mui.addMessage("Using default boardsize.");
+				board = new Board();
 			}
 		} else {
+			mui.addMessage("DEBUG2");
+			mui.addMessage(serverMessage[1] + " " + getClientName());
 			mui.addMessage("A game between you and " + firstPlayer
 					+ " has started!");
-			Integer[] boardSize = invites.get(firstPlayer);
+			Integer[] boardSize = invited.get(firstPlayer);
+			mui.addMessage("The boardsize I have stored for the invite from player "
+					+ firstPlayer + " equals " + Arrays.toString(boardSize));
 			if (boardSize != null) {
-				board = new Board(boardSize[1], boardSize[2]);
-			} else{
-				board= new Board();
+				board = new Board(boardSize[0], boardSize[1]);
+			} else {
+				mui.addMessage("Using default boardsize.");
+				board = new Board();
 			}
 		}
 
@@ -281,7 +298,7 @@ public class Client {
 		// 1 > Disc.RED
 		// TODO: board size
 
-		invites.clear();
+		invitedBy.clear();
 		mui.addMessage(board.toString());
 		mui.addMessage("You are YELLOW");
 	}
@@ -442,6 +459,10 @@ public class Client {
 		return clientName;
 	}
 
+	public void setClientName(String name) {
+		clientName = name;
+	}
+
 	//@ requires line != null;
 	public Board toBoard(String line) {
 		String[] protocol = line.split(" ");
@@ -478,5 +499,13 @@ public class Client {
 
 	private void requestBoard() {
 		sendMessage(REQUEST_BOARD);
+	}
+
+	public void addInvite(String name) {
+		addInvite(name, 6, 7);
+	}
+
+	public void addInvite(String name, int BoardX, int BoardY) {
+		invited.put(name, new Integer[] { BoardX, BoardY });
 	}
 } // end of class Client
