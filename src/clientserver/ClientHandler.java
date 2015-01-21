@@ -166,7 +166,7 @@ public class ClientHandler extends Thread {
 				break;
 			case Client.REQUEST_LEADERBOARD:
 				sendMessage(Server.ERROR + " Not implemented");
-				// TODO: leaderbords opslaan
+				// TODO: leaderboards opslaan
 				break;
 			default:
 				sendMessage(Server.ERROR + " Invalid command");
@@ -612,12 +612,14 @@ public class ClientHandler extends Thread {
 		if (!board.gameOver()) {
 			server.sendMessage(opponentName, Server.REQUEST_MOVE);
 		} else if (board.hasWinner()) {
-			server.updateLeaderbord(clientName, true);
-			server.updateLeaderbord(opponentName, false);
+			server.updateLeaderboard(clientName, true);
+			server.updateLeaderboard(opponentName, false);
 			server.sendMessage(opponentName, Server.GAME_END + " " + Game.WIN
 					+ " " + clientName);
 			sendMessage(Server.GAME_END + " " + Game.WIN + " " + clientName);
 		} else {
+			server.updateLeaderboard(clientName, null);
+			server.updateLeaderboard(opponentName, null);
 			server.sendMessage(opponentName, Server.GAME_END + " " + Game.DRAW);
 			sendMessage(Server.GAME_END + " " + Game.DRAW);
 		}

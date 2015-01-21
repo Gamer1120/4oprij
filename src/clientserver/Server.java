@@ -82,8 +82,8 @@ public class Server extends Thread {
 	/** The invites. */
 	private HashMap<String[], Integer[]> invites;
 
-	/** The leaderbord. */
-	private TreeSet<LeaderbordPair> leaderbord;
+	/** The leaderboard. */
+	private TreeSet<LeaderboardPair> leaderboard;
 
 	/**
 	 * Constructs a new Server object.
@@ -114,10 +114,10 @@ public class Server extends Thread {
 			 * new leaderboard, so it should be fine, that's why the unchecked
 			 * warning is supressed
 			 */
-			this.leaderbord = (TreeSet<LeaderbordPair>) in.readObject();
+			this.leaderboard = (TreeSet<LeaderboardPair>) in.readObject();
 			in.close();
 		} catch (IOException | ClassNotFoundException | ClassCastException e) {
-			this.leaderbord = new TreeSet<LeaderbordPair>();
+			this.leaderboard = new TreeSet<LeaderboardPair>();
 		}
 	}
 
@@ -492,44 +492,65 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Updates the score of the LeaderbordPair with the givien name. Adds 1
-	 * point if increment is true and removes 1 point if increment is false If
-	 * the name does't exists create a new pair with 1 point if increment is
-	 * true or -1 point if increment is false.
+	 * Generates a line with all players on the leaderboard.
+	 */
+	public String getLeaderboard() {
+		synchronized (leaderboard) {
+			String scores = "";
+			int rank = 1;
+			for (LeaderboardPair pair : leaderboard) {
+				scores += " " + pair.getName() + " " + pair.getWins() + " "
+						+ pair.getLosses() + " " + rank++;
+			}
+			return scores;
+		}
+	}
+
+	/**
+	 * Updates the score of the LeaderboardPair with the givin name. If the name
+	 * doesn't exists it creates a new LeaderboardPair. If win is null 1 is
+	 * added to games played and if it's true or false 1 is added to gamse
+	 * playad and to games won or games lost repectively.
 	 * 
 	 * @param name
-	 *            Name of he LeaderbordPair
+	 *            Name of he LeaderboardPair
 	 * @param increment
 	 *            Wether to increment or decrement the score
 	 */
 	/*@ requires name != null;
 	 */
 	// TODO: ensure de privates
-	public void updateLeaderbord(String name, boolean increment) {
-		synchronized (leaderbord) {
+	public void updateLeaderboard(String name, Boolean win) {
+		synchronized (leaderboard) {
 			boolean found = false;
-			for (LeaderbordPair pair : leaderbord) {
+			for (LeaderboardPair pair : leaderboard) {
 				if (pair.getName().equals(name)) {
-					if (increment) {
-						pair.incrementScore();
+					if (win == null) {
+						pair.updateDraw();
+					} else if (win) {
+						pair.updateWin();
 					} else {
-						pair.decrementScore();
+						pair.updateLoss();
 					}
 					found = true;
 					break;
 				}
 			}
 			if (!found) {
-				if (increment) {
-					leaderbord.add(new LeaderbordPair(name, 1));
+				LeaderboardPair pair = new LeaderboardPair(name);
+				if (win == null) {
+					pair.updateDraw();
+				} else if (win) {
+					pair.updateWin();
 				} else {
-					leaderbord.add(new LeaderbordPair(name, -1));
+					pair.updateLoss();
 				}
+				leaderboard.add(pair);
 			}
 			try {
 				ObjectOutput out = new ObjectOutputStream(new FileOutputStream(
 						FILENAME));
-				out.writeObject(leaderbord);
+				out.writeObject(leaderboard);
 				out.flush();
 				out.close();
 			} catch (IOException e) {
