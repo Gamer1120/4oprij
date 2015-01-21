@@ -196,6 +196,8 @@ public class Client {
 				notifyAll();
 			case Server.CHAT:
 				mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
+			case Server.LEADERBOARD:
+				mui.addMessage(line);
 			}
 		}
 	}
@@ -297,20 +299,13 @@ public class Client {
 			mui.addMessage("[GAME]A game between you and " + secondPlayer
 					+ " has started!");
 			Integer[] boardSize = invitedBy.get(secondPlayer);
-			if (boardSize != null) {
+
 				board = new Board(boardSize[1], boardSize[0]);
-			} else {
-				board = new Board();
-			}
 		} else {
 			mui.addMessage("[GAME]A game between you and " + firstPlayer
 					+ " has started!");
 			Integer[] boardSize = invited.get(firstPlayer);
-			if (boardSize != null) {
-				board = new Board(boardSize[0], boardSize[1]);
-			} else {
-				board = new Board();
-			}
+				board = new Board(boardSize[1], boardSize[0]);
 		}
 
 		this.isIngame = true;
@@ -415,7 +410,6 @@ public class Client {
 					shutdown();
 				}
 			}
-
 		} else if (currPlayer.equals(secondPlayer)) {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
@@ -571,7 +565,7 @@ public class Client {
 	 *            The name this Client just invited.
 	 */
 	public void addClientInvite(String name) {
-		addClientInvite(name, 6, 7);
+		addClientInvite(name, 7, 6);
 	}
 
 	/**
@@ -597,7 +591,7 @@ public class Client {
 	 *            The name this Client just got invited by.
 	 */
 	public void addServerInvite(String name) {
-		addServerInvite(name, 6, 7);
+		addServerInvite(name, 7, 6);
 	}
 
 	/**

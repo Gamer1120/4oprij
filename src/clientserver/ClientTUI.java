@@ -128,8 +128,8 @@ public class ClientTUI extends Thread implements ClientView {
 				} else if (splitInput.length >= 4) {
 					try {
 						client.addClientInvite(splitInput[1],
-								Integer.parseInt(splitInput[3]),
-								Integer.parseInt(splitInput[2]));
+								Integer.parseInt(splitInput[2]),
+								Integer.parseInt(splitInput[3]));
 						client.sendMessage(input);
 						addMessage("[INVITE]Successfully tried to invite: "
 								+ splitInput[1]
@@ -138,6 +138,8 @@ public class ClientTUI extends Thread implements ClientView {
 						addMessage("[INVITE]Please specify the BoardX and BoardY as integers. Invite failed.");
 					}
 				}
+			} else if (splitInput[0].equals("LEADERBOARD")) {
+				client.sendMessage(Client.REQUEST_LEADERBOARD);
 			} else {
 				client.sendMessage(input);
 			}
@@ -190,7 +192,7 @@ public class ClientTUI extends Thread implements ClientView {
 			client.shutdown();
 		}
 		client.sendMessage(Client.CONNECT + " " + name + " " + Features.CHAT
-				+ " " + Features.CUSTOM_BOARD_SIZE);
+				+ " " + Features.CUSTOM_BOARD_SIZE+ " " + Features.LEADERBOARD);
 		client.setClientName(name);
 		client.readInput();
 	}
