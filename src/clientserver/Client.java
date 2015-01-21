@@ -45,7 +45,6 @@ public class Client {
 	 */
 	private String clientName;
 
-	//TODO: Make this ClientView compatable
 	/**
 	 * The User Interface of this Client.
 	 */
@@ -121,7 +120,6 @@ public class Client {
 		this.isIngame = false;
 		this.invitedBy = new HashMap<String, Integer[]>();
 		this.isConnected = false;
-		//TODO: Needs to be any player.
 		this.localPlayer = localPlayer;
 		this.requestedBoard = false;
 		this.invited = new HashMap<String, Integer[]>();
@@ -285,7 +283,6 @@ public class Client {
 		currPlayer = null; // Not set yet.
 		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
 		// 1 > Disc.RED
-		// TODO: board size
 
 		invitedBy.clear();
 		invited.clear();
@@ -350,8 +347,6 @@ public class Client {
 			currPlayer = secondPlayer;
 		}
 		int move = -1;
-		// TODO: betere error handing met request bord
-		// TODO: board printen op clientTUI
 		if (currPlayer.equals(firstPlayer)) {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
