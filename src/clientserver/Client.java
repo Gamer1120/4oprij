@@ -608,4 +608,10 @@ public class Client {
 	public void addServerInvite(String name, int BoardX, int BoardY) {
 		invitedBy.put(name, new Integer[] { BoardX, BoardY });
 	}
+	
+	public void showLeaderBoard(String serverMessage){
+		//EXAMPLE: WinPlayer 1 0 1 LosePlayer 0 1 2
+		//DELEN DOOR 4, dat is aantal Clients dat je moet listen
+
+	}
 }
