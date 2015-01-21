@@ -20,6 +20,7 @@ public class ClientTUI extends Thread implements ClientView {
 	private Object waiter = new Object();
 	private InetAddress inet;
 	private int port;
+	private static final String DEFAULT_INET = "localhost";
 
 	public ClientTUI(InetAddress inet, int port) {
 		this.inet = inet;
@@ -98,7 +99,7 @@ public class ClientTUI extends Thread implements ClientView {
 		// Connects to localhost:2727
 		InetAddress addr = null;
 		try {
-			addr = InetAddress.getByName("localhost");
+			addr = InetAddress.getByName(DEFAULT_INET);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
