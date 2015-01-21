@@ -390,6 +390,8 @@ public class Client {
 					requestedBoard = true;
 					try {
 						wait();
+						mui.addMessage("This is the board the server has: ");
+						mui.addMessage(board.toString());
 						moveOK(serverMessage);
 					} catch (InterruptedException e) {
 						mui.addMessage("Interrupted.");

@@ -16,8 +16,8 @@ public abstract class Player extends Observable {
 	// Constructors:
 	/*@
 		requires theName != null;
-		requires thedisc == thedisc.XX || thedisc == thedisc.OO;
-		ensures this.getName() == theName; ensures this.getdisc() == thedisc;
+		requires theDisc == Disc.YELLOW || theDisc == Disc.RED;
+		ensures this.getName() == theName; ensures this.getDisc() == theDisc;
 	 */
 	/**
 	 * Creates a new Player object.
