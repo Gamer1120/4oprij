@@ -165,8 +165,7 @@ public class ClientHandler extends Thread {
 				requestLobbyChecks();
 				break;
 			case Client.REQUEST_LEADERBOARD:
-				sendMessage(Server.ERROR + " Not implemented");
-				// TODO: leaderboards opslaan
+				requestLeaderboardChecks();
 				break;
 			default:
 				sendMessage(Server.ERROR + " Invalid command");
@@ -247,9 +246,9 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * returns wheter this cliens has a chat feature.
+	 * returns wheter this cliens has the chat feature.
 	 *
-	 * @return true if the client has a chat feature.
+	 * @return true if the client has the chat feature.
 	 */
 	//@ requires connected();
 	/*@ pure */public boolean hasChat() {
@@ -257,13 +256,23 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * returns wheter this cliens has connected.
+	 * returns wheter this cliens has the custom board size feature.
 	 *
-	 * @return true if the client has a name
+	 * @return true if the client has the custom board size feature.
 	 */
 	//@ requires connected();
 	/*@ pure */public boolean hasCustomBoardSize() {
 		return clientFeatures.contains(Features.CUSTOM_BOARD_SIZE);
+	}
+
+	/**
+	 * returns wheter this cliens has the leaderboard feature.
+	 *
+	 * @return true if the client has the leaderboard feature.
+	 */
+	//@ requires connected();
+	/*@ pure */public boolean hasLeaderboard() {
+		return clientFeatures.contains(Features.LEADERBOARD);
 	}
 
 	/**
@@ -710,6 +719,31 @@ public class ClientHandler extends Thread {
 	//@ requires connected();
 	private void requestLobby() {
 		sendMessage(Server.LOBBY + server.getLobby());
+	}
+
+	/**
+	 * Checks if the client is connected. If this is the case it calls
+	 * requestLobby to send the lobby.
+	 */
+	private void requestLeaderboardChecks() {
+		if (!connected()) {
+			sendMessage(Server.ERROR + " You have to connect first");
+		} else if (!hasLeaderboard()) {
+			sendMessage(Server.ERROR + " Your client doesn't support the "
+					+ Features.LEADERBOARD
+					+ " feature. Please add this feature if you want to use it");
+		} else {
+			requestLeaderboard();
+		}
+	}
+
+	/**
+	 * Sends the leaderboard to the client.
+	 */
+	//@ requires connected();
+	//@ requires hasLeaderboard();
+	private void requestLeaderboard() {
+		sendMessage(Server.LEADERBOARD + server.getLeaderboard());
 	}
 
 	/**
