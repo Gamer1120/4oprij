@@ -1,7 +1,5 @@
 package game;
 
-import java.util.Arrays;
-
 public class Test {
 	public final static int N = 0;
 	public final static Disc D = Disc.YELLOW;
@@ -11,7 +9,7 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		Board board = new Board();
-		//printAll(board);
+		printAll(board);
 		michaelTest(board);
 	}
 
@@ -65,7 +63,7 @@ public class Test {
 		System.out.println(b.toProtocol());
 		System.out.println("The board has " + b.getColumns() + " columns and "
 				+ b.getRows() + " rows.");
-		
+
 	}
 
 }

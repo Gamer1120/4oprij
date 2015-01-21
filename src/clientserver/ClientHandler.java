@@ -734,7 +734,7 @@ public class ClientHandler extends Thread {
 
 	/**
 	 * End s the game, resets the values belonging to the game and broadcasts
-	 * the lobby because this client just joined the lobb again.
+	 * the lobby because this client just joined the lobby again.
 	 */
 	//@ ensures playerNumber == -1;
 	//@ ensures opponentName == null;
@@ -749,25 +749,25 @@ public class ClientHandler extends Thread {
 	/**
 	 * This ClientHandler signs off from the Server and subsequently sends a
 	 * last broadcast to the Server to inform that the Client is no longer
-	 * participati ng in the lobby.
+	 * participating in the lobby.
 	 */
-	//@ ensures loop == false;
+	//@ ensures !loop;
 	private void shutdown() {
 		// TODO: clients moeten kunnen reconnecten na dc
 		this.loop = false;
 		server.removeInvite(clientName);
 		server.removeHandler(this);
-		if (inGame()) {
-			server.sendMessage(opponentName, Server.GAME_END + " "
-					+ Game.DISCONNECT);
-		} else if (clientName != null) {
-			server.broadcastLobby();
-		}
-		server.print("ClientHandler: " + clientName + " has left");
 		try {
 			sock.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		if (inGame()) {
+			server.sendMessage(opponentName, Server.GAME_END + " "
+					+ Game.DISCONNECT);
+		} else if (connected()) {
+			server.broadcastLobby();
+		}
+		server.print("ClientHandler: " + clientName + " has left");
 	}
 }
