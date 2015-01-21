@@ -638,7 +638,7 @@ public class ClientHandler extends Thread {
 			sendMessage(Server.ERROR + " You have to connect first");
 		} else if (command.length < 2) {
 			sendMessage(Server.ERROR + " Invalid arguments");
-		} else if (hasChat()) {
+		} else if (!hasChat()) {
 			sendMessage(Server.ERROR + " Your client doesn't support the "
 					+ Features.CHAT
 					+ " feature. Please add this feature if you want to use it");
