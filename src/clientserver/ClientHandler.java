@@ -612,7 +612,8 @@ public class ClientHandler extends Thread {
 		if (!board.gameOver()) {
 			server.sendMessage(opponentName, Server.REQUEST_MOVE);
 		} else if (board.hasWinner()) {
-			// TODO: game end final strings
+			server.updateLeaderbord(clientName, true);
+			server.updateLeaderbord(opponentName, false);
 			server.sendMessage(opponentName, Server.GAME_END + " " + Game.WIN
 					+ " " + clientName);
 			sendMessage(Server.GAME_END + " " + Game.WIN + " " + clientName);

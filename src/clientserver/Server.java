@@ -2,11 +2,18 @@ package clientserver;
 
 import game.Board;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.TreeSet;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -55,6 +62,9 @@ public class Server extends Thread {
 
 	public static final String FEATURES = Features.CHAT + " "
 			+ Features.CUSTOM_BOARD_SIZE;
+
+	/** The Constant LEADERBOARD. */
+	public static final String FILENAME = "leaderboard.obj";
 	/**
 	 * The port of the server.
 	 */
@@ -72,6 +82,9 @@ public class Server extends Thread {
 	/** The invites. */
 	private HashMap<String[], Integer[]> invites;
 
+	/** The leaderbord. */
+	private TreeSet<LeaderbordPair> leaderbord;
+
 	/**
 	 * Constructs a new Server object.
 	 *
@@ -83,11 +96,26 @@ public class Server extends Thread {
 	/*@ requires portArg >= 1 & portArg <= 65535;
 		requires muiArg != null;
 	 */
+	@SuppressWarnings("unchecked")
 	public Server(int portArg, MessageUI muiArg) {
 		this.port = portArg;
 		this.mui = muiArg;
 		this.threads = new HashSet<ClientHandler>();
 		this.invites = new HashMap<String[], Integer[]>();
+		try {
+			ObjectInput in = new ObjectInputStream(
+					new FileInputStream(FILENAME));
+			/*
+			 * We weten zeker dat als het bestand bestaat het een
+			 * TreeSet<LeaderbordPair> is. Het is niet mogelijk om instanceof
+			 * TreeSet<CustomClass> te doen dus is altijd ongecheckt.
+			 * Vandaar de supress.
+			 */
+			this.leaderbord = (TreeSet<LeaderbordPair>) in.readObject();
+			in.close();
+		} catch (IOException | ClassNotFoundException e) {
+			this.leaderbord = new TreeSet<LeaderbordPair>();
+		}
 	}
 
 	/**
@@ -459,4 +487,51 @@ public class Server extends Thread {
 			}
 		}
 	}
-} // end of class Server
+
+	/**
+	 * Updates the score of the LeaderbordPair with the givien name. Adds 1
+	 * point if increment is true and removes 1 point if increment is false If
+	 * the name does't exists create a new pair with 1 point if increment is
+	 * true or -1 point if increment is false.
+	 * 
+	 * @param name
+	 *            Name of he LeaderbordPair
+	 * @param increment
+	 *            Wether to increment or decrement the score
+	 */
+	/*@ requires name != null;
+	 */
+	// TODO: ensure de privates
+	public void updateLeaderbord(String name, boolean increment) {
+		synchronized (leaderbord) {
+			boolean found = false;
+			for (LeaderbordPair pair : leaderbord) {
+				if (pair.getName().equals(name)) {
+					if (increment) {
+						pair.incrementScore();
+					} else {
+						pair.decrementScore();
+					}
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				if (increment) {
+					leaderbord.add(new LeaderbordPair(name, 1));
+				} else {
+					leaderbord.add(new LeaderbordPair(name, -1));
+				}
+			}
+			try {
+				ObjectOutput out = new ObjectOutputStream(new FileOutputStream(
+						FILENAME));
+				out.writeObject(leaderbord);
+				out.flush();
+				out.close();
+			} catch (IOException e) {
+				print("Error couldn't save leaderboard");
+			}
+		}
+	}
+}
