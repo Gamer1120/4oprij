@@ -177,9 +177,8 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * This method can be used to send a message over the socket connection to
-	 * the Client. If the writing of a message fails, the method concludes that
-	 * the socket connection has been lost and shutdown() is called.
+	 * This method checks wether a game starts, ends or a move is requested
+	 * before sending the message
 	 *
 	 * @param msg
 	 *            the message
@@ -189,15 +188,32 @@ public class ClientHandler extends Thread {
 		String[] command = msg.split("\\s+");
 		switch (command[0]) {
 		case Server.GAME_START:
+			write(msg);
 			startGame(command);
 			break;
 		case Server.GAME_END:
+			write(msg);
 			endGame();
 			break;
 		case Server.REQUEST_MOVE:
 			move = true;
+			write(msg);
 			break;
+		default:
+			write(msg);
 		}
+	}
+
+	/**
+	 * This method can be used to send a message over the socket connection to
+	 * the Client. If the writing of a message fails, the method concludes that
+	 * the socket connection has been lost and shutdown() is called.
+	 *
+	 * @param msg
+	 *            the message
+	 */
+	//@ requires msg != null;
+	private void write(String msg) {
 		try {
 			out.write(msg);
 			out.newLine();
