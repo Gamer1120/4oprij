@@ -3,9 +3,9 @@ package game;
 import clientserver.ClientView;
 
 /**
- * Class for maintaining a human player in Tic Tac Toe.
+ * Class for maintaining a HumanPlayer in Connect4.
  * 
- * @author Sven Konings en Michael Koopman
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
 public class HumanPlayer extends Player {
 	/**
@@ -13,25 +13,26 @@ public class HumanPlayer extends Player {
 	 */
 	private ClientView view;
 
-	// Constructors:
-	/*@
-		requires disc == Disc.YELLOW || disc == Disc.RED;
-		ensures this.getDisc() == disc;
-	 */
+	//@ private invariant view != null;
+
 	/**
 	 * Creates a new HumanPlayer object with a given Disc and ClientView.
+	 * 
+	 * @param disc
+	 *            The Disc this HumanPlayer should have.
+	 * @param viewArg
+	 *            The ClientView this HumanPlayer should have.
+	 */
+	/*@
+		requires disc == Disc.YELLOW || disc == Disc.RED;
+		requires viewArg != null;
+		ensures getDisc() == disc;
 	 */
 	public HumanPlayer(Disc disc, ClientView viewArg) {
 		super("HumanPlayer", disc);
 		view = viewArg;
 	}
 
-	// Commands:
-
-	/*@
-		requires board != null;
-		ensures board.isField(\result) && board.isEmptyField(\result);
-	 */
 	/**
 	 * Asks the user to input the field where to place the next mark. This is
 	 * done using the view.
@@ -39,6 +40,10 @@ public class HumanPlayer extends Player {
 	 * @param board
 	 *            the game board
 	 * @return the player's chosen field
+	 */
+	/*@
+		requires board != null;
+		ensures board.isField(\result) && board.isEmptyField(\result);
 	 */
 	public int determineMove(Board board) {
 		return view.makeMove();
