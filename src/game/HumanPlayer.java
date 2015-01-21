@@ -6,23 +6,20 @@ import clientserver.ClientView;
  * Class for maintaining a human player in Tic Tac Toe.
  * 
  * @author Sven Konings en Michael Koopman
- * @version $Revision: 1.0 $
  */
 public class HumanPlayer extends Player {
 	/**
-	 * View of the game
+	 * The View used by the Client
 	 */
 	private ClientView view;
 
 	// Constructors:
 	/*@
-		requires name != null;
-		requires mark == Mark.XX || mark == Mark.OO;
-		ensures this.getName() == name;
-		ensures this.getMark() == mark;
+		requires disc == Disc.YELLOW || disc == Disc.RED;
+		ensures this.getDisc() == disc;
 	 */
 	/**
-	 * Creates a new human player object.
+	 * Creates a new HumanPlayer object with a given Disc and ClientView.
 	 */
 	public HumanPlayer(Disc disc, ClientView viewArg) {
 		super("HumanPlayer", disc);
