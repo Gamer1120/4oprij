@@ -78,10 +78,28 @@ public class Client {
 	 * An integer to determine which Player's turn it is.
 	 */
 	private String currPlayer;
+	/**
+	 * A boolean to determine whether this Client is connected.
+	 */
 	private boolean isConnected;
+	/**
+	 * The Player this Client is.
+	 */
 	private Player localPlayer;
+	/**
+	 * If the Client requests the Board from the server, it's saved here that it
+	 * has already been requested, so it's not requested for a second time.
+	 */
 	private boolean requestedBoard;
+	/**
+	 * A Map of invites this Client is invited by. This map gets emptied every
+	 * time a Game starts.
+	 */
 	private Map<String, Integer[]> invitedBy;
+	/**
+	 * A Map of invited this Client sent. This map gets emptied every time a
+	 * Game starts.
+	 */
 	private Map<String, Integer[]> invited;
 
 	/*@	private invariant sock != null;
@@ -214,9 +232,9 @@ public class Client {
 
 	/**
 	 * This method accepts the Server.INVITE packet sent by the Server. When
-	 * this method is called, it adds the inviter to an inviterlist, and, if the
-	 * player isn't ingame, it will also show the Client that they have been
-	 * invited by that Client.
+	 * this method is called, it adds the inviter (and to an inviterlist, and
+	 * potentially, the custom board size. If the player isn't ingame, it will
+	 * also show the Client that they have been invited by that Client.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -225,7 +243,7 @@ public class Client {
 	private void invite(String[] serverMessage) {
 		String opponentName = serverMessage[1];
 		if (serverMessage.length == 2) {
-			invitedBy.put(opponentName, new Integer[] { 6, 7 });
+			addServerInvite(opponentName);
 			if (!isIngame) {
 				mui.addMessage("Player: "
 						+ opponentName
@@ -233,9 +251,9 @@ public class Client {
 			}
 		} else if (serverMessage.length >= 4) {
 			try {
-				invitedBy.put(opponentName,
-						new Integer[] { Integer.parseInt(serverMessage[2]),
-								Integer.parseInt(serverMessage[3]) });
+				addServerInvite(opponentName,
+						Integer.parseInt(serverMessage[2]),
+						Integer.parseInt(serverMessage[3]));
 			} catch (NumberFormatException e) {
 				mui.addMessage("The server just sent an invite with an invalid custom board size.");
 			}
@@ -266,7 +284,7 @@ public class Client {
 					+ " has started!");
 			Integer[] boardSize = invitedBy.get(secondPlayer);
 			if (boardSize != null) {
-				board = new Board(boardSize[0], boardSize[1]);
+				board = new Board(boardSize[1], boardSize[0]);
 			} else {
 				mui.addMessage("Using default boardsize.");
 				board = new Board();
@@ -455,11 +473,25 @@ public class Client {
 		return clientName;
 	}
 
+	/**
+	 * This method sets the name for this Client.
+	 * 
+	 * @param name
+	 *            The name this Client should have.
+	 */
 	//@ ensures getClientName().equals(name);
 	public void setClientName(String name) {
 		clientName = name;
 	}
 
+	/**
+	 * This method makes a Board out of the packet the server sends when the
+	 * Board is requested.
+	 * 
+	 * @param line
+	 *            The Boardpacket the Server sent.
+	 * @return A new Board object with the Board as sent by the Server.
+	 */
 	//@ requires line != null;
 	public Board toBoard(String line) {
 		String[] protocol = line.split(" ");
@@ -493,6 +525,13 @@ public class Client {
 		return test;
 	}
 
+	/**
+	 * This method is used to convert an Stringarray to a single String.
+	 * 
+	 * @param array
+	 *            The array to convert.
+	 * @return The array converted to one line.
+	 */
 	//@ requires array != null;
 	public String arrayToLine(String[] array) {
 		String retLine = "";
@@ -502,15 +541,61 @@ public class Client {
 		return retLine;
 	}
 
+	/**
+	 * Method to request the board from the server.
+	 */
 	private void requestBoard() {
 		sendMessage(REQUEST_BOARD);
 	}
 
-	public void addInvite(String name) {
-		addInvite(name, 6, 7);
+	/**
+	 * Method to add an invite to the list of people this Client has invited.
+	 * 
+	 * @param name
+	 *            The name this Client just invited.
+	 */
+	public void addClientInvite(String name) {
+		addClientInvite(name, 6, 7);
 	}
 
-	public void addInvite(String name, int BoardX, int BoardY) {
+	/**
+	 * Method to add an invite to the list of people this Client has invited
+	 * with a custom Board size.
+	 * 
+	 * @param name
+	 *            The name this Client just invited.
+	 * @param BoardX
+	 *            The custom Board size's X value.
+	 * @param BoardY
+	 *            The custom Board size's Y value.
+	 */
+	public void addClientInvite(String name, int BoardX, int BoardY) {
 		invited.put(name, new Integer[] { BoardX, BoardY });
 	}
-} // end of class Client
+
+	/**
+	 * Method to add an invite to the list of people this Client has been
+	 * invited by.
+	 * 
+	 * @param name
+	 *            The name this Client just got invited by.
+	 */
+	public void addServerInvite(String name) {
+		addServerInvite(name, 6, 7);
+	}
+
+	/**
+	 * Method to add an invite to the list of people this Client has been
+	 * invited by with a custom Board size.
+	 * 
+	 * @param name
+	 *            The name this Client just got invited by.
+	 * @param BoardX
+	 *            The custom Board size's X value.
+	 * @param BoardY
+	 *            The custom Board size's Y value.
+	 */
+	public void addServerInvite(String name, int BoardX, int BoardY) {
+		invitedBy.put(name, new Integer[] { BoardX, BoardY });
+	}
+}
