@@ -1,11 +1,20 @@
-package clientserver;
+
 
 /**
- * <!-- Versie 1.1
+ * <!-- Versie 1.3
  *
  * -------------
  * - CHANGELOG -
  * -------------
+ *
+ * Versie 1.3
+ *
+ * + Ping/Pong
+ * + Name in Chat sent by server
+ * + Default port (WARNING)
+ * + Error codes documented
+ * * fixed leaderboard packet
+ * - multitypes
  *
  * Versie 1.2
  *
@@ -15,7 +24,7 @@ package clientserver;
  *
  * Versie 1.1
  *
- * + Package aangepas naar bruikbaar formaat
+ * + Package aangepast naar bruikbaar formaat
  * + Javadocs gelayout voor verbeterde readability.
  *
  * Versie 1.0
@@ -113,17 +122,6 @@ package clientserver;
  *
  * <p>De telling van kolommen begint links, en start bij 0 (net als bij een <code>array</code>). Bij een bord van 7 breed heb je dus kolommen <code>0</code>, <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code>, <code>5</code> en <code>6</code> van links naar rechts.</p>
  *
- * <p>Een voorbeeld van een BOARD-packet van de server is als volgt: <br/>
- *
- *     <code>BOARD 4 4   00 01 02 03 \n 10 11 12 13 \n 20 21 22 23 \n 30 31 32 33 \n\n</code><br/>
- *     Het hierbijhorende board is als volgt:<br/>
- *     <code>
- *         30 31 32 33 <br/>
- *         20 21 22 23 <br/>
- *         10 11 12 13 <br/>
- *         00 01 02 03 <br/>
- *     </code>
- *     </p>
  *
  * <h3 id="player-names">Player Names</h3>
  *
@@ -137,25 +135,22 @@ package clientserver;
  * <p>Het leaderboard is een extra optie waar we het bij het bespreken van het protocol niet aan toe zijn gekomen. Ik heb daarom een eigen packet hiervoor geschreven. Hierin worden maximaal 50 entries verstuurd, met daarin naam, winst, verlies en spellen gespeeld.</p>
  *
  *
+ * <h3 id="errorcodes">Errorcodes</h3>
+ *
+ * <p>Als er een error wordt verstuurd, wordt dit gedaan met een 'id', de header van de packet waardoor de fout is ontstaan. Aangezien numerieke ID's veel gedoe zijn, en lastig debuggen, heb ik gekozen voor deze makkelijkere optie. </p>
+ *
+ *
  * <h3 id="over-delimiters">Over Delimiters</h3>
  *
  * <p>Ik heb gekozen voor een dubbele carriage return (<code>\n\n</code>) als delimiter als footer omdat dit het debuggen iets makkelijker maakt: je kunt hiermee ook heel lange packets maken met enige layout erin, zoals in <code>BOARD</code>. Hierin zou je dan bijvoorbeeld elke rij een newline kunnen geven, zodat je het in de terminal ook als nieuwe lijnen ziet.</p>
  *
- * <p>Als delimiter tussen argumenten gebruiken wij minstens  een spaties (<code> <\code>) omdat dit makkelijk, handig en makkelijk te lezen is.<br>
- *     Voorbeeld: <code>CONNECT Matthias        CHAT \n\n</code></p>
- *
- * <p>Een packet moet met de volgende regex in 1 keer teruggebracht kunnen worden tot een normale, enkele regel:<br>
- *     <code>s/[ \n]+(?:.)/[ ]/</code></p>
+ * <p>Als delimiter tussen argumenten gebruiken wij een spatie (<code> <\code>) omdat dit makkelijk en handig is.</p>
  *
  * <p>Een losse carriage return mag overal in een packet voorkomen, behalve:
  *
  * <ul>
- *     <li>In (de waarde van) een argument. <br>
- *         Voorbeeld: <code>CONNECT Matthias\n CHAT\n\n</code> mag wel, maar <code>CONNECT Matth\nias CH\nAT\n\n</code> niet.
- *     </li>
- *     <li>Achter een andere carriage return. <br>
- *         Voorbeeld: <code>CONNECT Matthias\n \nCHAT\n\n</code> mag wel, maar <code>CONNECT Matthias\n\n CHAT\n\n</code> niet.
- *     </li>
+ *     <li>In een argument</li>
+ *     <li>Achter een andere carriage return</li>
  * </ul></p>
  *
  *
@@ -211,13 +206,13 @@ package clientserver;
  *
  * <p>Parameters omringd met blokhaken (<code>[]</code> zijn optioneel. Dit hoeft niet per se gebruikt te worden bij het communiceren, maar kunnen voor extra features gebruikt worden. Hoekhaken daarentegen (<code><></code>)zijn verplicht. </p>
  *
- **/
+ */
 
 public class Protocol {
 	public static class Client {
 		/**
 		 * <h3 id="client">Client</h3>
-		 **/
+		 */
 
 		/**
 		 * <p>Connect <br>
@@ -231,7 +226,7 @@ public class Protocol {
 		 *             <code>Feature</code>: <code>String</code> (15) - Een unieke naam voor een feature.
 		 *         </li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String CONNECT = "CONNECT";
 
@@ -244,7 +239,7 @@ public class Protocol {
 		 *     <ul>
 		 *         <li><code>Reason</code>: <code>String</code> (15) - De reden van het verbreken van de verbinding.</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String QUIT = "QUIT";
 
@@ -260,7 +255,7 @@ public class Protocol {
 		 *         <li><code>BoardY</code>: <code>short</code> - De hoogte van het spelbord. Standaardwaarde is 6. Minimaal 4.</li>
 		 *         <li><code>Settings</code>: Eigen inbreng - Verdere settings die je mee wilt geven in het spel. </li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String INVITE = "INVITE";
 
@@ -273,7 +268,7 @@ public class Protocol {
 		 *     <ul>
 		 *         <li><code>Opponent Name</code>: <code>String</code> (15) - De naam van degene die de uitgedaagde partij heeft uitgedaagd.</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String ACCEPT_INVITE = "ACCEPT";
 
@@ -286,7 +281,7 @@ public class Protocol {
 		 *     <ul>
 		 *         <li><code>Opponent Name</code>: <code>String</code> (15) - De naam van degene die de uitgedaagde partij heeft uitgedaagd.</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String DECLINE_INVITE = "DECLINE";
 
@@ -299,7 +294,7 @@ public class Protocol {
 		 *     <ul>
 		 *         <li><code>Column</code>: <code>short</code> - De kolom waarin de move wordt gezet.</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String MOVE = "MOVE";
 
@@ -312,7 +307,7 @@ public class Protocol {
 		 *     <ul>
 		 *         <li><code>Chat</code>: <code>String</code> (512) - De boodschap aan de server chat</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String CHAT = "CHAT";
 
@@ -321,7 +316,7 @@ public class Protocol {
 		 *     Name: <code>REQUEST</code> <br>
 		 *     Descriptie: Vraagt het <code>Board</code> aan van de server <br>
 		 *     Content: none</p>
-		 **/
+		 */
 
 		public static final String REQUEST_BOARD = "REQUEST";
 
@@ -330,7 +325,7 @@ public class Protocol {
 		 *     Name: <code>LOBBY</code> <br>
 		 *     Descriptie: Vraag de lijst met on-line spelers aan. <br>
 		 *     Content: none</p>
-		 **/
+		 */
 
 		public static final String REQUEST_LOBBY = "LOBBY";
 
@@ -339,16 +334,38 @@ public class Protocol {
 		 *     Name: <code>LEADERBOARD</code> <br>
 		 *     Descriptie: Vraag het leaderboard aan <br>
 		 *     Content: none</p>
-		 **/
+		 */
 
 		public static final String REQUEST_LEADERBOARD = "LEADERBOARD";
+
+		/**
+		 * <p>Error <br>
+		 *     Name: <code>ERROR</code><br/>
+		 *     Descriptie: Zend een error naar de server toe.<br/>
+		 *     Content: <code>&lt;Error Code&gt;</code> <code>&lt;Message&gt;</code></p>
+		 *     <ul>
+		 *         <li><code>Error Code</code>: <code>String</code> - De code is de header van het bericht waar de fout door is ontstaan. </li>
+		 *         <li><code>Message</code>: <code>String</code> (255) - Het bericht dat je aan je error hangt. Hierin kan je extra info tonen over wat er precies is foutgegaan.</li>
+		 *     </ul>
+		 */
+
+		public static final String ERROR = "ERROR";
+
+		/**
+		 * <p>Ping <br>
+		 *     Name: <code>PING</code><br/>
+		 *     Descriptie: Vraag een respons van de server aan, om te kijken hoe snel deze reageert en om te kijken of de verbinding nog bestaat.<br/>
+		 *     Content: none</p>
+		 */
+
+		public static final String PING = "PING";
 
 	}
 
 	public static class Server {
 		/**
 		 * <h3 id="server">Server</h3>
-		 **/
+		 */
 
 		/**
 		 * <p>Accept Connect <br>
@@ -361,7 +378,7 @@ public class Protocol {
 		 *         	   <code>Feature</code>: <code>String</code> (15) - De unieken naam van een feature.
 		 *         </li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String ACCEPT_CONNECT = "OK";
 
@@ -369,12 +386,12 @@ public class Protocol {
 		 * <p>Error <br>
 		 *     Name: <code>ERROR</code> <br>
 		 *     Descriptie: Een errormessage <br>
-		 *     Content: <code>&lt;Error&gt;</code></p>
-		 *
+		 *     Content: <code>&lt;Error Code&gt;</code> <code>&lt;Message&gt;</code></p>
 		 *     <ul>
-		 *         <li><code>Error</code>: <code>String</code> (512) - De gegevens van de error message. Kan van alles zijn.</li>
+		 *         <li><code>Error Code</code>: <code>String</code> - De code is de header van het bericht waar de fout door is ontstaan. </li>
+		 *         <li><code>Message</code>: <code>String</code> (255) - Het bericht dat je aan je error hangt. Hierin kan je extra info tonen over wat er precies is foutgegaan.</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String ERROR = "ERROR";
 
@@ -406,9 +423,22 @@ public class Protocol {
 		 *         <li><code>BoardY</code>: <code>short</code> | <code>int</code> - De hoogte van het bord. Standaard 6, kleinste waarde 4.</li>
 		 *         <li><code>Settings</code>: Eigen type - Zelf in te vullen ruimte, dit kan gebruikt worden voor extra settings.</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String INVITE = "INVITE";
+
+		/**
+		 * <p>Decline invite<br>
+		 *     Name: <code>DECLINE</code> <br>
+		 *     Descriptie: De packet die naar de uitdager wordt teruggestuurt om te zeggen dat zijn uitdaging is afgewezen.. <br>
+		 *     Content: <code>&lt;Opponent Name&gt;</code></p>
+		 *
+		 *     <ul>
+		 *         <li><code>Opponent Name</code>: <code>String</code> (15) - De naam van de uitdagende partij.</li>
+		 *     </ul>
+		 */
+
+		public static final String DECLINE_INVITE = "DECLINE";
 
 		/**
 		 * <p>Game Start <br>
@@ -421,7 +451,7 @@ public class Protocol {
 		 *         <li><code>Player 2</code>: <code>String</code> (15) - Naam van de tweede speler</li>
 		 *         <li><code>Extras</code>: Eigen type - Zelf in te vullen ruimte, die gebruikt kan worden voor bijvoorbeeld extra spelers of meekijkers</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String GAME_START = "START";
 
@@ -435,7 +465,7 @@ public class Protocol {
 		 *         <li><code>Type</code>: <code>String</code> &gt; <code>'WIN'</code> <code>'DISCONNECT'</code> <code>'DRAW'</code> - Type van einde spel</li>
 		 *         <li><code>Winner Name</code>: <code>String</code> (15) - Naam van de winnaar, of andere info over de reden van het einde.</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String GAME_END = "END";
 
@@ -444,7 +474,7 @@ public class Protocol {
 		 *     Name: <code>REQUEST</code> <br>
 		 *     Descriptie: Een packet dat verstuurd wordt naar de speler om aan te geven dat deze persoon aan de beurt is om een zet te doen. <br>
 		 *     Content: none</p>
-		 **/
+		 */
 
 		public static final String REQUEST_MOVE = "REQUEST";
 
@@ -459,7 +489,7 @@ public class Protocol {
 		 *         <li><code>Column</code>: <code>short</code> - De kolom waar de zet in gedaan wordt.</li>
 		 *         <li><code>Player Name</code>: <code>String</code> (15) - De naam van de speler die net een zet heeft gedaan.</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String MOVE_OK = "MOVE";
 
@@ -472,9 +502,9 @@ public class Protocol {
 		 *     <ul>
 		 *         <li><code>BoardX</code>: <code>short</code> - De breedte van het bord</li>
 		 *         <li><code>BoardY</code>: <code>short</code> - De hoogte van het bord</li>
-		 *         <li><code>Board</code>: <code>byte[]</code> - Een array van (breedte * hoogte) getallen lang gescheiden door spaties, waarin de nummers van de spelers staan. Start links onderin het bord, het wordt per rij weggeschreven, van links naar rechts in de rij, beginnend bij de onderste rij, naar boven..</li>
+		 *         <li><code>Board</code>: <code>byte[]</code> - Een array van (breedte * hoogte) getallen lang, waarin de nummers van de spelers staan. Start links onderin het bord, het wordt per rij weggeschreven, van links naar rechts in de rij, beginnend bij de onderste rij, naar boven..</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String BOARD = "BOARD";
 
@@ -482,12 +512,13 @@ public class Protocol {
 		 * <p>Chat <br>
 		 *     Name: <code>CHAT</code> <br>
 		 *     Descriptie: Een packet wat een chatbericht bevat <br>
-		 *     Content: <code>&lt;Chat&gt;</code></p>
+		 *     Content: <code>&lt;Player Name&gt;</code> <code>&lt;Chat&gt;</code></p>
 		 *
 		 *     <ul>
+		 *         <li><code>Player Name</code>: <code>String</code></li>
 		 *         <li><code>Chat</code>: <code>String</code> (512)</li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String CHAT = "CHAT";
 
@@ -499,7 +530,7 @@ public class Protocol {
 		 *
 		 *     <ul>
 		 *         <li><code>Player Statistics</code>: <code>Player Statistic</code> (50) - De statistieken van maximaal 50 spelers tegelijk worden verstuurd. <br>
-		 *             <code>Player Statistic</code>: <code>&lt;Player Name&gt;</code> <code>&lt;Games Won&gt;</code> <code>&lt;Games Lost&gt;</code> <code>&lt;Ranking&gt;</code> <br>
+		 *             <code>Player Statistic</code>: <code>&lt;Player Name&gt;</code> <code>&lt;Games Won&gt;</code> <code>&lt;Games Lost&gt;</code> <code>&lt;Games Played&gt;</code> <code>&lt;Ranking&gt;</code> <br>
 		 *             <ul>
 		 *                 <li><code>Player Name</code>: <code>String</code> (15) - Naam van de speler in de betreffende statistiek</li>
 		 *                 <li><code>Games Won</code>: <code>int</code> - Aantal games gewonnen</li>
@@ -509,10 +540,18 @@ public class Protocol {
 		 *             </ul>
 		 *         </li>
 		 *     </ul>
-		 **/
+		 */
 
 		public static final String LEADERBOARD = "LEADERBOARD";
 
+		/**
+		 * <p>Pong <br>
+		 *     Name: <code>PONG</code><br/>
+		 *     Descriptie: De respons van de server op een <code>PING</code>-packet.<br/>
+		 *     Content: none</p>
+		 */
+
+		public static final String PONG = "PONG";
 	}
 
 	public static class Features {
@@ -528,7 +567,7 @@ public class Protocol {
 		public static final String CUSTOM_BOARD_SIZE = "CUSTOM_BOARD";
 
 		public static final String SECURITY = "SECURITY";
-		public static final String MULTIPLAYER = "MULTIPLAYER";
+		public static final String MULTIPLAYER = "MULTIPLAYER"; // Deze functie wordt niet door het protocol gespecificeerd.
 	}
 
 	public static class Settings {
@@ -540,6 +579,32 @@ public class Protocol {
 		/**
 		 * <p>Het protocol heeft characterencoding UTF-16. Dit is de standaard encoding van een string in java, dus daar zouden geen problemen mee moeten zijn.</p>
 		 */
+
 		public static final String ENCODING = "UTF-16";
+
+		/**
+		 * <p>Het aantal seconden voordat een client timeout. Dit is in de opdracht vastgesteld, en zal dus niet veranderen.</p>
+		 */
+
+		public static final int TIMEOUTSECONDS = 15;
+
+		/**
+		 * <p>Default server port nummer. <br>
+		 *     <b>BELANGRIJK:</b> In de opdracht staat dat je bij het opstarten van de server een poortnummer moet invoeren. De waarde hier is dus niet een waarde die altijd opgaat. </p>
+		 */
+
+		public static final short DEFAULT_PORT = 2707;
+
+		/**
+		 * <p>Default delimiter tussen header en content, en tussen twee waarden in de content</p>
+		 */
+
+		public static final char DELIMITER = ' ';
+
+		/**
+		 * <p>Teken dat aan het einde van elke packet moet zitten, en dus niet in de rest van de waarden mag zitten.</p>
+		 */
+
+		public static final char PACKET_END = '\n';
 	}
 }
