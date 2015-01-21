@@ -234,15 +234,13 @@ public class Client {
 						+ " has invited you to a game of Connect4 (default boardsize)!");
 			}
 		} else if (serverMessage.length >= 4) {
-			mui.addMessage("Got invited with custom board size, namely "
-					+ Integer.parseInt(serverMessage[2]) + " x "
-					+ Integer.parseInt(serverMessage[3]));
-			invitedBy.put(
-					opponentName,
-					new Integer[] { Integer.parseInt(serverMessage[2]),
-							Integer.parseInt(serverMessage[3]) });
-			mui.addMessage("The value I just put in the map is: "
-					+ Arrays.toString(invitedBy.get(opponentName)));
+			try {
+				invitedBy.put(opponentName,
+						new Integer[] { Integer.parseInt(serverMessage[2]),
+								Integer.parseInt(serverMessage[3]) });
+			} catch (NumberFormatException e) {
+				mui.addMessage("The server just sent an invite with an invalid custom board size.");
+			}
 		}
 	}
 
@@ -264,12 +262,9 @@ public class Client {
 		secondPlayer = serverMessage[2];
 
 		if (firstPlayer.equals(getClientName())) {
-			mui.addMessage("DEBUG1");
 			mui.addMessage("A game between you and " + secondPlayer
 					+ " has started!");
 			Integer[] boardSize = invitedBy.get(secondPlayer);
-			mui.addMessage("The boardsize I have stored for the invite from player "
-					+ secondPlayer + " equals " + Arrays.toString(boardSize));
 			if (boardSize != null) {
 				board = new Board(boardSize[0], boardSize[1]);
 			} else {
@@ -277,13 +272,9 @@ public class Client {
 				board = new Board();
 			}
 		} else {
-			mui.addMessage("DEBUG2");
-			mui.addMessage(serverMessage[1] + " " + getClientName());
 			mui.addMessage("A game between you and " + firstPlayer
 					+ " has started!");
 			Integer[] boardSize = invited.get(firstPlayer);
-			mui.addMessage("The boardsize I have stored for the invite from player "
-					+ firstPlayer + " equals " + Arrays.toString(boardSize));
 			if (boardSize != null) {
 				board = new Board(boardSize[0], boardSize[1]);
 			} else {
@@ -299,6 +290,7 @@ public class Client {
 		// TODO: board size
 
 		invitedBy.clear();
+		invited.clear();
 		mui.addMessage(board.toString());
 		mui.addMessage("You are YELLOW");
 	}
@@ -466,9 +458,12 @@ public class Client {
 	//@ requires line != null;
 	public Board toBoard(String line) {
 		String[] protocol = line.split(" ");
-		int boardColumns = Integer.parseInt(protocol[1]);
-		int boardRows = Integer.parseInt(protocol[2]);
-		Board test = new Board(boardRows, boardColumns);
+		Board test = null;
+		try {
+			int boardColumns = Integer.parseInt(protocol[1]);
+			int boardRows = Integer.parseInt(protocol[2]);
+		
+		test = new Board(boardRows, boardColumns);
 		int i = 3;
 		for (int row = boardRows - 1; row >= 0; row--) {
 			for (int col = 0; col < boardColumns; col++) {
@@ -484,6 +479,11 @@ public class Client {
 				}
 				i++;
 			}
+		}
+		
+		} catch (NumberFormatException e) {
+			mui.addMessage("Server sent a wrong board. TERMINATING.");
+			shutdown();
 		}
 		return test;
 	}

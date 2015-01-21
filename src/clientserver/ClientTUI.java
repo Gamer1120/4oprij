@@ -71,12 +71,15 @@ public class ClientTUI extends Thread implements ClientView {
 					client.sendMessage(input);
 				} else if (splitInput.length == 3) {
 					addMessage("For a custom board size you need to specify both the BoardX and BoardY");
-				} else if (splitInput.length >= 4){
-					addMessage(splitInput[1]);
-					addMessage(splitInput[2]);
-					addMessage(splitInput[3]);
-					client.addInvite(splitInput[1], Integer.parseInt(splitInput[2]), Integer.parseInt(splitInput[3]));
-					client.sendMessage(input);
+				} else if (splitInput.length >= 4) {
+					try {
+						client.addInvite(splitInput[1],
+								Integer.parseInt(splitInput[2]),
+								Integer.parseInt(splitInput[3]));
+						client.sendMessage(input);
+					} catch (NumberFormatException e) {
+						addMessage("Please specify the BoardX and BoardY as integers.");
+					}
 				}
 			} else {
 				client.sendMessage(input);
