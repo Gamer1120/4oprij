@@ -12,7 +12,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -89,24 +88,27 @@ public class Client {
 	 	private invariant mui != null;
 	 	private invariant in != null;
 	 	private invariant out != null;
-	  	private invariant invites != null;
+	  	private invariant invited != null;
+	  	private invariant invitedBy != null;
+	  	private invariant localPlayer != null;
 	 */
 
 	/**
 	 * Constructs a Client object and tries to make a Socket connection
 	 * 
-	 * @param name
-	 *            The name of this Client object.
 	 * @param host
 	 *            The IP-adress of this Client
 	 * @param port
 	 *            The port of this Client
 	 * @param muiArg
 	 *            The MessageUI for this Client
+	 * @param localPlayer
+	 *            The Player Object to use for this Client
 	 */
 	/*@ requires host != null;
 	 	requires port >= 1 & port <= 65535;
 	 	requires muiArg != null;
+	 	requires localPlayer != null;
 	 */
 	public Client(InetAddress host, int port, ClientTUI muiArg,
 			Player localPlayer) throws IOException {
@@ -244,6 +246,8 @@ public class Client {
 	 * This method accepts the Server.GAME_START packet sent by the Server. When
 	 * this method is called, it will show the Client that a the game is
 	 * started. The Client is set to being in-game, and a new Board is created.
+	 * The size of the Board is dependant on the size sent in the invite (the
+	 * Boardsizes of the invites are saved in a HashMap).
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -251,7 +255,7 @@ public class Client {
 	/*@ requires serverMessage[0].equals(Server.GAME_START);
 	 	ensures board != null;
 	 	ensures this.isIngame;
-	 	ensures currPlayer == -1;
+	 	ensures currPlayer == null;
 	 */
 	private void gameStart(String[] serverMessage) {
 		firstPlayer = serverMessage[1];
@@ -293,6 +297,7 @@ public class Client {
 	/**
 	 * This method accepts the Server.GAME_END packet sent by the Server. When
 	 * this method is called, it will set the Client to no longer being in-game.
+	 * It will also show the client who won the game, or if the game was a draw.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -315,7 +320,10 @@ public class Client {
 
 	/**
 	 * This method accepts the Server.MOVE packet sent by the Server. When this
-	 * method is called, it will request a move from the Player.
+	 * method is called, it will request a move from the Player. If the Player
+	 * is a HumanPlayer, the GameView will be used to ask for a move. If the
+	 * Player is a ComputerPlayer, the determineMove() method from the
+	 * ComputerPlayer is used instead.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -327,7 +335,7 @@ public class Client {
 		}
 		if (localPlayer instanceof HumanPlayer) {
 			localPlayer.determineMove(board);
-		} else{
+		} else {
 			int move = localPlayer.determineMove(board);
 			sendMessage(MOVE + " " + move);
 		}
@@ -336,7 +344,8 @@ public class Client {
 	/**
 	 * This method accepts the Server.MOVE_OK packet sent by the Server. When
 	 * this method is called, it will update the Board by inserting the Disc for
-	 * the Player that was given in the packet.
+	 * the Player that was given in the packet. If it can't insert the Disc, it
+	 * will request the Board and try to insert the Disc once again.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -429,9 +438,6 @@ public class Client {
 	 * note, before it does this, it also sets the loop and isIngame variables
 	 * for this Client to false.
 	 */
-	/*@	ensures !loop;
-	 	ensures !isIngame;
-	 */
 	public void shutdown() {
 		loop = false;
 		isIngame = false;
@@ -449,6 +455,7 @@ public class Client {
 		return clientName;
 	}
 
+	//@ ensures getClientName().equals(name);
 	public void setClientName(String name) {
 		clientName = name;
 	}
