@@ -159,7 +159,7 @@ public class Client {
 			} catch (IOException | NullPointerException e) {
 				shutdown();
 			}
-			mui.addMessage("Server: " + line);
+			mui.addMessage("[SERVER]" + line);
 			String[] serverMessage = line.split("\\s+");
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
@@ -186,7 +186,7 @@ public class Client {
 				moveOK(serverMessage);
 				break;
 			case Server.ERROR:
-				mui.addMessage(line);
+				mui.addMessage("[ERROR]" + line.split(" ",2)[1]);
 				if (!isConnected) {
 					mui.askName();
 				}
@@ -194,8 +194,9 @@ public class Client {
 			case Server.BOARD:
 				board = toBoard(line);
 				notifyAll();
+			case Server.CHAT:
+				mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
 			}
-
 		}
 	}
 
@@ -210,10 +211,10 @@ public class Client {
 	 */
 	//@	requires serverMessage[0].equals(Server.ACCEPT_CONNECT);
 	private void connect(String[] serverMessage) {
-		mui.addMessage("Successfully established connection to server: "
+		mui.addMessage("[CONNECT]Successfully established connection to server: "
 		// IP of the server
 				+ sock.getRemoteSocketAddress().toString());
-		mui.addMessage("The features of this server are:"
+		mui.addMessage("[FEATURES]The features of this server are:"
 				+ arrayToLine(serverMessage));
 	}
 
@@ -227,7 +228,7 @@ public class Client {
 	 */
 	//@ requires serverMessage[0].equals(Server.LOBBY);
 	private void lobby(String[] serverMessage) {
-		mui.addMessage("The people that are currently in the lobby are:"
+		mui.addMessage("[LOBBY]The people that are currently in the lobby are:"
 				+ arrayToLine(serverMessage));
 	}
 
@@ -246,9 +247,12 @@ public class Client {
 		if (serverMessage.length == 2) {
 			addServerInvite(opponentName);
 			if (!isIngame) {
-				mui.addMessage("Player: "
+				mui.addMessage("[INVITE]"
 						+ opponentName
 						+ " has invited you to a game of Connect4 (default boardsize)!");
+				mui.addMessage("Use \"ACCEPT " + opponentName
+						+ "\" to accept this invite or \"DECLINE " + opponentName
+						+ "\" to decline it.");
 			}
 		} else if (serverMessage.length >= 4) {
 			try {
@@ -256,13 +260,16 @@ public class Client {
 				int boardY = Integer.parseInt(serverMessage[3]);
 				addServerInvite(opponentName, boardX, boardY);
 				if (!isIngame) {
-					mui.addMessage("Player: "
+					mui.addMessage("[INVITE]"
 							+ opponentName
 							+ " has invited you to a game of Connect4 with a custom Board size of "
 							+ boardX + " x " + boardY + "!");
+					mui.addMessage("Use \"ACCEPT " + opponentName
+							+ "\" to accept this invite or \"DECLINE " + opponentName
+							+ "\" to decline it.");
 				}
 			} catch (NumberFormatException e) {
-				mui.addMessage("The server just sent an invite with an invalid custom board size.");
+				mui.addMessage("[ERROR]The server just sent an invite with an invalid custom board size.");
 			}
 		}
 	}
@@ -287,7 +294,7 @@ public class Client {
 		secondPlayer = serverMessage[2];
 
 		if (firstPlayer.equals(getClientName())) {
-			mui.addMessage("A game between you and " + secondPlayer
+			mui.addMessage("[GAME]A game between you and " + secondPlayer
 					+ " has started!");
 			Integer[] boardSize = invitedBy.get(secondPlayer);
 			if (boardSize != null) {
@@ -296,7 +303,7 @@ public class Client {
 				board = new Board();
 			}
 		} else {
-			mui.addMessage("A game between you and " + firstPlayer
+			mui.addMessage("[GAME]A game between you and " + firstPlayer
 					+ " has started!");
 			Integer[] boardSize = invited.get(firstPlayer);
 			if (boardSize != null) {
@@ -314,7 +321,7 @@ public class Client {
 		invitedBy.clear();
 		invited.clear();
 		mui.addMessage(board.toString());
-		mui.addMessage("You are YELLOW");
+		mui.addMessage("[GAME]You are YELLOW");
 	}
 
 	/**
@@ -331,12 +338,13 @@ public class Client {
 	private void gameEnd(String[] serverMessage) {
 		this.isIngame = false;
 		if (serverMessage.length > 2) {
-			mui.addMessage("The winner is: " + serverMessage[2]);
+			mui.addMessage("[GAME]The winner is: " + serverMessage[2]);
 		} else if (serverMessage.length == 2) {
 			if (serverMessage[1].equals(Game.DRAW)) {
-				mui.addMessage("The game was a draw!");
+				mui.addMessage("[GAME]The game was a draw!");
 			} else {
-				mui.addMessage("The game has ended. Reason: " + Arrays.toString(serverMessage));
+				mui.addMessage("[GAME]The game has ended. Reason: "
+						+ Arrays.toString(serverMessage));
 			}
 		}
 	}
@@ -383,7 +391,7 @@ public class Client {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
-				mui.addMessage("Server did not send a valid move. TERMINATING.");
+				mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
 				shutdown();
 			}
 			if (board.isField(move) && board.isEmptyField(move)) {
@@ -395,15 +403,15 @@ public class Client {
 					requestedBoard = true;
 					try {
 						wait();
-						mui.addMessage("This is the board the server has: ");
+						mui.addMessage("[BOARD]This is the board the server has: ");
 						mui.addMessage(board.toString());
 						moveOK(serverMessage);
 					} catch (InterruptedException e) {
-						mui.addMessage("Interrupted.");
+						mui.addMessage("[ERROR]Interrupted. TERMINATING.");
 						shutdown();
 					}
 				} else {
-					mui.addMessage("Can't make the move on both the local board, and the board on the server. TERMINATING.");
+					mui.addMessage("[ERROR]Can't make the move on both the local board, and the board on the server. TERMINATING.");
 					shutdown();
 				}
 			}
@@ -412,7 +420,7 @@ public class Client {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
-				mui.addMessage("Server did not send a valid move. TERMINATING.");
+				mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
 				shutdown();
 			}
 			if (board.isField(move) && board.isEmptyField(move)) {
@@ -426,15 +434,15 @@ public class Client {
 						wait();
 						moveOK(serverMessage);
 					} catch (InterruptedException e) {
-						mui.addMessage("Interrupted.");
+						mui.addMessage("[ERROR]Interrupted. TERMINATING.");
 						shutdown();
 					}
 				} else {
-					mui.addMessage("Can't make the move on both the local board, and the board on the server. TERMINATING.");
+					mui.addMessage("[ERROR]Can't make the move on both the local board, and the board on the server. TERMINATING.");
 					shutdown();
 				}
 
-				mui.addMessage("Server sent an invalid move. TERMINATING.");
+				mui.addMessage("[ERROR]Server sent an invalid move. TERMINATING.");
 			}
 		}
 		mui.addMessage(board.toString());
@@ -527,7 +535,7 @@ public class Client {
 			}
 
 		} catch (NumberFormatException e) {
-			mui.addMessage("Server sent a wrong board. TERMINATING.");
+			mui.addMessage("[ERROR]Server sent a wrong board. TERMINATING.");
 			shutdown();
 		}
 		return test;

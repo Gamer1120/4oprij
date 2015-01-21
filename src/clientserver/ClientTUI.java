@@ -13,27 +13,61 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class ClientTUI extends Thread implements ClientView {
+	/**
+	 * The Client this ClientTUI is made for.
+	 */
 	private Client client;
+	/**
+	 * The reader used to read from System.in.
+	 */
 	private BufferedReader reader;
+	/**
+	 * A boolean to determine whether the server has requested a move.
+	 */
 	private boolean moveRequested;
-	private int move;
+	/**
+	 * The InetAddress the ClientTUI will be connecting to.
+	 */
 	private InetAddress inet;
+	/**
+	 * The port the ClientTUI will be connecting to.
+	 */
 	private int port;
+	/**
+	 * A constant for the default adress to connect to, in this case localhost.
+	 */
 	private static final String DEFAULT_INET = "localhost";
 
+	/**
+	 * Creates a ClientTUI object.
+	 * 
+	 * @param inet
+	 *            The InetAddress this ClientTUI will connect to.
+	 * @param port
+	 *            The port this ClientTUI will connect to.
+	 */
 	public ClientTUI(InetAddress inet, int port) {
 		this.inet = inet;
 		this.port = port;
 		this.moveRequested = false;
-		this.move = -1;
 		this.reader = new BufferedReader(new InputStreamReader(System.in));
 		askName();
 	}
 
+	/**
+	 * Prints a message to System.out.
+	 * 
+	 * @param msg
+	 *            The message to print.
+	 */
 	public void addMessage(String msg) {
 		System.out.println(msg);
 	}
 
+	/**
+	 * This method reads the messages in the InputStream. Then, it decides which
+	 * command was sent, and executes this command.
+	 */
 	public void run() {
 		while (true) {
 			String input = null;
@@ -50,9 +84,9 @@ public class ClientTUI extends Thread implements ClientView {
 				break;
 			} else if (input.equals("HELP")) {
 				if (client.isIngame) {
-					addMessage("Available commands are: MOVE <column> and EXIT");
+					addMessage("[HELP]Available commands are: MOVE <column> and EXIT");
 				} else {
-					addMessage("Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD and EXIT");
+					addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD and EXIT");
 				}
 			} else if (splitInput[0].equals("MOVE")) {
 				if (moveRequested) {
@@ -60,36 +94,40 @@ public class ClientTUI extends Thread implements ClientView {
 					client.sendMessage(input);
 					if (splitInput.length == 2) {
 						try {
-							move = Integer.parseInt(splitInput[1]);
+							Integer.parseInt(splitInput[1]);
 
 						} catch (NumberFormatException
 								| ArrayIndexOutOfBoundsException e) {
-							addMessage("Please enter a valid move after MOVE.");
+							addMessage("[ERROR]Please enter a valid move after MOVE.");
 						}
 					} else {
-						addMessage("Please enter a valid move after MOVE.");
+						addMessage("[ERROR]Please enter a valid move after MOVE.");
 					}
 				} else {
-					addMessage("There was no move requested.");
+					addMessage("[ERROR]There was no move requested.");
 
 				}
 			} else if (splitInput[0].equals("INVITE")) {
 				if (splitInput.length == 1) {
-					addMessage("Please add a player to invite.");
+					addMessage("[ERROR]Please add a player to invite.");
 				} else if (splitInput.length == 2) {
-					addMessage(splitInput[1]);
 					client.addClientInvite(splitInput[1]);
 					client.sendMessage(input);
+					addMessage("[INVITE]Successfully tried to invite: "
+							+ splitInput[1] + " with default board size.");
 				} else if (splitInput.length == 3) {
-					addMessage("For a custom board size you need to specify both the BoardX and BoardY");
+					addMessage("[ERROR]For a custom board size you need to specify both the BoardX and BoardY");
 				} else if (splitInput.length >= 4) {
 					try {
 						client.addClientInvite(splitInput[1],
 								Integer.parseInt(splitInput[3]),
 								Integer.parseInt(splitInput[2]));
 						client.sendMessage(input);
+						addMessage("[INVITE]Successfully tried to invite: "
+								+ splitInput[1]
+								+ " with the specified custom board size.");
 					} catch (NumberFormatException e) {
-						addMessage("Please specify the BoardX and BoardY as integers.");
+						addMessage("[INVITE]Please specify the BoardX and BoardY as integers. Invite failed.");
 					}
 				}
 			} else {
@@ -99,6 +137,12 @@ public class ClientTUI extends Thread implements ClientView {
 		}
 	}
 
+	/**
+	 * The main method to start a new ClientTUI and connect to the Server.
+	 * 
+	 * @param args
+	 *            The command line arguments.
+	 */
 	public static void main(String[] args) {
 		// Connects to localhost:2727
 		InetAddress addr = null;
@@ -112,10 +156,14 @@ public class ClientTUI extends Thread implements ClientView {
 		c.askName();
 	}
 
+	/**
+	 * Asks the user for their name. If they enter -N or -S instead, a
+	 * ComputerPlayer with a NaiveStrategy or SmartStrategy is made.
+	 */
 	@Override
 	public void askName() {
 		String name = null;
-		addMessage("Please enter your name (or -N for a ComputerPlayer with a NaiveStrategy or -S for a ComputerPlayer with a SmartStrategy): ");
+		addMessage("[NAME]Please enter your name (or -N for a ComputerPlayer with a NaiveStrategy or -S for a ComputerPlayer with a SmartStrategy): ");
 		try {
 			name = reader.readLine();
 			if (name.equals("-N")) {
@@ -138,12 +186,12 @@ public class ClientTUI extends Thread implements ClientView {
 		client.setClientName(name);
 		client.readInput();
 	}
-
+	/**
+	 * Asks the player to make a move.
+	 */
 	public int makeMove() {
-		this.move = -1;
 		this.moveRequested = true;
-		addMessage("Please enter a move...");
-		return move;
-
+		addMessage("[MOVE]Please enter a move...");
+		return -1;
 	}
 }
