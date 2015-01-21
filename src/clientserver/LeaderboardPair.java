@@ -64,24 +64,24 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	public int compareTo(LeaderboardPair pair) {
 		// Highest combined score
 		if (this.getPoints() > pair.getPoints()) {
-			return 1;
-		} else if (this.getPoints() < pair.getPoints()) {
 			return -1;
+		} else if (this.getPoints() < pair.getPoints()) {
+			return 1;
 			// Most wins
 		} else if (this.getWins() > pair.getWins()) {
-			return 1;
-		} else if (this.getWins() < pair.getWins()) {
 			return -1;
+		} else if (this.getWins() < pair.getWins()) {
+			return 1;
 			// Least losses
 		} else if (this.getLosses() < pair.getLosses()) {
-			return 1;
-		} else if (this.getLosses() > pair.getLosses()) {
 			return -1;
+		} else if (this.getLosses() > pair.getLosses()) {
+			return 1;
 			// Highest total games
 		} else if (this.getGames() > pair.getGames()) {
-			return 1;
-		} else if (this.getGames() < pair.getGames()) {
 			return -1;
+		} else if (this.getGames() < pair.getGames()) {
+			return 1;
 			// Alphabetical order (captital letters first)
 		} else {
 			return this.getName().compareTo(pair.getName());
