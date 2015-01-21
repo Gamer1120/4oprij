@@ -70,7 +70,7 @@ public class Client {
 	 * A variable to test if a Player is in-game. If they are, they won't
 	 * receive any invite messages.
 	 */
-	private boolean isIngame;
+	public boolean isIngame;
 	/**
 	 * The Board this Client uses for determining their move.
 	 */

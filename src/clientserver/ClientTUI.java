@@ -48,8 +48,13 @@ public class ClientTUI extends Thread implements ClientView {
 			if (input.equals("EXIT")) {
 				client.shutdown();
 				break;
+			} else if (input.equals("HELP")) {
+				if (client.isIngame) {
+					addMessage("Available commands are: MOVE <column> and EXIT");
+				} else {
+					addMessage("Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD and EXIT");
+				}
 			} else if (splitInput[0].equals("MOVE")) {
-
 				if (moveRequested) {
 					moveRequested = false;
 					client.sendMessage(input);
@@ -128,8 +133,8 @@ public class ClientTUI extends Thread implements ClientView {
 		} catch (IOException e) {
 			client.shutdown();
 		}
-		client.sendMessage(Client.CONNECT + " " + name
-				+ " CUSTOM_BOARD_SIZE CHAT");
+		client.sendMessage(Client.CONNECT + " " + name + " " + Features.CHAT
+				+ " " + Features.CUSTOM_BOARD_SIZE);
 		client.setClientName(name);
 		client.readInput();
 	}
