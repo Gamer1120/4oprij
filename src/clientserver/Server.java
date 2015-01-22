@@ -38,6 +38,8 @@ public class Server extends Thread {
 	/** The Constant INVITE. */
 	public static final String INVITE = "INVITE";
 
+	public static final String DECLINE_INVITE = "DECLINE";
+
 	/** The Constant GAME_START. */
 	public static final String GAME_START = "START";
 
@@ -58,7 +60,7 @@ public class Server extends Thread {
 
 	/** The Constant LEADERBOARD. */
 	public static final String LEADERBOARD = "LEADERBOARD";
-	
+
 	public static final String PONG = "PONG";
 	// END OF PROTOCOL
 
@@ -307,6 +309,7 @@ public class Server extends Thread {
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
 					Integer[] boardSize = invites.get(invite);
+					invites.remove(invite);
 					board = new Board(boardSize[1].intValue(),
 							boardSize[0].intValue());
 					break;
@@ -462,7 +465,11 @@ public class Server extends Thread {
 	public void removeInvite(String name) {
 		synchronized (invites) {
 			for (String[] invite : invites.keySet()) {
-				if (invite[0].equals(name) || invite[1].equals(name)) {
+				if (invite[0].equals(name)) {
+					sendMessage(invite[1], Server.DECLINE_INVITE + " " + name);
+					invites.remove(invite);
+				} else if (invite[1].equals(name)) {
+					sendMessage(invite[0], Server.DECLINE_INVITE + " " + name);
 					invites.remove(invite);
 				}
 			}

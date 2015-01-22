@@ -169,6 +169,12 @@ public class ClientHandler extends Thread {
 			case Client.REQUEST_LEADERBOARD:
 				requestLeaderboardChecks();
 				break;
+			case Client.ERROR:
+				server.print(clientName + ": " + line);
+				break;
+			case Client.PING:
+				sendMessage(Server.PONG);
+				break;
 			default:
 				sendMessage(Server.ERROR + " Invalid command");
 				break;
@@ -542,8 +548,7 @@ public class ClientHandler extends Thread {
 	private void decline(String[] command) {
 		//TODO: decline je eigen invite
 		server.removeInvite(command[1], clientName);
-		server.sendMessage(command[1], Server.ERROR + " " + clientName
-				+ " declined your invite");
+		server.sendMessage(command[1], Server.DECLINE_INVITE + " " + clientName);
 	}
 
 	/**
