@@ -1,8 +1,10 @@
 package clientserver;
 
 import java.io.Serializable;
+
 /**
- * Leaderboard class for the Connect4 according to the protocol of the TI-2 group.<br>
+ * Leaderboard class for the Connect4 according to the protocol of the TI-2
+ * group.<br>
  * <br>
  * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 
@@ -48,17 +50,17 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	}
 
 	public void updateWin() {
-		score[0] += 1;
-		score[2] += 1;
+		score[0]++;
+		score[2]++;
 	}
 
 	public void updateLoss() {
-		score[1] += 1;
-		score[2] += 1;
+		score[1]++;
+		score[2]++;
 	}
 
 	public void updateDraw() {
-		score[2] += 1;
+		score[2]++;
 	}
 
 	public int compareTo(LeaderboardPair pair) {
@@ -92,6 +94,17 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 		if (o instanceof LeaderboardPair) {
 			return name.equals(((LeaderboardPair) o).getName())
 					&& score == ((LeaderboardPair) o).getScore();
+		} else {
+			return false;
+		}
+	}
+
+	public boolean equalScore(Object o) {
+		if (o instanceof LeaderboardPair) {
+			LeaderboardPair pair = (LeaderboardPair) o;
+			return this.getWins() == pair.getWins()
+					&& this.getLosses() == pair.getLosses()
+					&& this.getGames() == pair.getGames();
 		} else {
 			return false;
 		}

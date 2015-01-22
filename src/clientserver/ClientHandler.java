@@ -507,8 +507,9 @@ public class ClientHandler extends Thread {
 	/**
 	 * Checks if the client is connected, if the client send a command with
 	 * valid arguments, if the opponent exists and if the opponent specified in
-	 * the command send an invite to this player. If this is the case decline
-	 * will be called to decline the invite.
+	 * the command send an invite to this player or this player sent an invite
+	 * to the opponent. If this is the case decline will be called to decline
+	 * the invite.
 	 *
 	 * @param command
 	 *            the command send by the client
@@ -523,7 +524,8 @@ public class ClientHandler extends Thread {
 			sendMessage(Server.ERROR + " Invalid arguments");
 		} else if (!server.nameExists(command[1])) {
 			sendMessage(Server.ERROR + " Name doesn't exist");
-		} else if (!server.isInvited(command[1], clientName)) {
+		} else if (!server.isInvited(command[1], clientName)
+				|| !server.isInvited(clientName, command[1])) {
 			sendMessage(Server.ERROR + " Not invited by this client");
 		} else {
 			decline(command);
@@ -532,7 +534,7 @@ public class ClientHandler extends Thread {
 
 	/**
 	 * Declines the invite, send a message to the opponent and deletes it from
-	 * the server.
+	 * the server. You can decline invites sent by you.
 	 *
 	 * @param command
 	 *            the command send by the client
@@ -548,6 +550,7 @@ public class ClientHandler extends Thread {
 	private void decline(String[] command) {
 		//TODO: decline je eigen invite
 		server.removeInvite(command[1], clientName);
+		server.removeInvite(clientName, command[1]);
 		server.sendMessage(command[1], Server.DECLINE_INVITE + " " + clientName);
 	}
 
