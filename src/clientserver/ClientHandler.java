@@ -142,6 +142,7 @@ public class ClientHandler extends Thread {
 				connectChecks(command);
 				break;
 			case Client.QUIT:
+				server.print(clientName + " quit: " + command[1]);
 				shutdown();
 				break;
 			case Client.INVITE:
@@ -658,6 +659,7 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
+	//TODO: chat lengte
 	/*@ requires command != null;
 		requires command[0].equals(Client.CHAT);
 	*/

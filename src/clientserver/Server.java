@@ -502,7 +502,8 @@ public class Server extends Thread {
 			int rank = 1;
 			for (LeaderboardPair pair : leaderboard) {
 				scores += " " + pair.getName() + " " + pair.getWins() + " "
-						+ pair.getLosses() + " " + rank++;
+						+ pair.getLosses() + " " + pair.getGames() + " "
+						+ rank++;
 			}
 			return scores;
 		}
