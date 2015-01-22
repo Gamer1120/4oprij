@@ -176,6 +176,9 @@ public class Client {
 			case Server.INVITE:
 				invite(serverMessage);
 				break;
+			case Server.DECLINE_INVITE:
+				declineInvite(serverMessage);
+				break;
 			case Server.GAME_START:
 				gameStart(serverMessage);
 				break;
@@ -197,13 +200,21 @@ public class Client {
 			case Server.BOARD:
 				board = toBoard(line);
 				notifyAll();
+				break;
 			case Server.CHAT:
 				mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
+				break;
 			case Server.LEADERBOARD:
 				showLeaderBoard(serverMessage);
-				//TODO: Decline invites van server
+				break;
+			//TODO: Decline invites van server
 			case Server.PONG:
 				mui.addMessage("[PING]Pong!");
+				break;
+			default:
+				sendMessage(ERROR + " " + serverMessage[0]
+						+ " Unknown command.");
+				break;
 			}
 		}
 	}
@@ -286,6 +297,17 @@ public class Client {
 		}
 	}
 
+	private void declineInvite(String[] serverMessage) {
+		if (serverMessage.length > 1) {
+			invited.remove(serverMessage[1]);
+			mui.addMessage("[INVITE]The invite you sent to " + serverMessage[1]
+					+ " got declined.");
+		} else{
+			mui.addMessage("[INVITE]The server just tried to decline one of your invites, but it didn't send who declined yours.");
+			sendMessage(ERROR + " " + serverMessage[0] + " Your server didn't send me who declined the invite.");
+		}
+	}
+
 	/**
 	 * This method accepts the Server.GAME_START packet sent by the Server. When
 	 * this method is called, it will show the Client that a the game is
@@ -322,9 +344,6 @@ public class Client {
 		currPlayer = null; // Not set yet.
 		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
 		// 1 > Disc.RED
-
-		invitedBy.clear();
-		invited.clear();
 		mui.addMessage(board.toString());
 		mui.addMessage("[GAME]You are YELLOW");
 	}
@@ -397,6 +416,7 @@ public class Client {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
 				mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
+				sendMessage(ERROR + " " + Server.MOVE_OK + " You didn't send a valid move.");
 				shutdown();
 			}
 			if (board.isField(move) && board.isEmptyField(move)) {
@@ -413,10 +433,12 @@ public class Client {
 						moveOK(serverMessage);
 					} catch (InterruptedException e) {
 						mui.addMessage("[ERROR]Interrupted. TERMINATING.");
+						sendMessage(ERROR + " " + Server.BOARD + " My client got interrupted.");
 						shutdown();
 					}
 				} else {
 					mui.addMessage("[ERROR]Can't make the move on both the local board, and the board on the server. TERMINATING.");
+					sendMessage(ERROR + " " + Server.BOARD + " I can't make the specified move on the local board, and the Board you just sent me. TERMINATING.");
 					shutdown();
 				}
 			}
@@ -425,6 +447,7 @@ public class Client {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
 				mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
+				sendMessage(ERROR + " " + Server.MOVE_OK + " You didn't send a valid move.");
 				shutdown();
 			}
 			if (board.isField(move) && board.isEmptyField(move)) {
@@ -439,14 +462,14 @@ public class Client {
 						moveOK(serverMessage);
 					} catch (InterruptedException e) {
 						mui.addMessage("[ERROR]Interrupted. TERMINATING.");
+						sendMessage(ERROR + " " + Server.BOARD + " My client got interrupted.");
 						shutdown();
 					}
 				} else {
 					mui.addMessage("[ERROR]Can't make the move on both the local board, and the board on the server. TERMINATING.");
+					sendMessage(ERROR + " " + Server.BOARD + " I can't make the specified move on the local board, and the Board you just sent me. TERMINATING.");
 					shutdown();
 				}
-
-				mui.addMessage("[ERROR]Server sent an invalid move. TERMINATING.");
 			}
 		}
 		mui.addMessage(board.toString());
@@ -540,6 +563,7 @@ public class Client {
 
 		} catch (NumberFormatException e) {
 			mui.addMessage("[ERROR]Server sent a wrong board. TERMINATING.");
+			sendMessage(ERROR + " " + Server.BOARD + " You sent me an invalid Board. TERMINATING.");
 			shutdown();
 		}
 		return test;
@@ -618,7 +642,11 @@ public class Client {
 	public void addServerInvite(String name, int BoardX, int BoardY) {
 		invitedBy.put(name, new Integer[] { BoardX, BoardY });
 	}
-
+	
+	public void removeServerInvite(String name){
+		invited.remove(name);
+	}
+	
 	public void showLeaderBoard(String[] serverMessage) {
 		// EXAMPLE: LEADERBOARD REQUEST_BOARD 1 0 1 1 WinPlayer 1 0 1 2 LosePlayer 0 1 1 3 SmartPlayer 0 1 1 4
 		// DELEN DOOR 4, dat is aantal Clients dat je moet listen
@@ -634,7 +662,7 @@ public class Client {
 			}
 		} else {
 			mui.addMessage("[ERROR]Didn't get a valid Leaderboard from the Server.");
-			sendMessage(ERROR + " " + Server.LEADERBOARD + "");
+			sendMessage(ERROR + " " + Server.LEADERBOARD + " Didn't get a valid Leaderboard from your Server :(");
 		}
 	}
 }

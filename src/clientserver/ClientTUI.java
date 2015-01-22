@@ -140,6 +140,14 @@ public class ClientTUI extends Thread implements ClientView {
 				}
 			} else if (splitInput[0].equals("LEADERBOARD")) {
 				client.sendMessage(Client.REQUEST_LEADERBOARD);
+			} else if (splitInput[0].equals("DECLINE")) {
+				if (splitInput.length > 1) {
+					client.removeServerInvite(splitInput[1]);
+					client.sendMessage(input);
+					addMessage("[INVITE]Successfully tried to decline " + splitInput[1] + "'s invite.");
+				} else {
+					addMessage("[INVITE]Please specify whose invite you'd like to decline.");
+				}
 			} else {
 				client.sendMessage(input);
 			}
@@ -192,7 +200,7 @@ public class ClientTUI extends Thread implements ClientView {
 			client.shutdown();
 		}
 		client.sendMessage(Client.CONNECT + " " + name + " " + Features.CHAT
-				+ " " + Features.CUSTOM_BOARD_SIZE+ " " + Features.LEADERBOARD);
+				+ " " + Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD);
 		client.setClientName(name);
 		client.readInput();
 	}
