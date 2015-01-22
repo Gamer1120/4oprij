@@ -511,9 +511,8 @@ public class Server extends Thread {
 			for (LeaderboardPair pair : leaderboard) {
 				scores += " " + pair.getName() + " " + pair.getWins() + " "
 						+ pair.getLosses() + " " + pair.getGames() + " " + rank;
-				if (pair.equalScore(oldPair)) {
+				if (!pair.equalScore(oldPair)) {
 					rank++;
-				} else {
 					oldPair = pair;
 				}
 			}
