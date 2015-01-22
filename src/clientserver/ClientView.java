@@ -10,8 +10,9 @@ package clientserver;
 public interface ClientView extends MessageUI {
 	/**
 	 * Asks for the name of the player.
+	 * @return 
 	 */
-	public void askName();
+	public String askName();
 
 	/**
 	 * Asks the player to make a move.

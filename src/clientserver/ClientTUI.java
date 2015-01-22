@@ -4,6 +4,7 @@ import game.ComputerPlayer;
 import game.Disc;
 import game.HumanPlayer;
 import game.NaiveStrategy;
+import game.Player;
 import game.SmartStrategy;
 
 import java.io.BufferedReader;
@@ -41,14 +42,16 @@ public class ClientTUI extends Thread implements ClientView {
 	 * The port the ClientTUI will be connecting to.
 	 */
 	private int port;
+
+	private Player player;
+
 	/**
 	 * A constant for the default adress to connect to, in this case localhost.
 	 */
 	private static final String DEFAULT_INET = "localhost";
 	private static final int DEFAULT_PORT = 2727;
 
-	private static final String CLIENT_FEATURES = Features.CHAT + " "
-			+ Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD;
+	
 
 	/**
 	 * Creates a ClientTUI object.
@@ -58,12 +61,10 @@ public class ClientTUI extends Thread implements ClientView {
 	 * @param port
 	 *            The port this ClientTUI will connect to.
 	 */
-	public ClientTUI(InetAddress inet, int port) {
-		this.inet = inet;
-		this.port = port;
+	public ClientTUI() {
 		this.moveRequested = false;
 		this.reader = new BufferedReader(new InputStreamReader(System.in));
-		askName();
+		this.client = new Client(this);
 	}
 
 	/**
@@ -131,75 +132,24 @@ public class ClientTUI extends Thread implements ClientView {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		ClientTUI c = new ClientTUI(addr, DEFAULT_PORT);
-		c.askName();
+		ClientTUI c = new ClientTUI();
 	}
 
 	/**
 	 * Asks the user for their name. If they enter -N or -S instead, a
 	 * ComputerPlayer with a NaiveStrategy or SmartStrategy is made.
 	 */
+	/*
+	 * while loop met boolean true totdat connect accept, client maken zonder player etc, in connect accept uiteindelijke naam opvragen en player maken
+	 */
 	@Override
-	public void askName() {
-		String name = null;
-		String[] splitName = null;
-		addMessage("[NAME]Please enter your name (or -N for a ComputerPlayer with a NaiveStrategy or -S for a ComputerPlayer with a SmartStrategy): ");
+	public String askName() {
+		addMessage("Please enter your name or -N or -S");
 		try {
-			name = reader.readLine();
-			splitName = name.split("\\s+");
-			if (splitName[0].equals("-N")) {
-				if (splitName.length == 1) {
-					name = "NaivePlayer";
-					this.client = new Client(
-							inet,
-							port,
-							this,
-							new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
-					client.sendMessage(Client.CONNECT + " " + name + " "
-							+ CLIENT_FEATURES);
-				} else {
-					name = splitName[1];
-					this.client = new Client(
-							inet,
-							port,
-							this,
-							new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
-					client.sendMessage(Client.CONNECT + " " + name + " "
-							+ CLIENT_FEATURES);
-				}
-			} else if (splitName[0].equals("-S")) {
-				if (splitName.length == 1) {
-					name = "SmartPlayer";
-					this.client = new Client(
-							inet,
-							port,
-							this,
-							new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
-					client.sendMessage(Client.CONNECT + " " + name + " "
-							+ CLIENT_FEATURES);
-				} else {
-					name = splitName[1];
-					this.client = new Client(
-							inet,
-							port,
-							this,
-							new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
-					client.sendMessage(Client.CONNECT + " " + name + " "
-							+ CLIENT_FEATURES);
-				}
-			} else {
-				this.client = new Client(inet, port, this, new HumanPlayer(
-						Disc.YELLOW, this));
-				client.sendMessage(Client.CONNECT + " " + name + " "
-						+ CLIENT_FEATURES);
-			}
+			return reader.readLine();
 		} catch (IOException e) {
-			addMessage("Unable to connect to server. TERMINATING.");
-			System.exit(0);
+			return null;
 		}
-
-		client.setClientName(name);
-		client.readInput();
 	}
 
 	/**
@@ -313,5 +263,33 @@ public class ClientTUI extends Thread implements ClientView {
 		} else {
 			addMessage("[INVITE]Please specify whose invite you'd like to decline.");
 		}
+	}
+	
+	public InetAddress askHost(){
+		addMessage("Please enter the IP address you'd like to connect to.");
+		try {
+			return InetAddress.getByName(reader.readLine());
+		} catch (UnknownHostException e) {
+			addMessage("[ERROR]Unknown host.");
+		} catch (IOException e) {
+			addMessage("[ERROR]Please enter a valid IP address.");
+		}
+		return null;
+	}
+	
+	public int askPort(){
+		addMessage("Please enter the port you'd like to connect to.");
+		try {
+			return (Integer.parseInt(reader.readLine()));
+		} catch (NumberFormatException e) {
+			addMessage("[ERROR]That is not a valid number.");
+		} catch (IOException e) {
+			addMessage("[ERROR]Please enter a valid port.");
+		}
+		return -1;
+	}
+	
+	public void setClient(Client client){
+		this.client = client;
 	}
 }

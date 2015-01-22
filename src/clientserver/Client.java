@@ -3,7 +3,10 @@ package clientserver;
 import game.Board;
 import game.Disc;
 import game.HumanPlayer;
+import game.ComputerPlayer;
+import game.NaiveStrategy;
 import game.Player;
+import game.SmartStrategy;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -39,7 +42,8 @@ public class Client {
 	public static final String ERROR = "ERROR";
 	public static final String PING = "PING";
 	// END OF PROTOCOL
-	// FIXME
+	private static final String CLIENT_FEATURES = Features.CHAT + " "
+			+ Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD;
 	public String firstPlayer;
 	public String secondPlayer;
 
@@ -106,6 +110,10 @@ public class Client {
 	 */
 	private Map<String, Integer[]> invited;
 
+	private InetAddress host;
+
+	private int port;
+
 	/*@	private invariant sock != null;
 	 	private invariant mui != null;
 	 	private invariant in != null;
@@ -132,21 +140,42 @@ public class Client {
 	 	requires muiArg != null;
 	 	requires localPlayer != null;
 	 */
-	public Client(InetAddress host, int port, ClientTUI muiArg,
-			Player localPlayer) throws IOException {
-		this.sock = new Socket(host, port);
-		this.mui = muiArg;
-		this.in = new BufferedReader(new InputStreamReader(
-				sock.getInputStream()));
-		this.out = new BufferedWriter(new OutputStreamWriter(
-				sock.getOutputStream()));
-		this.loop = true;
-		this.isIngame = false;
-		this.invitedBy = new HashMap<String, Integer[]>();
+	public Client(ClientTUI muiArg) {
 		this.isConnected = false;
-		this.localPlayer = localPlayer;
-		this.requestedBoard = false;
 		this.invited = new HashMap<String, Integer[]>();
+		this.invitedBy = new HashMap<String, Integer[]>();
+		this.loop = true;
+
+		this.mui = muiArg;
+		this.clientName = mui.askName();
+		this.localPlayer = null;
+		while (localPlayer == null) {
+			setUpPlayer();
+		}
+		this.host = null;
+		while (host == null) {
+			setUpIP();
+		}
+		this.port = -1;
+		while (port == -1) {
+			setUpPort();
+		}
+		mui.setClient(this);
+		try {
+			this.sock = new Socket(host, port);
+			this.in = new BufferedReader(new InputStreamReader(
+					sock.getInputStream()));
+			this.out = new BufferedWriter(new OutputStreamWriter(
+					sock.getOutputStream()));
+		} catch (IOException e) {
+			// TODO Ask again for IP and port
+			e.printStackTrace();
+		}
+		this.isIngame = false;
+		this.requestedBoard = false;
+		sendMessage(CONNECT + " " + getClientName() + " " + CLIENT_FEATURES);
+		readInput();
+
 	}
 
 	/**
@@ -700,5 +729,45 @@ public class Client {
 			sendMessage(ERROR + " " + Server.LEADERBOARD
 					+ " Didn't get a valid Leaderboard from your Server :(");
 		}
+	}
+
+	public void setPlayer(Player player) {
+		localPlayer = player;
+	}
+
+	public String askName() {
+		return mui.getName();
+	}
+
+	public void setUpPlayer() {
+		String[] splitName = getClientName().split("\\s+");
+		if (splitName[0].equals("-N")) {
+			if (splitName.length == 1) {
+				setClientName("NaivePlayer");
+				setPlayer(new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
+			} else {
+				setClientName(splitName[1]);
+				setPlayer(new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
+			}
+		} else if (splitName[0].equals("-S")) {
+			if (splitName.length == 1) {
+				setClientName("SmartPlayer");
+				setPlayer(new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
+			} else {
+				setClientName(splitName[1]);
+				setPlayer(new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
+			}
+		} else {
+			setClientName(splitName[0]);
+			setPlayer(new HumanPlayer(Disc.YELLOW, mui));
+		}
+	}
+
+	public void setUpIP() {
+		this.host = mui.askHost();
+	}
+
+	public void setUpPort() {
+		this.port = mui.askPort();
 	}
 }
