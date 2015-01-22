@@ -91,22 +91,29 @@ public class ClientTUI extends Thread implements ClientView {
 				client.shutdown();
 				break;
 			}
-			if (input.equals("QUIT")) {
+			switch (splitInput[0]) {
+			case "QUIT":
 				quit();
-			} else if (input.equals("HELP")) {
+				break;
+			case "HELP":
 				help();
-			} else if (splitInput[0].equals("MOVE")) {
+				break;
+			case "MOVE":
 				move(input, splitInput);
-			} else if (splitInput[0].equals("INVITE")) {
+				break;
+			case "INVITE":
 				invite(input, splitInput);
-			} else if (splitInput[0].equals("LEADERBOARD")) {
+				break;
+			case "LEADERBOARD":
 				client.sendMessage(Client.REQUEST_LEADERBOARD);
-			} else if (splitInput[0].equals("DECLINE")) {
+				break;
+			case "DECLINE":
 				decline(input, splitInput);
-			} else {
+				break;
+			default:
 				client.sendMessage(input);
+				break;
 			}
-
 		}
 	}
 
@@ -203,11 +210,19 @@ public class ClientTUI extends Thread implements ClientView {
 		return -1;
 	}
 
+	/**
+	 * Sends a Client.QUIT message to the server, and then shuts down the
+	 * client.
+	 */
 	private void quit() {
 		client.sendMessage(Client.QUIT + " Disconnected.");
 		client.shutdown();
 	}
 
+	/**
+	 * Shows the commands that are available. In case the client is in-game,
+	 * different commands are shown than when he's not.
+	 */
 	private void help() {
 		if (client.isIngame) {
 			addMessage("[HELP]Available commands are: MOVE <column>, PING and QUIT");
@@ -216,6 +231,15 @@ public class ClientTUI extends Thread implements ClientView {
 		}
 	}
 
+	/**
+	 * Forwards the move the player just made to the server, if the move was
+	 * valid, and there was a move requested.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
 	private void move(String input, String[] splitInput) {
 		if (moveRequested) {
 			moveRequested = false;
@@ -236,6 +260,16 @@ public class ClientTUI extends Thread implements ClientView {
 		}
 	}
 
+	/**
+	 * Forwards the invite the player just made to the server, if the player
+	 * added a name to invite. It saves the invite in the client. This method
+	 * also supports custom board sizes.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
 	private void invite(String input, String[] splitInput) {
 		if (splitInput.length == 1) {
 			addMessage("[ERROR]Please add a player to invite.");
@@ -259,7 +293,17 @@ public class ClientTUI extends Thread implements ClientView {
 			}
 		}
 	}
-	private void decline(String input, String[] splitInput){
+
+	/**
+	 * Forwards the rejected invite to the Server, if the player specified whose
+	 * invite to decline.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
+	private void decline(String input, String[] splitInput) {
 		if (splitInput.length > 1) {
 			client.removeServerInvite(splitInput[1]);
 			client.sendMessage(input);
