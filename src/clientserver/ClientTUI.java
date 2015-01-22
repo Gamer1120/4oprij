@@ -144,7 +144,8 @@ public class ClientTUI extends Thread implements ClientView {
 				if (splitInput.length > 1) {
 					client.removeServerInvite(splitInput[1]);
 					client.sendMessage(input);
-					addMessage("[INVITE]Successfully tried to decline " + splitInput[1] + "'s invite.");
+					addMessage("[INVITE]Successfully tried to decline "
+							+ splitInput[1] + "'s invite.");
 				} else {
 					addMessage("[INVITE]Please specify whose invite you'd like to decline.");
 				}
@@ -181,26 +182,69 @@ public class ClientTUI extends Thread implements ClientView {
 	@Override
 	public void askName() {
 		String name = null;
+		String[] splitName = null;
 		addMessage("[NAME]Please enter your name (or -N for a ComputerPlayer with a NaiveStrategy or -S for a ComputerPlayer with a SmartStrategy): ");
 		try {
 			name = reader.readLine();
-			if (name.equals("-N")) {
-				name = "NaivePlayer";
-				this.client = new Client(inet, port, this, new ComputerPlayer(
-						Disc.YELLOW, new NaiveStrategy()));
-			} else if (name.equals("-S")) {
-				name = "SmartPlayer";
-				this.client = new Client(inet, port, this, new ComputerPlayer(
-						Disc.YELLOW, new SmartStrategy()));
+			splitName = name.split("\\s+");
+			if (splitName[0].equals("-N")) {
+				if (splitName.length == 1) {
+					name = "NaivePlayer";
+					this.client = new Client(
+							inet,
+							port,
+							this,
+							new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
+					client.sendMessage(Client.CONNECT + " " + name + " "
+							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
+							+ " " + Features.LEADERBOARD);
+				} else {
+					name = splitName[1];
+					this.client = new Client(
+							inet,
+							port,
+							this,
+							new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
+					client.sendMessage(Client.CONNECT + " " + name + " "
+							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
+							+ " " + Features.LEADERBOARD);
+				}
+			} else if (splitName[0].equals("-S")) {
+				if (splitName.length == 1) {
+					name = "SmartPlayer";
+					this.client = new Client(
+							inet,
+							port,
+							this,
+							new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
+					client.sendMessage(Client.CONNECT + " " + name + " "
+							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
+							+ " " + Features.LEADERBOARD);
+				} else {
+					name = splitName[1];
+					this.client = new Client(
+							inet,
+							port,
+							this,
+							new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
+					addMessage(Client.CONNECT + " " + name + " "
+							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
+							+ " " + Features.LEADERBOARD);
+					client.sendMessage(Client.CONNECT + " " + name + " "
+							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
+							+ " " + Features.LEADERBOARD);
+				}
 			} else {
 				this.client = new Client(inet, port, this, new HumanPlayer(
 						Disc.YELLOW, this));
+				client.sendMessage(Client.CONNECT + " " + name + " "
+						+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
+						+ " " + Features.LEADERBOARD);
 			}
 		} catch (IOException e) {
 			client.shutdown();
 		}
-		client.sendMessage(Client.CONNECT + " " + name + " " + Features.CHAT
-				+ " " + Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD);
+
 		client.setClientName(name);
 		client.readInput();
 	}

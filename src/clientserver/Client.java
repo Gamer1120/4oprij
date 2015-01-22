@@ -297,14 +297,23 @@ public class Client {
 		}
 	}
 
+	/**
+	 * This method accepts the Server.DECLINE_INVITE packet. If the Server
+	 * specified a person, the person will be removed from the list of people
+	 * this Client has invited.
+	 * 
+	 * @param serverMessage
+	 *            The full messsage the server sent.
+	 */
 	private void declineInvite(String[] serverMessage) {
 		if (serverMessage.length > 1) {
 			invited.remove(serverMessage[1]);
 			mui.addMessage("[INVITE]The invite you sent to " + serverMessage[1]
 					+ " got declined.");
-		} else{
+		} else {
 			mui.addMessage("[INVITE]The server just tried to decline one of your invites, but it didn't send who declined yours.");
-			sendMessage(ERROR + " " + serverMessage[0] + " Your server didn't send me who declined the invite.");
+			sendMessage(ERROR + " " + serverMessage[0]
+					+ " Your server didn't send me who declined the invite.");
 		}
 	}
 
@@ -416,7 +425,8 @@ public class Client {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
 				mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
-				sendMessage(ERROR + " " + Server.MOVE_OK + " You didn't send a valid move.");
+				sendMessage(ERROR + " " + Server.MOVE_OK
+						+ " You didn't send a valid move.");
 				shutdown();
 			}
 			if (board.isField(move) && board.isEmptyField(move)) {
@@ -433,12 +443,16 @@ public class Client {
 						moveOK(serverMessage);
 					} catch (InterruptedException e) {
 						mui.addMessage("[ERROR]Interrupted. TERMINATING.");
-						sendMessage(ERROR + " " + Server.BOARD + " My client got interrupted.");
+						sendMessage(ERROR + " " + Server.BOARD
+								+ " My client got interrupted.");
 						shutdown();
 					}
 				} else {
 					mui.addMessage("[ERROR]Can't make the move on both the local board, and the board on the server. TERMINATING.");
-					sendMessage(ERROR + " " + Server.BOARD + " I can't make the specified move on the local board, and the Board you just sent me. TERMINATING.");
+					sendMessage(ERROR
+							+ " "
+							+ Server.BOARD
+							+ " I can't make the specified move on the local board, and the Board you just sent me. TERMINATING.");
 					shutdown();
 				}
 			}
@@ -447,7 +461,8 @@ public class Client {
 				move = Integer.parseInt(serverMessage[2]);
 			} catch (NumberFormatException e) {
 				mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
-				sendMessage(ERROR + " " + Server.MOVE_OK + " You didn't send a valid move.");
+				sendMessage(ERROR + " " + Server.MOVE_OK
+						+ " You didn't send a valid move.");
 				shutdown();
 			}
 			if (board.isField(move) && board.isEmptyField(move)) {
@@ -462,12 +477,16 @@ public class Client {
 						moveOK(serverMessage);
 					} catch (InterruptedException e) {
 						mui.addMessage("[ERROR]Interrupted. TERMINATING.");
-						sendMessage(ERROR + " " + Server.BOARD + " My client got interrupted.");
+						sendMessage(ERROR + " " + Server.BOARD
+								+ " My client got interrupted.");
 						shutdown();
 					}
 				} else {
 					mui.addMessage("[ERROR]Can't make the move on both the local board, and the board on the server. TERMINATING.");
-					sendMessage(ERROR + " " + Server.BOARD + " I can't make the specified move on the local board, and the Board you just sent me. TERMINATING.");
+					sendMessage(ERROR
+							+ " "
+							+ Server.BOARD
+							+ " I can't make the specified move on the local board, and the Board you just sent me. TERMINATING.");
 					shutdown();
 				}
 			}
@@ -563,7 +582,8 @@ public class Client {
 
 		} catch (NumberFormatException e) {
 			mui.addMessage("[ERROR]Server sent a wrong board. TERMINATING.");
-			sendMessage(ERROR + " " + Server.BOARD + " You sent me an invalid Board. TERMINATING.");
+			sendMessage(ERROR + " " + Server.BOARD
+					+ " You sent me an invalid Board. TERMINATING.");
 			shutdown();
 		}
 		return test;
@@ -642,11 +662,26 @@ public class Client {
 	public void addServerInvite(String name, int BoardX, int BoardY) {
 		invitedBy.put(name, new Integer[] { BoardX, BoardY });
 	}
-	
-	public void removeServerInvite(String name){
+
+	/**
+	 * Method to remove an invite from the list of people this client has
+	 * invited. It's called when the server sends a Server.DECLINE_INVITE
+	 * packet.
+	 * 
+	 * @param name
+	 *            The name of the person who declined the invite.
+	 */
+	public void removeServerInvite(String name) {
 		invited.remove(name);
 	}
-	
+
+	/**
+	 * If the server sent a valid Leaderboard, this method adds the formatted
+	 * leaderboard to the View.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
 	public void showLeaderBoard(String[] serverMessage) {
 		// EXAMPLE: LEADERBOARD REQUEST_BOARD 1 0 1 1 WinPlayer 1 0 1 2 LosePlayer 0 1 1 3 SmartPlayer 0 1 1 4
 		// DELEN DOOR 4, dat is aantal Clients dat je moet listen
@@ -662,7 +697,8 @@ public class Client {
 			}
 		} else {
 			mui.addMessage("[ERROR]Didn't get a valid Leaderboard from the Server.");
-			sendMessage(ERROR + " " + Server.LEADERBOARD + " Didn't get a valid Leaderboard from your Server :(");
+			sendMessage(ERROR + " " + Server.LEADERBOARD
+					+ " Didn't get a valid Leaderboard from your Server :(");
 		}
 	}
 }
