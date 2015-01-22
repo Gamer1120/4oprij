@@ -77,8 +77,7 @@ public class Server extends Thread {
 	/**
 	 * The User Interface of the server.
 	 */
-	private MessageUI mui;
-	// TODO: feature lijst
+	private ServerView mui;
 
 	/** The threads. */
 	private HashSet<ClientHandler> threads;
@@ -101,7 +100,7 @@ public class Server extends Thread {
 		requires muiArg != null;
 	 */
 	@SuppressWarnings("unchecked")
-	public Server(int portArg, MessageUI muiArg) {
+	public Server(int portArg, ServerView muiArg) {
 		this.port = portArg;
 		this.mui = muiArg;
 		this.threads = new HashSet<ClientHandler>();
@@ -141,9 +140,8 @@ public class Server extends Thread {
 				ch.start();
 			}
 		} catch (IOException e) {
-			// TODO: betere error handling
-			e.printStackTrace();
-
+			mui.addMessage("Port unavailable, select a different one");
+			mui.stopListening();
 		}
 	}
 

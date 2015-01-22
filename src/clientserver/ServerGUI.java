@@ -19,11 +19,13 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 /**
- * A GUI for the server, as provided in the files in week 7 for the Multiclient chat.
- * @author  Theo Ruys
+ * A GUI for the server, as provided in the files in week 7 for the Multiclient
+ * chat.
+ * 
+ * @author Theo Ruys
  * @version 2005.02.21
  */
-public class ServerGUI extends JFrame implements ActionListener, MessageUI {
+public class ServerGUI extends JFrame implements ActionListener, ServerView {
 
 	private static final long serialVersionUID = 1L;
 	private JButton bConnect;
@@ -42,6 +44,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 			public void windowClosing(WindowEvent e) {
 				e.getWindow().dispose();
 			}
+
 			public void windowClosed(WindowEvent e) {
 				System.exit(0);
 			}
@@ -113,7 +116,8 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	}
 
 	/**
-	 * Construct a Server-object, which is waiting for clients. The port field and button should be disabled
+	 * Construct a Server-object, which is waiting for clients. The port field
+	 * and button should be disabled
 	 */
 	private void startListening() {
 		int port = 0;
@@ -134,7 +138,17 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		addMessage("Started listening on port " + port + "...");
 	}
 
-	/** add a message to the textarea  */
+	/**
+	 * Construct a Server-object, which is waiting for clients. The port field
+	 * and button should be disabled
+	 */
+	public void stopListening() {
+		tfPort.setEditable(true);
+		bConnect.setEnabled(true);
+		addMessage("Stopped listining");
+	}
+
+	/** add a message to the textarea */
 	public void addMessage(String msg) {
 		taMessages.append(msg + "\n");
 	}

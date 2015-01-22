@@ -554,7 +554,6 @@ public class ClientHandler extends Thread {
 		ensures !server.isInvited(command[1], clientName);
 	 */
 	private void decline(String[] command) {
-		//TODO: decline je eigen invite
 		server.removeInvite(command[1], clientName);
 		server.removeInvite(clientName, command[1]);
 		server.sendMessage(command[1], Server.DECLINE_INVITE + " " + clientName);
