@@ -706,7 +706,7 @@ public class ClientHandler extends Thread {
 		requires command[0].equals(Client.CHAT);
 	 */
 	private void chat(String line) {
-		server.broadcastChat(Server.CHAT + " " + clientName + ":"
+		server.broadcastChat(Server.CHAT + " " + clientName + " "
 				+ line.split(" ", 2)[1]);
 	}
 
