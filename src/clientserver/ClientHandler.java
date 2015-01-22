@@ -143,7 +143,9 @@ public class ClientHandler extends Thread {
 				break;
 			case Client.QUIT:
 				server.print(clientName + ": " + line);
-				shutdown();
+				if (loop) {
+					shutdown();
+				}
 				break;
 			case Client.INVITE:
 				inviteChecks(command);
