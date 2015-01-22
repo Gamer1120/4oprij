@@ -65,7 +65,7 @@ public class Server extends Thread {
 	// END OF PROTOCOL
 
 	public static final String FEATURES = Features.CHAT + " "
-			+ Features.CUSTOM_BOARD_SIZE;
+			+ Features.LEADERBOARD + " " + Features.CUSTOM_BOARD_SIZE;
 
 	/** The Constant LEADERBOARD. */
 	public static final String FILENAME = "leaderboard.obj";
