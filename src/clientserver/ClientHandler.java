@@ -317,9 +317,7 @@ public class ClientHandler extends Thread {
 	 */
 	//TODO: board ensures !NULL
 	public void setBoard(Board b) {
-		synchronized (board) {
-			board = b;
-		}
+		board = b;
 	}
 
 	/**
