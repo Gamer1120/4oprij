@@ -506,15 +506,15 @@ public class Server extends Thread {
 	public String getLeaderboard() {
 		synchronized (leaderboard) {
 			String scores = "";
-			int rank = 1;
+			int rank = 0;
 			LeaderboardPair oldPair = null;
 			for (LeaderboardPair pair : leaderboard) {
-				scores += " " + pair.getName() + " " + pair.getWins() + " "
-						+ pair.getLosses() + " " + pair.getGames() + " " + rank;
 				if (!pair.equalScore(oldPair)) {
 					rank++;
 					oldPair = pair;
 				}
+				scores += " " + pair.getName() + " " + pair.getWins() + " "
+						+ pair.getLosses() + " " + pair.getGames() + " " + rank;
 			}
 			return scores;
 		}
