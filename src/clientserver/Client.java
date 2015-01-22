@@ -39,7 +39,7 @@ public class Client {
 	public static final String ERROR = "ERROR";
 	public static final String PING = "PING";
 	// END OF PROTOCOL
-	// TODO: Fix this.
+	// FIXME
 	public String firstPlayer;
 	public String secondPlayer;
 
