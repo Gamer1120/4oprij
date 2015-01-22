@@ -92,68 +92,17 @@ public class ClientTUI extends Thread implements ClientView {
 				break;
 			}
 			if (input.equals("QUIT")) {
-				client.sendMessage(Client.QUIT + " Disconnected.");
-				client.shutdown();
-				break;
+				quit();
 			} else if (input.equals("HELP")) {
-				if (client.isIngame) {
-					addMessage("[HELP]Available commands are: MOVE <column>, PING and QUIT");
-				} else {
-					addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD, PING and QUIT");
-				}
+				help();
 			} else if (splitInput[0].equals("MOVE")) {
-				if (moveRequested) {
-					moveRequested = false;
-					client.sendMessage(input);
-					if (splitInput.length == 2) {
-						try {
-							Integer.parseInt(splitInput[1]);
-
-						} catch (NumberFormatException
-								| ArrayIndexOutOfBoundsException e) {
-							addMessage("[ERROR]Please enter a valid move after MOVE.");
-						}
-					} else {
-						addMessage("[ERROR]Please enter a valid move after MOVE.");
-					}
-				} else {
-					addMessage("[ERROR]There was no move requested.");
-
-				}
+				move(input, splitInput);
 			} else if (splitInput[0].equals("INVITE")) {
-				if (splitInput.length == 1) {
-					addMessage("[ERROR]Please add a player to invite.");
-				} else if (splitInput.length == 2) {
-					client.addClientInvite(splitInput[1]);
-					client.sendMessage(input);
-					addMessage("[INVITE]Tried to invite: "
-							+ splitInput[1] + " with default board size.");
-				} else if (splitInput.length == 3) {
-					addMessage("[ERROR]For a custom board size you need to specify both the BoardX and BoardY");
-				} else if (splitInput.length >= 4) {
-					try {
-						client.addClientInvite(splitInput[1],
-								Integer.parseInt(splitInput[2]),
-								Integer.parseInt(splitInput[3]));
-						client.sendMessage(input);
-						addMessage("[INVITE]Tried to invite: "
-								+ splitInput[1]
-								+ " with the specified custom board size.");
-					} catch (NumberFormatException e) {
-						addMessage("[INVITE]Please specify the BoardX and BoardY as integers. Invite failed.");
-					}
-				}
+				invite(input, splitInput);
 			} else if (splitInput[0].equals("LEADERBOARD")) {
 				client.sendMessage(Client.REQUEST_LEADERBOARD);
 			} else if (splitInput[0].equals("DECLINE")) {
-				if (splitInput.length > 1) {
-					client.removeServerInvite(splitInput[1]);
-					client.sendMessage(input);
-					addMessage("[INVITE]Tried to decline "
-							+ splitInput[1] + "'s invite.");
-				} else {
-					addMessage("[INVITE]Please specify whose invite you'd like to decline.");
-				}
+				decline(input, splitInput);
 			} else {
 				client.sendMessage(input);
 			}
@@ -252,5 +201,72 @@ public class ClientTUI extends Thread implements ClientView {
 		this.moveRequested = true;
 		addMessage("[MOVE]Please enter a move...");
 		return -1;
+	}
+
+	private void quit() {
+		client.sendMessage(Client.QUIT + " Disconnected.");
+		client.shutdown();
+	}
+
+	private void help() {
+		if (client.isIngame) {
+			addMessage("[HELP]Available commands are: MOVE <column>, PING and QUIT");
+		} else {
+			addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD, PING and QUIT");
+		}
+	}
+
+	private void move(String input, String[] splitInput) {
+		if (moveRequested) {
+			moveRequested = false;
+			client.sendMessage(input);
+			if (splitInput.length == 2) {
+				try {
+					Integer.parseInt(splitInput[1]);
+
+				} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+					addMessage("[ERROR]Please enter a valid move after MOVE.");
+				}
+			} else {
+				addMessage("[ERROR]Please enter a valid move after MOVE.");
+			}
+		} else {
+			addMessage("[ERROR]There was no move requested.");
+
+		}
+	}
+
+	private void invite(String input, String[] splitInput) {
+		if (splitInput.length == 1) {
+			addMessage("[ERROR]Please add a player to invite.");
+		} else if (splitInput.length == 2) {
+			client.addClientInvite(splitInput[1]);
+			client.sendMessage(input);
+			addMessage("[INVITE]Tried to invite: " + splitInput[1]
+					+ " with default board size.");
+		} else if (splitInput.length == 3) {
+			addMessage("[ERROR]For a custom board size you need to specify both the BoardX and BoardY");
+		} else if (splitInput.length >= 4) {
+			try {
+				client.addClientInvite(splitInput[1],
+						Integer.parseInt(splitInput[2]),
+						Integer.parseInt(splitInput[3]));
+				client.sendMessage(input);
+				addMessage("[INVITE]Tried to invite: " + splitInput[1]
+						+ " with the specified custom board size.");
+			} catch (NumberFormatException e) {
+				addMessage("[INVITE]Please specify the BoardX and BoardY as integers. Invite failed.");
+			}
+		}
+	}
+	private void decline(String input, String[] splitInput){
+		if (splitInput.length > 1) {
+			client.removeServerInvite(splitInput[1]);
+			client.sendMessage(input);
+			addMessage("[INVITE]Tried to decline " + splitInput[1]
+					+ "'s invite.");
+		} else {
+			addMessage("[INVITE]Please specify whose invite you'd like to decline.");
+		}
 	}
 }
