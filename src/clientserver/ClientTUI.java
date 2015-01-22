@@ -194,7 +194,8 @@ public class ClientTUI extends Thread implements ClientView {
 						+ CLIENT_FEATURES);
 			}
 		} catch (IOException e) {
-			client.shutdown();
+			addMessage("Unable to connect to server. TERMINATING.");
+			System.exit(0);
 		}
 
 		client.setClientName(name);
