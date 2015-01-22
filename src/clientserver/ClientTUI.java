@@ -46,6 +46,9 @@ public class ClientTUI extends Thread implements ClientView {
 	 */
 	private static final String DEFAULT_INET = "localhost";
 
+	private static final String CLIENT_FEATURES = Features.CHAT + " "
+			+ Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD;
+
 	/**
 	 * Creates a ClientTUI object.
 	 * 
@@ -196,8 +199,7 @@ public class ClientTUI extends Thread implements ClientView {
 							this,
 							new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
 					client.sendMessage(Client.CONNECT + " " + name + " "
-							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
-							+ " " + Features.LEADERBOARD);
+							+ CLIENT_FEATURES);
 				} else {
 					name = splitName[1];
 					this.client = new Client(
@@ -206,8 +208,7 @@ public class ClientTUI extends Thread implements ClientView {
 							this,
 							new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
 					client.sendMessage(Client.CONNECT + " " + name + " "
-							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
-							+ " " + Features.LEADERBOARD);
+							+ CLIENT_FEATURES);
 				}
 			} else if (splitName[0].equals("-S")) {
 				if (splitName.length == 1) {
@@ -218,8 +219,7 @@ public class ClientTUI extends Thread implements ClientView {
 							this,
 							new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
 					client.sendMessage(Client.CONNECT + " " + name + " "
-							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
-							+ " " + Features.LEADERBOARD);
+							+ CLIENT_FEATURES);
 				} else {
 					name = splitName[1];
 					this.client = new Client(
@@ -227,19 +227,14 @@ public class ClientTUI extends Thread implements ClientView {
 							port,
 							this,
 							new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
-					addMessage(Client.CONNECT + " " + name + " "
-							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
-							+ " " + Features.LEADERBOARD);
 					client.sendMessage(Client.CONNECT + " " + name + " "
-							+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
-							+ " " + Features.LEADERBOARD);
+							+ CLIENT_FEATURES);
 				}
 			} else {
 				this.client = new Client(inet, port, this, new HumanPlayer(
 						Disc.YELLOW, this));
 				client.sendMessage(Client.CONNECT + " " + name + " "
-						+ Features.CHAT + " " + Features.CUSTOM_BOARD_SIZE
-						+ " " + Features.LEADERBOARD);
+						+ CLIENT_FEATURES);
 			}
 		} catch (IOException e) {
 			client.shutdown();

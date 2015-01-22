@@ -192,6 +192,7 @@ public class Client {
 				moveOK(serverMessage);
 				break;
 			case Server.ERROR:
+				//TODO: Zet dit netjes neer.
 				mui.addMessage("[ERROR]" + line.split(" ", 2)[1]);
 				if (!isConnected) {
 					mui.askName();
@@ -207,7 +208,6 @@ public class Client {
 			case Server.LEADERBOARD:
 				showLeaderBoard(serverMessage);
 				break;
-			//TODO: Decline invites van server
 			case Server.PONG:
 				mui.addMessage("[PING]Pong!");
 				break;
