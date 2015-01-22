@@ -381,7 +381,7 @@ public class ClientHandler extends Thread {
 	 * valid arguments, if the opponent exists, if neither player is in a game
 	 * and checks wether there is no invite between both player. If this is the
 	 * case invite will be called and an invite will be send to the opponent
-	 * specified in the command. You can invite and play against yourself.
+	 * specified in the command.
 	 *
 	 * @param command
 	 *            the command send by the client
@@ -394,6 +394,8 @@ public class ClientHandler extends Thread {
 			sendError(Client.INVITE, "You have to connect first");
 		} else if (command.length < 2) {
 			sendError(Client.INVITE, "Invalid arguments");
+		} else if (clientName.equals(command[1])) {
+			sendError(Client.INVITE, "You can't invite yourself");
 		} else if (!server.nameExists(command[1])) {
 			sendError(Client.INVITE, "Name doesn't exist");
 		} else if (inGame()) {
