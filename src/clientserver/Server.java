@@ -58,6 +58,8 @@ public class Server extends Thread {
 
 	/** The Constant LEADERBOARD. */
 	public static final String LEADERBOARD = "LEADERBOARD";
+	
+	public static final String PONG = "PONG";
 	// END OF PROTOCOL
 
 	public static final String FEATURES = Features.CHAT + " "

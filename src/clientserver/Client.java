@@ -36,9 +36,12 @@ public class Client {
 	public static final String REQUEST_BOARD = "REQUEST";
 	public static final String REQUEST_LOBBY = "LOBBY";
 	public static final String REQUEST_LEADERBOARD = "LEADERBOARD";
+	public static final String ERROR = "ERROR";
+	public static final String PING = "PING";
+	// END OF PROTOCOL
+	// TODO: Fix this.
 	public String firstPlayer;
 	public String secondPlayer;
-	// END OF PROTOCOL
 
 	/**
 	 * The name of this Client.
@@ -186,7 +189,7 @@ public class Client {
 				moveOK(serverMessage);
 				break;
 			case Server.ERROR:
-				mui.addMessage("[ERROR]" + line.split(" ",2)[1]);
+				mui.addMessage("[ERROR]" + line.split(" ", 2)[1]);
 				if (!isConnected) {
 					mui.askName();
 				}
@@ -214,7 +217,7 @@ public class Client {
 	//@	requires serverMessage[0].equals(Server.ACCEPT_CONNECT);
 	private void connect(String[] serverMessage) {
 		mui.addMessage("[CONNECT]Successfully established connection to server: "
-		// IP of the server
+				// IP of the server
 				+ sock.getRemoteSocketAddress().toString());
 		mui.addMessage("[FEATURES]The features of this server are:"
 				+ arrayToLine(serverMessage));
@@ -253,8 +256,8 @@ public class Client {
 						+ opponentName
 						+ " has invited you to a game of Connect4 (default boardsize)!");
 				mui.addMessage("Use \"ACCEPT " + opponentName
-						+ "\" to accept this invite or \"DECLINE " + opponentName
-						+ "\" to decline it.");
+						+ "\" to accept this invite or \"DECLINE "
+						+ opponentName + "\" to decline it.");
 			}
 		} else if (serverMessage.length >= 4) {
 			try {
@@ -267,8 +270,8 @@ public class Client {
 							+ " has invited you to a game of Connect4 with a custom Board size of "
 							+ boardX + " x " + boardY + "!");
 					mui.addMessage("Use \"ACCEPT " + opponentName
-							+ "\" to accept this invite or \"DECLINE " + opponentName
-							+ "\" to decline it.");
+							+ "\" to accept this invite or \"DECLINE "
+							+ opponentName + "\" to decline it.");
 				}
 			} catch (NumberFormatException e) {
 				mui.addMessage("[ERROR]The server just sent an invite with an invalid custom board size.");
@@ -300,12 +303,12 @@ public class Client {
 					+ " has started!");
 			Integer[] boardSize = invitedBy.get(secondPlayer);
 
-				board = new Board(boardSize[1], boardSize[0]);
+			board = new Board(boardSize[1], boardSize[0]);
 		} else {
 			mui.addMessage("[GAME]A game between you and " + firstPlayer
 					+ " has started!");
 			Integer[] boardSize = invited.get(firstPlayer);
-				board = new Board(boardSize[1], boardSize[0]);
+			board = new Board(boardSize[1], boardSize[0]);
 		}
 
 		this.isIngame = true;
@@ -608,8 +611,8 @@ public class Client {
 	public void addServerInvite(String name, int BoardX, int BoardY) {
 		invitedBy.put(name, new Integer[] { BoardX, BoardY });
 	}
-	
-	public void showLeaderBoard(String serverMessage){
+
+	public void showLeaderBoard(String serverMessage) {
 		//EXAMPLE: WinPlayer 1 0 1 LosePlayer 0 1 2
 		//DELEN DOOR 4, dat is aantal Clients dat je moet listen
 
