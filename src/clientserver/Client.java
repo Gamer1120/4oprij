@@ -376,8 +376,8 @@ public class Client {
 			if (serverMessage[1].equals(Game.DRAW)) {
 				mui.addMessage("[GAME]The game was a draw!");
 			} else {
-				mui.addMessage("[GAME]The game has ended. Reason: "
-						+ Arrays.toString(serverMessage));
+				mui.addMessage("[GAME]The game has ended. Reason:"
+						+ arrayToLine(serverMessage));
 			}
 		}
 	}
