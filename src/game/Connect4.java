@@ -1,4 +1,5 @@
 package game;
+
 public class Connect4 {
 	public final static String NAIVE_PLAYER = "-N";
 	public final static String SMART_PLAYER = "-S";
@@ -10,7 +11,7 @@ public class Connect4 {
 		Disc d = Disc.YELLOW;
 		for (int i = 0; i < Game.NUMBER_PLAYERS; i++) {
 			if (i >= args.length) {
-				player[i] = new ComputerPlayer(d);
+				player[i] = new ComputerPlayer(d, new MinMaxStrategy());
 			} else if (NAIVE_PLAYER.equalsIgnoreCase(args[i])) {
 				player[i] = new ComputerPlayer(d, new NaiveStrategy());
 			} else if (SMART_PLAYER.equalsIgnoreCase(args[i])) {

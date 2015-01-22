@@ -7,7 +7,7 @@ public class MinMaxStrategy implements Strategy {
 	}
 
 	public int determineMove(Board b, Disc d) {
-		Minimax strategy = new Minimax(b, 12);
+		Minimax strategy = new Minimax(b, 8);
 		return strategy.alphaBeta(d);
 	}
 }

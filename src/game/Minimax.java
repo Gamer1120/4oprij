@@ -3,47 +3,18 @@ package game;
 public class Minimax {
 	private final Board board;
 	public static final int[] INCREMENT = { 0, 1, 4, 32, 128, 512 };
-	private int column, boardsAnalyzed, maxDepth;
-	private boolean redWinFound, yellowWinFound;
+	private int column, maxDepth;
 
 	public Minimax(Board board, int maxDepth) {
 		this.board = board;
-		this.boardsAnalyzed = 0;
 		this.maxDepth = maxDepth;
 	}
 
-	public int getBoardsAnalyzed() {
-		return boardsAnalyzed;
-	}
-
 	public int alphaBeta(Disc d) {
-		redWinFound = yellowWinFound = false;
 		if (d == Disc.YELLOW) {
-			evaluateYellowMove(0, 1, -1, Integer.MIN_VALUE + 1,
-					Integer.MAX_VALUE - 1);
-			if (yellowWinFound) {
-				return column;
-			}
-			redWinFound = yellowWinFound = false;
-			evaluateRedMove(0, 1, -1, Integer.MIN_VALUE + 1,
-					Integer.MAX_VALUE - 1);
-			if (redWinFound) {
-				return column;
-			}
 			evaluateYellowMove(0, maxDepth, -1, Integer.MIN_VALUE + 1,
 					Integer.MAX_VALUE - 1);
 		} else {
-			evaluateRedMove(0, 1, -1, Integer.MIN_VALUE + 1,
-					Integer.MAX_VALUE - 1);
-			if (redWinFound) {
-				return column;
-			}
-			redWinFound = yellowWinFound = false;
-			evaluateYellowMove(0, 1, -1, Integer.MIN_VALUE + 1,
-					Integer.MAX_VALUE - 1);
-			if (yellowWinFound) {
-				return column;
-			}
 			evaluateRedMove(0, maxDepth, -1, Integer.MIN_VALUE + 1,
 					Integer.MAX_VALUE - 1);
 		}
@@ -52,12 +23,10 @@ public class Minimax {
 
 	private int evaluateRedMove(int depth, int maxDepth, int col, int alpha,
 			int beta) {
-		boardsAnalyzed++;
 		int min = Integer.MAX_VALUE, score = 0;
 		if (col != -1) {
 			score = getHeuristicScore(Disc.YELLOW, board, col, depth, maxDepth);
 			if (board.isWinner(Disc.YELLOW)) {
-				yellowWinFound = true;
 				return score;
 			}
 		}
@@ -95,12 +64,10 @@ public class Minimax {
 
 	private int evaluateYellowMove(int depth, int maxDepth, int col, int alpha,
 			int beta) {
-		boardsAnalyzed++;
 		int max = Integer.MIN_VALUE, score = 0;
 		if (col != -1) {
 			score = getHeuristicScore(Disc.RED, board, col, depth, maxDepth);
 			if (board.isWinner(Disc.RED)) {
-				redWinFound = true;
 				return score;
 			}
 		}
@@ -108,7 +75,6 @@ public class Minimax {
 			return score;
 		}
 		for (int c = 0; c < board.getColumns(); c++) {
-			//TODO: werken met deepcopy inplaats van disc verwijderen?
 			if (board.isEmptyField(c)) {
 				int r = board.emptyRow(c);
 				board.setField(r, c, Disc.YELLOW);
@@ -137,7 +103,6 @@ public class Minimax {
 	public int getHeuristicScore(Disc d, Board board, int col, int depth,
 			int maxDepth) {
 		int score = 0, row = board.emptyRow(col) + 1, redCount, yellowCount;
-		redWinFound = yellowWinFound = false;
 
 		redCount = yellowCount = 0;
 		int cStart = col - 3, colStart = cStart >= 0 ? cStart : 0, colEnd = board
@@ -153,12 +118,10 @@ public class Minimax {
 				}
 			}
 			if (redCount == 4) {
-				redWinFound = true;
 				if (depth <= 2) {
 					return Integer.MIN_VALUE + 1;
 				}
 			} else if (yellowCount == 4) {
-				yellowWinFound = true;
 				if (depth <= 2) {
 					return Integer.MAX_VALUE - 1;
 				}
@@ -177,12 +140,10 @@ public class Minimax {
 			}
 		}
 		if (redCount == 4) {
-			redWinFound = true;
 			if (depth <= 2) {
 				return Integer.MIN_VALUE + 1;
 			}
 		} else if (yellowCount == 4) {
-			yellowWinFound = true;
 			if (depth <= 2) {
 				return Integer.MAX_VALUE - 1;
 			}
@@ -203,12 +164,10 @@ public class Minimax {
 				}
 			}
 			if (redCount == 4) {
-				redWinFound = true;
 				if (depth <= 2) {
 					return Integer.MIN_VALUE + 1;
 				}
 			} else if (yellowCount == 4) {
-				yellowWinFound = true;
 				if (depth <= 2) {
 					return Integer.MAX_VALUE - 1;
 				}
@@ -231,12 +190,10 @@ public class Minimax {
 				}
 			}
 			if (redCount == 4) {
-				redWinFound = true;
 				if (depth <= 2) {
 					return Integer.MIN_VALUE + 1;
 				}
 			} else if (yellowCount == 4) {
-				yellowWinFound = true;
 				if (depth <= 2) {
 					return Integer.MAX_VALUE - 1;
 				}
@@ -308,7 +265,6 @@ public class Minimax {
 		Disc d = Disc.RED;
 		int col = minimax.alphaBeta(d);
 		System.out.println("Place in column: " + col);
-		System.out.println("Boards analyzed: " + minimax.getBoardsAnalyzed());
 		board.insertDisc(col, d);
 		System.out.println(board);
 	}
