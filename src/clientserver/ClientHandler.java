@@ -317,7 +317,9 @@ public class ClientHandler extends Thread {
 	 */
 	//TODO: board ensures !NULL
 	public void setBoard(Board b) {
-		board = b;
+		synchronized (board) {
+			board = b;
+		}
 	}
 
 	/**
@@ -574,14 +576,16 @@ public class ClientHandler extends Thread {
 	*/
 	private void moveChecks(String[] command) {
 		// TODO: game met meer dan 2 players of spectators
-		if (!connected()) {
-			sendError(Client.MOVE, "You have to connect first");
-		} else if (!inGame()) {
-			sendError(Client.MOVE, "You aren't in a game");
-		} else if (!move) {
-			sendError(Client.MOVE, "It's not your turn to move");
-		} else {
-			validMove(command);
+		synchronized (board) {
+			if (!connected()) {
+				sendError(Client.MOVE, "You have to connect first");
+			} else if (!inGame()) {
+				sendError(Client.MOVE, "You aren't in a game");
+			} else if (!move) {
+				sendError(Client.MOVE, "It's not your turn to move");
+			} else {
+				validMove(command);
+			}
 		}
 	}
 
@@ -811,10 +815,12 @@ public class ClientHandler extends Thread {
 	//@ ensures opponentName == null;
 	//@ ensures !inGame();
 	private void endGame() {
-		playerNumber = -1;
-		board = null;
-		opponentName = null;
-		server.broadcastLobby();
+		synchronized (board) {
+			playerNumber = -1;
+			board = null;
+			opponentName = null;
+			server.broadcastLobby();
+		}
 	}
 
 	/**
