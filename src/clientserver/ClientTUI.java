@@ -45,6 +45,7 @@ public class ClientTUI extends Thread implements ClientView {
 	 * A constant for the default adress to connect to, in this case localhost.
 	 */
 	private static final String DEFAULT_INET = "localhost";
+	private static final int DEFAULT_PORT = 2727;
 
 	private static final String CLIENT_FEATURES = Features.CHAT + " "
 			+ Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD;
@@ -90,14 +91,15 @@ public class ClientTUI extends Thread implements ClientView {
 				client.shutdown();
 				break;
 			}
-			if (input.equals("EXIT")) {
+			if (input.equals("QUIT")) {
+				client.sendMessage(Client.QUIT + " Disconnected.");
 				client.shutdown();
 				break;
 			} else if (input.equals("HELP")) {
 				if (client.isIngame) {
-					addMessage("[HELP]Available commands are: MOVE <column>, PING and EXIT");
+					addMessage("[HELP]Available commands are: MOVE <column>, PING and QUIT");
 				} else {
-					addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD, PING and EXIT");
+					addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD, PING and QUIT");
 				}
 			} else if (splitInput[0].equals("MOVE")) {
 				if (moveRequested) {
@@ -124,7 +126,7 @@ public class ClientTUI extends Thread implements ClientView {
 				} else if (splitInput.length == 2) {
 					client.addClientInvite(splitInput[1]);
 					client.sendMessage(input);
-					addMessage("[INVITE]Successfully tried to invite: "
+					addMessage("[INVITE]Tried to invite: "
 							+ splitInput[1] + " with default board size.");
 				} else if (splitInput.length == 3) {
 					addMessage("[ERROR]For a custom board size you need to specify both the BoardX and BoardY");
@@ -134,7 +136,7 @@ public class ClientTUI extends Thread implements ClientView {
 								Integer.parseInt(splitInput[2]),
 								Integer.parseInt(splitInput[3]));
 						client.sendMessage(input);
-						addMessage("[INVITE]Successfully tried to invite: "
+						addMessage("[INVITE]Tried to invite: "
 								+ splitInput[1]
 								+ " with the specified custom board size.");
 					} catch (NumberFormatException e) {
@@ -147,7 +149,7 @@ public class ClientTUI extends Thread implements ClientView {
 				if (splitInput.length > 1) {
 					client.removeServerInvite(splitInput[1]);
 					client.sendMessage(input);
-					addMessage("[INVITE]Successfully tried to decline "
+					addMessage("[INVITE]Tried to decline "
 							+ splitInput[1] + "'s invite.");
 				} else {
 					addMessage("[INVITE]Please specify whose invite you'd like to decline.");
@@ -173,8 +175,7 @@ public class ClientTUI extends Thread implements ClientView {
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		int port = 2727;
-		ClientTUI c = new ClientTUI(addr, port);
+		ClientTUI c = new ClientTUI(addr, DEFAULT_PORT);
 		c.askName();
 	}
 
