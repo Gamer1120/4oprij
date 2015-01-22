@@ -200,7 +200,10 @@ public class Client {
 			case Server.CHAT:
 				mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
 			case Server.LEADERBOARD:
-				mui.addMessage(line);
+				showLeaderBoard(serverMessage);
+				//TODO: Decline invites van server
+			case Server.PONG:
+				mui.addMessage("[PING]Pong!");
 			}
 		}
 	}
@@ -275,6 +278,10 @@ public class Client {
 				}
 			} catch (NumberFormatException e) {
 				mui.addMessage("[ERROR]The server just sent an invite with an invalid custom board size.");
+				sendMessage(ERROR
+						+ " "
+						+ INVITE
+						+ " Your server just sent me an invite with an invalid custom board size :(");
 			}
 		}
 	}
@@ -612,9 +619,22 @@ public class Client {
 		invitedBy.put(name, new Integer[] { BoardX, BoardY });
 	}
 
-	public void showLeaderBoard(String serverMessage) {
-		//EXAMPLE: WinPlayer 1 0 1 LosePlayer 0 1 2
-		//DELEN DOOR 4, dat is aantal Clients dat je moet listen
-
+	public void showLeaderBoard(String[] serverMessage) {
+		// EXAMPLE: LEADERBOARD REQUEST_BOARD 1 0 1 1 WinPlayer 1 0 1 2 LosePlayer 0 1 1 3 SmartPlayer 0 1 1 4
+		// DELEN DOOR 4, dat is aantal Clients dat je moet listen
+		// If it is a valid leaderboard
+		if ((serverMessage.length - 1) % 5 == 0) {
+			int amountOfPlayers = (serverMessage.length - 1) / 5;
+			for (int i = 0; i < amountOfPlayers; i++) {
+				mui.addMessage(serverMessage[((i * 5) + 5)] + ". "
+						+ serverMessage[((i * 5) + 1)] + " Wins: "
+						+ serverMessage[((i * 5) + 2)] + " Draws: "
+						+ serverMessage[((i * 5) + 3)] + " Losses: "
+						+ serverMessage[((i * 5) + 4)]);
+			}
+		} else {
+			mui.addMessage("[ERROR]Didn't get a valid Leaderboard from the Server.");
+			sendMessage(ERROR + " " + Server.LEADERBOARD + "");
+		}
 	}
 }

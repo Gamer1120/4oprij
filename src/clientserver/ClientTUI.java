@@ -92,9 +92,9 @@ public class ClientTUI extends Thread implements ClientView {
 				break;
 			} else if (input.equals("HELP")) {
 				if (client.isIngame) {
-					addMessage("[HELP]Available commands are: MOVE <column> and EXIT");
+					addMessage("[HELP]Available commands are: MOVE <column>, PING and EXIT");
 				} else {
-					addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD and EXIT");
+					addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD, PING and EXIT");
 				}
 			} else if (splitInput[0].equals("MOVE")) {
 				if (moveRequested) {
