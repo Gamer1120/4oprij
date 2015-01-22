@@ -1,7 +1,7 @@
 package game;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Random;
 /**
  * NaiveStrategy for the Connect4 according to the protocol of the TI-2 group.<br>
  * <br>
@@ -17,12 +17,13 @@ public class NaiveStrategy implements Strategy {
 	}
 
 	public int determineMove(Board b, Disc d) {
-		Set<Integer> empty = new HashSet<Integer>();
+		ArrayList<Integer> empty = new ArrayList<Integer>();
 		for (int col = 0; col < b.getColumns(); col++) {
 			if (b.isEmptyField(col)) {
 				empty.add(col);
 			}
 		}
-		return (int) empty.toArray()[((int) (Math.random() * empty.size()))];
+		Random rng = new Random();
+		return empty.get(rng.nextInt(empty.size()));
 	}
 }
