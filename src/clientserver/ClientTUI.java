@@ -47,6 +47,7 @@ public class ClientTUI implements ClientView {
 	 * @param msg
 	 *            The message to print.
 	 */
+	//@ requires msg != null;
 	public void addMessage(String msg) {
 		System.out.println(msg);
 	}
@@ -67,34 +68,47 @@ public class ClientTUI implements ClientView {
 				break;
 			}
 			switch (splitInput[0]) {
-			case "QUIT":
-				client.quit();
+			case Client.QUIT:
+				client.clientQuit();
 				break;
-			case "HELP":
-				client.help();
+			case Client.INVITE:
+				client.clientInvite(input, splitInput);
 				break;
-			case "MOVE":
-				client.move(input, splitInput);
+			case Client.ACCEPT_INVITE:
+				client.clientAccept(input, splitInput);
 				break;
-			case "INVITE":
-				client.invite(input, splitInput);
+			case Client.DECLINE_INVITE:
+				client.clientDecline(input, splitInput);
 				break;
-			case "LEADERBOARD":
+			case Client.MOVE:
+				client.clientMove(input, splitInput);
+				break;
+			case Client.CHAT:
+				client.sendMessage(input);
+				break;
+			case Client.REQUEST_LOBBY:
+				client.sendMessage(input);
+				break;
+			case Client.REQUEST_LEADERBOARD:
 				client.sendMessage(Client.REQUEST_LEADERBOARD);
 				break;
-			case "DECLINE":
-				client.decline(input, splitInput);
+			case Client.PING:
+				client.sendMessage(Client.PING);
 				break;
+			// CUSTOM COMMANDS
+			case Client.HELP:
+				client.clientHelp();
+				break;
+			// END OF CUSTOM COMMANDS
 			default:
-				//TODO: niet sturen?
-				client.sendMessage(input);
+				addMessage("[ERROR]Unknown command.");
 				break;
 			}
 		}
 	}
 
 	/**
-	 * The main method to start a new ClientTUI and connect to the Server.
+	 * The main method to start a new ClientTUI.
 	 * 
 	 * @param args
 	 *            The command line arguments.
@@ -104,11 +118,8 @@ public class ClientTUI implements ClientView {
 	}
 
 	/**
-	 * Asks the user for their name. If they enter -N or -S instead, a
-	 * ComputerPlayer with a NaiveStrategy or SmartStrategy is made.
-	 */
-	/*
-	 * while loop met boolean true totdat connect accept, client maken zonder player etc, in connect accept uiteindelijke naam opvragen en player maken
+	 * Asks the user for their name. After this, the setUpPlayer method is
+	 * called.
 	 */
 	@Override
 	public void askName() {
@@ -126,6 +137,12 @@ public class ClientTUI implements ClientView {
 		readInput();
 	}
 
+	/**
+	 * Asks the user for the IP of the server they want to connect to.
+	 * 
+	 * @return The InetAddress the person wants to connect to.
+	 */
+	//@ ensures host != null;
 	public InetAddress askHost() {
 		InetAddress host = null;
 		while (host == null) {
@@ -142,6 +159,12 @@ public class ClientTUI implements ClientView {
 		return host;
 	}
 
+	/**
+	 * Asks the user for the port of the server they want to connect to.
+	 * 
+	 * @return The port the person wants to connect to.
+	 */
+	//@ ensures port != 0;
 	public int askPort() {
 		int port = 0;
 		while (port == 0) {
@@ -158,10 +181,10 @@ public class ClientTUI implements ClientView {
 		return port;
 	}
 
-	public void setClient(Client client) {
-		this.client = client;
-	}
-
+	/**
+	 * Creates a new client with the host and port specified.
+	 */
+	//@ ensures client != null;
 	private void setUpClient() {
 		this.host = askHost();
 		this.port = askPort();

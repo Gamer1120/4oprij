@@ -39,6 +39,9 @@ public class Client extends Thread {
 	public static final String ERROR = "ERROR";
 	public static final String PING = "PING";
 	// END OF PROTOCOL
+	// CUSTOM COMMANDS
+	public static final String HELP = "HELP";
+	// END OF CUSTOM COMMANDS
 	private static final String CLIENT_FEATURES = Features.CHAT + " "
 			+ Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD;
 	public String firstPlayer;
@@ -153,6 +156,36 @@ public class Client extends Thread {
 		this.computerPlayer = null;
 	}
 
+	public void setUpPlayer(String askName) {
+		String[] splitName = askName.split("\\s+");
+		if (splitName[0].equals("-N")) {
+			if (splitName.length == 1) {
+				this.clientName = "NaivePlayer";
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new NaiveStrategy());
+			} else {
+				this.clientName = splitName[1];
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new NaiveStrategy());
+			}
+		} else if (splitName[0].equals("-S")) {
+			if (splitName.length == 1) {
+				this.clientName = "SmartPlayer";
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new SmartStrategy());
+			} else {
+				this.clientName = splitName[1];
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new SmartStrategy());
+			}
+		} else {
+			this.clientName = splitName[0];
+			this.computerPlayer = null;
+		}
+		isConnected = false;
+		sendMessage(CONNECT + " " + getClientName() + " " + CLIENT_FEATURES);
+	}
+
 	/**
 	 * This method reads the messages in the InputStream. Then, it decides which
 	 * command was sent, and executes this command by calling the method created
@@ -173,28 +206,28 @@ public class Client extends Thread {
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
 				isConnected = true;
-				connect(serverMessage);
+				serverConnect(serverMessage);
 				break;
 			case Server.LOBBY:
-				lobby(serverMessage);
+				serverLobby(serverMessage);
 				break;
 			case Server.INVITE:
-				invite(serverMessage);
+				serverInvite(serverMessage);
 				break;
 			case Server.DECLINE_INVITE:
-				declineInvite(serverMessage);
+				serverDecline(serverMessage);
 				break;
 			case Server.GAME_START:
-				gameStart(serverMessage);
+				serverGameStart(serverMessage);
 				break;
 			case Server.GAME_END:
-				gameEnd(serverMessage);
+				serverGameEnd(serverMessage);
 				break;
 			case Server.REQUEST_MOVE:
-				requestMove(serverMessage);
+				serverRequestMove(serverMessage);
 				break;
 			case Server.MOVE_OK:
-				moveOK(serverMessage);
+				serverMoveOK(serverMessage);
 				break;
 			case Server.ERROR:
 				//TODO: Zet dit netjes neer.
@@ -225,6 +258,25 @@ public class Client extends Thread {
 	}
 
 	/**
+	 * This method sends a message to the ClientHandler using the OutputStream
+	 * out.
+	 * 
+	 * @param msg
+	 *            The message to be sent.
+	 */
+	//@ requires msg != null;
+	public void sendMessage(String msg) {
+		try {
+			out.write(msg);
+			out.newLine();
+			out.flush();
+		} catch (IOException e) {
+			shutdown();
+		}
+	}
+
+	//ACCEPTING FROM SERVER
+	/**
 	 * This method accepts the Server.CONNECT packet sent by the Server. When
 	 * this method is called, it prints that a connection has been established
 	 * with the Server, as well as the IP adress and port of the Server. After
@@ -234,7 +286,7 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	//@	requires serverMessage[0].equals(Server.ACCEPT_CONNECT);
-	private void connect(String[] serverMessage) {
+	private void serverConnect(String[] serverMessage) {
 		mui.addMessage("[CONNECT]Successfully established connection to server: "
 				// IP of the server
 				+ sock.getRemoteSocketAddress().toString());
@@ -251,7 +303,7 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	//@ requires serverMessage[0].equals(Server.LOBBY);
-	private void lobby(String[] serverMessage) {
+	private void serverLobby(String[] serverMessage) {
 		mui.addMessage("[LOBBY]The people that are currently in the lobby are:"
 				+ arrayToLine(serverMessage));
 	}
@@ -266,7 +318,7 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	//@ requires serverMessage[0].equals(Server.INVITE);
-	private void invite(String[] serverMessage) {
+	private void serverInvite(String[] serverMessage) {
 		String opponentName = serverMessage[1];
 		if (serverMessage.length == 2) {
 			addServerInvite(opponentName);
@@ -310,7 +362,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full messsage the server sent.
 	 */
-	private void declineInvite(String[] serverMessage) {
+	private void serverDecline(String[] serverMessage) {
 		if (serverMessage.length > 1) {
 			invited.remove(serverMessage[1]);
 			mui.addMessage("[INVITE]The invite you sent to " + serverMessage[1]
@@ -337,7 +389,7 @@ public class Client extends Thread {
 	 	ensures this.isIngame;
 	 	ensures currPlayer == null;
 	 */
-	private void gameStart(String[] serverMessage) {
+	private void serverGameStart(String[] serverMessage) {
 		firstPlayer = serverMessage[1];
 		secondPlayer = serverMessage[2];
 
@@ -372,7 +424,7 @@ public class Client extends Thread {
 	/*@	requires serverMessage[0].equals(Server.GAME_END);
 	 	ensures !this.isIngame;
 	 */
-	private void gameEnd(String[] serverMessage) {
+	private void serverGameEnd(String[] serverMessage) {
 		this.board = null;
 		if (serverMessage.length > 2) {
 			mui.addMessage("[GAME]The winner is: " + serverMessage[2]);
@@ -397,7 +449,7 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	//@ requires serverMessage[0].equals(Server.REQUEST_MOVE);
-	private void requestMove(String[] serverMessage) {
+	private void serverRequestMove(String[] serverMessage) {
 		if (currPlayer == null) {
 			currPlayer = firstPlayer;
 		}
@@ -421,7 +473,7 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	//@ requires serverMessage[0].equals(Server.MOVE_OK);
-	private synchronized void moveOK(String[] serverMessage) {
+	private synchronized void serverMoveOK(String[] serverMessage) {
 		if (currPlayer == null) {
 			currPlayer = secondPlayer;
 		}
@@ -440,13 +492,13 @@ public class Client extends Thread {
 				currPlayer = secondPlayer;
 			} else {
 				if (!boardRequested) {
-					requestBoard();
+					clientRequestBoard();
 					boardRequested = true;
 					try {
 						wait();
 						mui.addMessage("[BOARD]This is the board the server has: ");
 						mui.addMessage(board.toString());
-						moveOK(serverMessage);
+						serverMoveOK(serverMessage);
 					} catch (InterruptedException e) {
 						mui.addMessage("[ERROR]Interrupted. TERMINATING.");
 						sendMessage(ERROR + " " + Server.BOARD
@@ -476,11 +528,11 @@ public class Client extends Thread {
 				currPlayer = firstPlayer;
 			} else {
 				if (!boardRequested) {
-					requestBoard();
+					clientRequestBoard();
 					boardRequested = true;
 					try {
 						wait();
-						moveOK(serverMessage);
+						serverMoveOK(serverMessage);
 					} catch (InterruptedException e) {
 						mui.addMessage("[ERROR]Interrupted. TERMINATING.");
 						sendMessage(ERROR + " " + Server.BOARD
@@ -500,24 +552,137 @@ public class Client extends Thread {
 		mui.addMessage(board.toString());
 	}
 
+	//END ACCEPTING FROM SERVER
+
+	//ACCEPTING FROM VIEW
 	/**
-	 * This method sends a message to the ClientHandler using the OutputStream
-	 * out.
+	 * Sends a Client.QUIT message to the server, and then shuts down the
 	 * 
-	 * @param msg
-	 *            The message to be sent.
 	 */
-	//@ requires msg != null;
-	public void sendMessage(String msg) {
-		try {
-			out.write(msg);
-			out.newLine();
-			out.flush();
-		} catch (IOException e) {
-			shutdown();
+	public void clientQuit() {
+		sendMessage(Client.QUIT + " Disconnected.");
+		shutdown();
+	}
+
+	/**
+	 * Shows the commands that are available. In case the client is in-game,
+	 * different commands are shown than when he's not.
+	 */
+	public void clientHelp() {
+		if (isIngame()) {
+			mui.addMessage("[HELP]Available commands are: " + Client.MOVE
+					+ " <column>, " + Client.PING + " and " + Client.QUIT + ".");
+		} else {
+			mui.addMessage("[HELP]Available commands are: " + Client.INVITE
+					+ " <player>, " + Client.ACCEPT_INVITE + " <player>, "
+					+ Client.DECLINE_INVITE + " <player>, " + Client.CHAT
+					+ " <message>, " + Client.REQUEST_LOBBY + ", "
+					+ Client.REQUEST_LEADERBOARD + ", " + Client.PING + " and "
+					+ Client.QUIT + ".");
 		}
 	}
 
+	/**
+	 * Forwards the move the player just made to the server, if the move was
+	 * valid, and there was a move requested.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
+	public void clientMove(String input, String[] splitInput) {
+		if (moveRequested) {
+			moveRequested = false;
+			if (splitInput.length == 2) {
+				try {
+					Integer.parseInt(splitInput[1]);
+				} catch (NumberFormatException e) {
+					mui.addMessage("[ERROR]Please enter a valid move after MOVE.");
+				}
+				sendMessage(input);
+			} else {
+				mui.addMessage("[ERROR]Please enter exactly one argument after MOVE.");
+			}
+		} else {
+			mui.addMessage("[ERROR]There was no move requested.");
+
+		}
+	}
+
+	/**
+	 * Forwards the invite the player just made to the server, if the player
+	 * added a name to invite. It saves the invite in the This method also
+	 * supports custom board sizes.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
+	public void clientInvite(String input, String[] splitInput) {
+		if (splitInput.length == 1) {
+			mui.addMessage("[ERROR]Please add a player to invite.");
+		} else if (splitInput.length == 2) {
+			addClientInvite(splitInput[1]);
+			sendMessage(input);
+			mui.addMessage("[INVITE]Tried to invite: " + splitInput[1]
+					+ " with default board size.");
+		} else if (splitInput.length == 3) {
+			mui.addMessage("[ERROR]For a custom board size you need to specify both the BoardX and BoardY");
+		} else if (splitInput.length >= 4) {
+			try {
+				addClientInvite(splitInput[1], Integer.parseInt(splitInput[2]),
+						Integer.parseInt(splitInput[3]));
+				sendMessage(input);
+				mui.addMessage("[INVITE]Tried to invite: " + splitInput[1]
+						+ " with the specified custom board size.");
+			} catch (NumberFormatException e) {
+				mui.addMessage("[INVITE]Please specify the BoardX and BoardY as integers. Invite failed.");
+			}
+		}
+	}
+
+	public void clientAccept(String input, String[] splitInput) {
+		if (splitInput.length == 2) {
+			sendMessage(Client.ACCEPT_INVITE + " " + splitInput[1]);
+		} else if (splitInput.length == 1) {
+			mui.addMessage("[ERROR]Please specify whose invite you'd like to decline.");
+		} else {
+			mui.addMessage("[ERROR]Please use DECLINE <name> to decline an invite.");
+		}
+	}
+
+	/**
+	 * Forwards the rejected invite to the Server, if the player specified whose
+	 * invite to decline.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
+	public void clientDecline(String input, String[] splitInput) {
+		if (splitInput.length > 1) {
+			removeServerInvite(splitInput[1]);
+			sendMessage(input);
+			mui.addMessage("[INVITE]Tried to decline " + splitInput[1]
+					+ "'s invite.");
+		} else {
+			mui.addMessage("[INVITE]Please specify whose invite you'd like to decline.");
+		}
+	}
+
+	/**
+	 * Method to request the board from the server.
+	 */
+	private void clientRequestBoard() {
+		sendMessage(REQUEST_BOARD);
+	}
+
+	//END ACCEPTING FROM VIEW
+
+	//CLIENT GETTERS
 	public Boolean isConnected() {
 		return isConnected;
 	}
@@ -527,29 +692,15 @@ public class Client extends Thread {
 	}
 
 	/**
-	 * This method closes the Socket connection and exits the program. On a side
-	 * note, before it does this, it also sets the loop and isIngame variables
-	 * for this Client to false.
-	 */
-	public void shutdown() {
-		if (loop) {
-			loop = false;
-			sendMessage(Client.QUIT + " Shutdown");
-			try {
-				sock.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	/**
 	 * This method returns the name of this Client.
 	 */
 	/*@ pure */public String getClientName() {
 		return clientName;
 	}
 
+	//END CLIENT GETTERS
+
+	//USEFUL METHODS
 	/**
 	 * This method makes a Board out of the packet the server sends when the
 	 * Board is requested.
@@ -610,12 +761,32 @@ public class Client extends Thread {
 	}
 
 	/**
-	 * Method to request the board from the server.
+	 * If the server sent a valid Leaderboard, this method adds the formatted
+	 * leaderboard to the View.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
 	 */
-	private void requestBoard() {
-		sendMessage(REQUEST_BOARD);
+	public void showLeaderBoard(String[] serverMessage) {
+		if ((serverMessage.length - 1) % 5 == 0) {
+			int amountOfPlayers = (serverMessage.length - 1) / 5;
+			for (int i = 0; i < amountOfPlayers; i++) {
+				mui.addMessage(serverMessage[((i * 5) + 5)] + ". "
+						+ serverMessage[((i * 5) + 1)] + " Wins: "
+						+ serverMessage[((i * 5) + 2)] + " Losses: "
+						+ serverMessage[((i * 5) + 3)] + " Games played: "
+						+ serverMessage[((i * 5) + 4)]);
+			}
+		} else {
+			mui.addMessage("[ERROR]Didn't get a valid Leaderboard from the Server.");
+			sendMessage(ERROR + " " + Server.LEADERBOARD
+					+ " Didn't get a valid Leaderboard from your Server :(");
+		}
 	}
 
+	//END USEFUL METHODS
+
+	//HANDLE INVITES
 	/**
 	 * Method to add an invite to the list of people this Client has invited.
 	 * 
@@ -679,161 +850,23 @@ public class Client extends Thread {
 		invited.remove(name);
 	}
 
-	/**
-	 * If the server sent a valid Leaderboard, this method adds the formatted
-	 * leaderboard to the View.
-	 * 
-	 * @param serverMessage
-	 *            The full message the server sent.
-	 */
-	public void showLeaderBoard(String[] serverMessage) {
-		if ((serverMessage.length - 1) % 5 == 0) {
-			int amountOfPlayers = (serverMessage.length - 1) / 5;
-			for (int i = 0; i < amountOfPlayers; i++) {
-				mui.addMessage(serverMessage[((i * 5) + 5)] + ". "
-						+ serverMessage[((i * 5) + 1)] + " Wins: "
-						+ serverMessage[((i * 5) + 2)] + " Draws: "
-						+ serverMessage[((i * 5) + 3)] + " Losses: "
-						+ serverMessage[((i * 5) + 4)]);
-			}
-		} else {
-			mui.addMessage("[ERROR]Didn't get a valid Leaderboard from the Server.");
-			sendMessage(ERROR + " " + Server.LEADERBOARD
-					+ " Didn't get a valid Leaderboard from your Server :(");
-		}
-	}
-
-	public void setUpPlayer(String askName) {
-		String[] splitName = askName.split("\\s+");
-		if (splitName[0].equals("-N")) {
-			if (splitName.length == 1) {
-				this.clientName = "NaivePlayer";
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new NaiveStrategy());
-			} else {
-				this.clientName = splitName[1];
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new NaiveStrategy());
-			}
-		} else if (splitName[0].equals("-S")) {
-			if (splitName.length == 1) {
-				this.clientName = "SmartPlayer";
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new SmartStrategy());
-			} else {
-				this.clientName = splitName[1];
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new SmartStrategy());
-			}
-		} else {
-			this.clientName = splitName[0];
-			this.computerPlayer = null;
-		}
-		isConnected = false;
-		sendMessage(CONNECT + " " + getClientName() + " " + CLIENT_FEATURES);
-	}
+	//END HANDLING INVITES
 
 	/**
-	 * Sends a Client.QUIT message to the server, and then shuts down the
-	 * 
+	 * This method closes the Socket connection and exits the program. On a side
+	 * note, before it does this, it also sets the loop and isIngame variables
+	 * for this Client to false.
 	 */
-	public void quit() {
-		sendMessage(Client.QUIT + " Disconnected.");
-		shutdown();
-	}
-
-	/**
-	 * Shows the commands that are available. In case the client is in-game,
-	 * different commands are shown than when he's not.
-	 */
-	public void help() {
-		if (isIngame()) {
-			mui.addMessage("[HELP]Available commands are: MOVE <column>, PING and QUIT");
-		} else {
-			mui.addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD, PING and QUIT");
-		}
-	}
-
-	/**
-	 * Forwards the move the player just made to the server, if the move was
-	 * valid, and there was a move requested.
-	 * 
-	 * @param input
-	 *            The raw message the server sent.
-	 * @param splitInput
-	 *            The message the server sent, split up in an array.
-	 */
-	public void move(String input, String[] splitInput) {
-		//TODO: checken of move requested en humanplayer
-		if (moveRequested) {
-			moveRequested = false;
-			sendMessage(input);
-			if (splitInput.length == 2) {
-				try {
-					Integer.parseInt(splitInput[1]);
-
-				} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-					mui.addMessage("[ERROR]Please enter a valid move after MOVE.");
-				}
-			} else {
-				mui.addMessage("[ERROR]Please enter a valid move after MOVE.");
-			}
-		} else {
-			mui.addMessage("[ERROR]There was no move requested.");
-
-		}
-	}
-
-	/**
-	 * Forwards the invite the player just made to the server, if the player
-	 * added a name to invite. It saves the invite in the This method also
-	 * supports custom board sizes.
-	 * 
-	 * @param input
-	 *            The raw message the server sent.
-	 * @param splitInput
-	 *            The message the server sent, split up in an array.
-	 */
-	public void invite(String input, String[] splitInput) {
-		if (splitInput.length == 1) {
-			mui.addMessage("[ERROR]Please add a player to invite.");
-		} else if (splitInput.length == 2) {
-			addClientInvite(splitInput[1]);
-			sendMessage(input);
-			mui.addMessage("[INVITE]Tried to invite: " + splitInput[1]
-					+ " with default board size.");
-		} else if (splitInput.length == 3) {
-			mui.addMessage("[ERROR]For a custom board size you need to specify both the BoardX and BoardY");
-		} else if (splitInput.length >= 4) {
+	public void shutdown() {
+		if (loop) {
+			loop = false;
+			sendMessage(Client.QUIT + " Shutdown");
 			try {
-				addClientInvite(splitInput[1], Integer.parseInt(splitInput[2]),
-						Integer.parseInt(splitInput[3]));
-				sendMessage(input);
-				mui.addMessage("[INVITE]Tried to invite: " + splitInput[1]
-						+ " with the specified custom board size.");
-			} catch (NumberFormatException e) {
-				mui.addMessage("[INVITE]Please specify the BoardX and BoardY as integers. Invite failed.");
+				sock.close();
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
 
-	/**
-	 * Forwards the rejected invite to the Server, if the player specified whose
-	 * invite to decline.
-	 * 
-	 * @param input
-	 *            The raw message the server sent.
-	 * @param splitInput
-	 *            The message the server sent, split up in an array.
-	 */
-	public void decline(String input, String[] splitInput) {
-		if (splitInput.length > 1) {
-			removeServerInvite(splitInput[1]);
-			sendMessage(input);
-			mui.addMessage("[INVITE]Tried to decline " + splitInput[1]
-					+ "'s invite.");
-		} else {
-			mui.addMessage("[INVITE]Please specify whose invite you'd like to decline.");
-		}
-	}
 }
