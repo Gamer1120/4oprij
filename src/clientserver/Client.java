@@ -3,6 +3,7 @@ package clientserver;
 import game.Board;
 import game.ComputerPlayer;
 import game.Disc;
+import game.MiniMaxStrategy;
 import game.NaiveStrategy;
 import game.SmartStrategy;
 
@@ -195,6 +196,16 @@ public class Client extends Thread {
 				this.clientName = splitName[1];
 				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
 						new SmartStrategy());
+			}
+		} else if (splitName[0].equals("-M")) {
+			if (splitName.length == 1) {
+				this.clientName = "MiniMaxPlayer";
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new MiniMaxStrategy(8));
+			} else {
+				this.clientName = splitName[1];
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new MiniMaxStrategy(8));
 			}
 		} else {
 			this.clientName = splitName[0];
