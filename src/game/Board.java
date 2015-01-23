@@ -466,4 +466,28 @@ public class Board extends Observable {
 		super.notifyObservers(new int[] { col, row });
 	}
 
+	/**
+	 * Compares 2 boards, and returns true if they're the same.
+	 * 
+	 * @param compareTo
+	 *            The board this is compared to.
+	 * @return true if this and compareTo are equal.
+	 */
+	public boolean equals(Board compareTo) {
+		boolean equals = true;
+		int columns = this.getColumns();
+		int rows = this.getRows();
+		if (columns == compareTo.getColumns() && rows == compareTo.getRows()) {
+			for (int col = 0; col < columns; col++) {
+				for (int row = 0; row < rows; row++) {
+					if (this.getField(row, col) != compareTo.getField(row, col)) {
+						equals = false;
+					}
+				}
+			}
+		} else {
+			equals = false;
+		}
+		return equals;
+	}
 }

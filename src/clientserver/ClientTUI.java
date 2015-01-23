@@ -86,6 +86,9 @@ public class ClientTUI implements ClientView {
 			case Client.CHAT:
 				client.sendMessage(input);
 				break;
+			case Client.REQUEST_BOARD:
+				client.clientRequestBoard();
+				break;
 			case Client.REQUEST_LOBBY:
 				client.sendMessage(input);
 				break;

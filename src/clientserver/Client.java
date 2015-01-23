@@ -79,10 +79,7 @@ public class Client extends Thread {
 	 * The Board this Client uses for determining their move.
 	 */
 	private Board board;
-	/**
-	 * An integer to determine which Player's turn it is.
-	 */
-	private String currPlayer;
+
 	/**
 	 * A boolean to determine whether this Client is connected.
 	 */
@@ -91,16 +88,6 @@ public class Client extends Thread {
 	 * The Player this Client is.
 	 */
 	private ComputerPlayer computerPlayer;
-
-	/**
-	 * The name of the player going first in a Game.
-	 */
-	private String firstPlayer;
-
-	/**
-	 * The name of the player going second in a Game.
-	 */
-	private String secondPlayer;
 
 	/**
 	 * If the Client requests the Board from the server, it's saved here that it
@@ -121,6 +108,8 @@ public class Client extends Thread {
 	 * Game starts.
 	 */
 	private Map<String, Integer[]> invited;
+
+	private int myNumber;
 
 	/*@	private invariant sock != null;
 	 	private invariant mui != null;
@@ -267,7 +256,7 @@ public class Client extends Thread {
 				break;
 			case Server.BOARD:
 				board = toBoard(line);
-				notifyAll();
+				//notifyAll();
 				break;
 			case Server.CHAT:
 				mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
@@ -419,23 +408,21 @@ public class Client extends Thread {
 	 	ensures currPlayer == null;
 	 */
 	private void serverGameStart(String[] serverMessage) {
-		firstPlayer = serverMessage[1];
-		secondPlayer = serverMessage[2];
-
-		if (firstPlayer.equals(getClientName())) {
-			mui.addMessage("[GAME]A game between you and " + secondPlayer
+		if (serverMessage[1].equals(getClientName())) {
+			myNumber = 1;
+			mui.addMessage("[GAME]A game between you and " + serverMessage[2]
 					+ " has started!");
-			Integer[] boardSize = invitedBy.get(secondPlayer);
+			Integer[] boardSize = invitedBy.get(serverMessage[2]);
 
 			board = new Board(boardSize[1], boardSize[0]);
 		} else {
-			mui.addMessage("[GAME]A game between you and " + firstPlayer
+			myNumber = 2;
+			mui.addMessage("[GAME]A game between you and " + serverMessage[1]
 					+ " has started!");
-			Integer[] boardSize = invited.get(firstPlayer);
+			Integer[] boardSize = invited.get(serverMessage[1]);
 			board = new Board(boardSize[1], boardSize[0]);
 		}
 
-		currPlayer = null; // Not set yet.
 		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
 		// 1 > Disc.RED
 		mui.addMessage(board.toString());
@@ -479,9 +466,6 @@ public class Client extends Thread {
 	//@ requires serverMessage[0].equals(Server.REQUEST_MOVE);
 	//@ ensures currPlayer != null;
 	private void serverRequestMove(String[] serverMessage) {
-		if (currPlayer == null) {
-			currPlayer = firstPlayer;
-		}
 		if (computerPlayer == null) {
 			moveRequested = true;
 			mui.addMessage("Please enter a move");
@@ -504,11 +488,26 @@ public class Client extends Thread {
 	//@ requires serverMessage[0].equals(Server.MOVE_OK);
 	//@ ensures currPlayer != null;
 	private synchronized void serverMoveOK(String[] serverMessage) {
-		if (currPlayer == null) {
-			currPlayer = secondPlayer;
-		}
+		// currPlayer houdt bij wiens beurt het is om een move te doen.
 		int move = -1;
+		try {
+			move = Integer.parseInt(serverMessage[2]);
+		} catch (NumberFormatException e) {
+			mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
+			sendMessage(ERROR + " " + Server.MOVE_OK
+					+ " You didn't send a valid move.");
+			shutdown();
+		}
+		if (board.isField(move) && board.isEmptyField(move)) {
+			if (Integer.parseInt(serverMessage[1]) == myNumber - 1) {
+				board.insertDisc(move, Disc.YELLOW);
+			} else {
+				board.insertDisc(move, Disc.RED);
+			}
+		}
+
 		//FIXME
+		/*
 		if (currPlayer.equals(firstPlayer)) {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
@@ -580,6 +579,7 @@ public class Client extends Thread {
 				}
 			}
 		}
+		*/
 		mui.addMessage(board.toString());
 	}
 
@@ -728,7 +728,7 @@ public class Client extends Thread {
 	/**
 	 * Method to request the board from the server.
 	 */
-	private void clientRequestBoard() {
+	public void clientRequestBoard() {
 		sendMessage(REQUEST_BOARD);
 	}
 
@@ -775,28 +775,60 @@ public class Client extends Thread {
 	public Board toBoard(String line) {
 		String[] protocol = line.split(" ");
 		Board test = null;
-		try {
-			int boardColumns = Integer.parseInt(protocol[1]);
-			int boardRows = Integer.parseInt(protocol[2]);
+		//true1 gaat goed
+		//false2 gaat goed
+		//false1 gaat fout
+		//true2 gaat fout
 
-			test = new Board(boardRows, boardColumns);
-			int i = 3;
-			for (int row = boardRows - 1; row >= 0; row--) {
-				for (int col = 0; col < boardColumns; col++) {
-					if (Integer.parseInt(protocol[i]) == 0) {
-						//Disc.EMPTY
-						test.setField(row, col, Disc.EMPTY);
-					} else if (Integer.parseInt(protocol[i]) == 1) {
-						//Disc.YELLOW
-						test.setField(row, col, Disc.YELLOW);
-					} else if (Integer.parseInt(protocol[i]) == 2) {
-						//Disc.RED
-						test.setField(row, col, Disc.RED);
+		try {
+			if (myNumber == 1) {
+				int boardColumns = Integer.parseInt(protocol[1]);
+				int boardRows = Integer.parseInt(protocol[2]);
+
+				test = new Board(boardRows, boardColumns);
+				int i = 3;
+				for (int row = boardRows - 1; row >= 0; row--) {
+					for (int col = 0; col < boardColumns; col++) {
+						if (Integer.parseInt(protocol[i]) == 0) {
+							//Disc.EMPTY
+							test.setField(row, col, Disc.EMPTY);
+						} else if (Integer.parseInt(protocol[i]) == 1) {
+							//Disc.YELLOW
+							test.setField(row, col, Disc.YELLOW);
+						} else if (Integer.parseInt(protocol[i]) == 2) {
+							//Disc.RED
+							test.setField(row, col, Disc.RED);
+						}
+						i++;
 					}
-					i++;
 				}
+			} else if (myNumber == 2) {
+				int boardColumns = Integer.parseInt(protocol[1]);
+				int boardRows = Integer.parseInt(protocol[2]);
+
+				test = new Board(boardRows, boardColumns);
+				int i = 3;
+				for (int row = boardRows - 1; row >= 0; row--) {
+					for (int col = 0; col < boardColumns; col++) {
+						if (Integer.parseInt(protocol[i]) == 0) {
+							//Disc.EMPTY
+							test.setField(row, col, Disc.EMPTY);
+						} else if (Integer.parseInt(protocol[i]) == 1) {
+							//Disc.YELLOW
+							test.setField(row, col, Disc.RED);
+						} else if (Integer.parseInt(protocol[i]) == 2) {
+							//Disc.RED
+							test.setField(row, col, Disc.YELLOW);
+						}
+						i++;
+					}
+				}
+			} else {
+				mui.addMessage("Something derped up here.");
 			}
 
+			board = test;
+			mui.addMessage(board.toString());
 		} catch (NumberFormatException e) {
 			mui.addMessage("[ERROR]Server sent a wrong board. TERMINATING.");
 			sendMessage(ERROR + " " + Server.BOARD
