@@ -1,4 +1,9 @@
-package game;
+package temp;
+
+import game.Board;
+import game.Disc;
+import game.Strategy;
+
 public class MinMaxStrategy implements Strategy {
 	public final static String NAME = "MinMax";
 
