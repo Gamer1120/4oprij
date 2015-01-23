@@ -16,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -54,7 +55,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 
 	/** builds the GUI. */
 	public void buildGUI() {
-		setSize(400, 400);
+		setSize(600, 400);
 
 		// Panel p1 - Listen
 
@@ -86,9 +87,11 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 
 		JLabel lbMessages = new JLabel("Messages:");
 		taMessages = new JTextArea("", 15, 50);
+		taMessages.setLineWrap(true);
 		taMessages.setEditable(false);
+		JScrollPane scroll = new JScrollPane(taMessages);
 		p2.add(lbMessages);
-		p2.add(taMessages, BorderLayout.SOUTH);
+		p2.add(scroll, BorderLayout.SOUTH);
 
 		Container cc = getContentPane();
 		cc.setLayout(new FlowLayout());
