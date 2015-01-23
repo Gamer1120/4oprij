@@ -385,6 +385,7 @@ public class ClientHandler extends Thread {
 	/*@ requires command != null;
 		requires command[0].equals(Client.INVITE);
 	 */
+	//TODO: BoardX > 0 en BoardY > 0;
 	private void inviteChecks(String[] command) {
 		if (!connected()) {
 			sendError(Client.INVITE, "You have to connect first");

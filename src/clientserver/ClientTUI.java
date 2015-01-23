@@ -32,7 +32,7 @@ public class ClientTUI implements ClientView {
 	 * The port the ClientTUI will be connecting to.
 	 */
 	private int port;
-
+	
 	/**
 	 * Creates a ClientTUI object.
 	 */
@@ -142,7 +142,6 @@ public class ClientTUI implements ClientView {
 	 * 
 	 * @return The InetAddress the person wants to connect to.
 	 */
-	//@ ensures host != null;
 	public InetAddress askHost() {
 		InetAddress host = null;
 		while (host == null) {
@@ -164,7 +163,6 @@ public class ClientTUI implements ClientView {
 	 * 
 	 * @return The port the person wants to connect to.
 	 */
-	//@ ensures port != 0;
 	public int askPort() {
 		int port = 0;
 		while (port == 0) {

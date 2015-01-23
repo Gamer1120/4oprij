@@ -42,10 +42,9 @@ public class Client extends Thread {
 	// CUSTOM COMMANDS
 	public static final String HELP = "HELP";
 	// END OF CUSTOM COMMANDS
+
 	private static final String CLIENT_FEATURES = Features.CHAT + " "
 			+ Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD;
-	public String firstPlayer;
-	public String secondPlayer;
 
 	/**
 	 * The name of this Client.
@@ -91,6 +90,17 @@ public class Client extends Thread {
 	 * The Player this Client is.
 	 */
 	private ComputerPlayer computerPlayer;
+
+	/**
+	 * The name of the player going first in a Game.
+	 */
+	private String firstPlayer;
+
+	/**
+	 * The name of the player going second in a Game.
+	 */
+	private String secondPlayer;
+
 	/**
 	 * If the Client requests the Board from the server, it's saved here that it
 	 * has already been requested, so it's not requested for a second time.
@@ -117,7 +127,6 @@ public class Client extends Thread {
 	 	private invariant out != null;
 	  	private invariant invited != null;
 	  	private invariant invitedBy != null;
-	  	private invariant localPlayer != null;
 	 */
 
 	/**
@@ -136,7 +145,6 @@ public class Client extends Thread {
 	/*@ requires host != null;
 	 	requires port >= 1 & port <= 65535;
 	 	requires muiArg != null;
-	 	requires localPlayer != null;
 	 */
 	public Client(InetAddress host, int port, ClientTUI muiArg)
 			throws IOException {
@@ -156,8 +164,18 @@ public class Client extends Thread {
 		this.computerPlayer = null;
 	}
 
-	public void setUpPlayer(String askName) {
-		String[] splitName = askName.split("\\s+");
+	/**
+	 * Sets up a player with the given name. If the name starts with "-N ", a
+	 * ComputerPlayer with a NaiveStrategy is created instead, and if the name
+	 * starts with "-S ", a ComputerPlayer with a SmartStrategy is created.
+	 * 
+	 * @param name
+	 *            The String returned by askName.
+	 */
+	//@ requires !name.equals("");
+	//@ requires name != null;
+	public void setUpPlayer(String name) {
+		String[] splitName = name.split("\\s+");
 		if (splitName[0].equals("-N")) {
 			if (splitName.length == 1) {
 				this.clientName = "NaivePlayer";
@@ -279,7 +297,7 @@ public class Client extends Thread {
 	/**
 	 * This method accepts the Server.CONNECT packet sent by the Server. When
 	 * this method is called, it prints that a connection has been established
-	 * with the Server, as well as the IP adress and port of the Server. After
+	 * with the Server, as well as the IP address and port of the Server. After
 	 * this, it lists the features the Server has.
 	 * 
 	 * @param serverMessage
@@ -362,6 +380,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full messsage the server sent.
 	 */
+	//@ requires serverMessage[0].equals(Server.DECLINE_INVITE);
 	private void serverDecline(String[] serverMessage) {
 		if (serverMessage.length > 1) {
 			invited.remove(serverMessage[1]);
@@ -386,7 +405,6 @@ public class Client extends Thread {
 	 */
 	/*@ requires serverMessage[0].equals(Server.GAME_START);
 	 	ensures board != null;
-	 	ensures this.isIngame;
 	 	ensures currPlayer == null;
 	 */
 	private void serverGameStart(String[] serverMessage) {
@@ -421,9 +439,8 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	/*@	requires serverMessage[0].equals(Server.GAME_END);
-	 	ensures !this.isIngame;
-	 */
+	//@	requires serverMessage[0].equals(Server.GAME_END);
+	//@ ensures this.board == null;
 	private void serverGameEnd(String[] serverMessage) {
 		this.board = null;
 		if (serverMessage.length > 2) {
@@ -449,6 +466,7 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	//@ requires serverMessage[0].equals(Server.REQUEST_MOVE);
+	//@ ensures currPlayer != null;
 	private void serverRequestMove(String[] serverMessage) {
 		if (currPlayer == null) {
 			currPlayer = firstPlayer;
@@ -473,11 +491,13 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	//@ requires serverMessage[0].equals(Server.MOVE_OK);
+	//@ ensures currPlayer != null;
 	private synchronized void serverMoveOK(String[] serverMessage) {
 		if (currPlayer == null) {
 			currPlayer = secondPlayer;
 		}
 		int move = -1;
+		//FIXME
 		if (currPlayer.equals(firstPlayer)) {
 			try {
 				move = Integer.parseInt(serverMessage[2]);
@@ -557,7 +577,7 @@ public class Client extends Thread {
 	//ACCEPTING FROM VIEW
 	/**
 	 * Sends a Client.QUIT message to the server, and then shuts down the
-	 * 
+	 * Client.
 	 */
 	public void clientQuit() {
 		sendMessage(Client.QUIT + " Disconnected.");
@@ -591,6 +611,9 @@ public class Client extends Thread {
 	 * @param splitInput
 	 *            The message the server sent, split up in an array.
 	 */
+	/*@	requires input != null;
+	 	requires splitInput != null;
+	 */
 	public void clientMove(String input, String[] splitInput) {
 		if (moveRequested) {
 			moveRequested = false;
@@ -612,13 +635,16 @@ public class Client extends Thread {
 
 	/**
 	 * Forwards the invite the player just made to the server, if the player
-	 * added a name to invite. It saves the invite in the This method also
-	 * supports custom board sizes.
+	 * added a name to invite. It saves the invite in the HashMap made for this.
+	 * This method also supports custom board sizes.
 	 * 
 	 * @param input
 	 *            The raw message the server sent.
 	 * @param splitInput
 	 *            The message the server sent, split up in an array.
+	 */
+	/*@	requires input != null;
+		requires splitInput != null;
 	 */
 	public void clientInvite(String input, String[] splitInput) {
 		if (splitInput.length == 1) {
@@ -643,6 +669,18 @@ public class Client extends Thread {
 		}
 	}
 
+	/**
+	 * Forwards that an invite has been accepted to the server, as well as whose
+	 * invite got accepted, provided that the player entered a name.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
+	/*@	requires input != null;
+		requires splitInput != null;
+	 */
 	public void clientAccept(String input, String[] splitInput) {
 		if (splitInput.length == 2) {
 			sendMessage(Client.ACCEPT_INVITE + " " + splitInput[1]);
@@ -661,6 +699,9 @@ public class Client extends Thread {
 	 *            The raw message the server sent.
 	 * @param splitInput
 	 *            The message the server sent, split up in an array.
+	 */
+	/*@	requires input != null;
+		requires splitInput != null;
 	 */
 	public void clientDecline(String input, String[] splitInput) {
 		if (splitInput.length > 1) {
@@ -683,11 +724,21 @@ public class Client extends Thread {
 	//END ACCEPTING FROM VIEW
 
 	//CLIENT GETTERS
-	public Boolean isConnected() {
+	/**
+	 * This method returns whether the client is connected to a server.
+	 * 
+	 * @return true if the client is connected to a server.
+	 */
+	/*@ pure */public Boolean isConnected() {
 		return isConnected;
 	}
 
-	public boolean isIngame() {
+	/**
+	 * This method returns whether the client is ingame.
+	 * 
+	 * @return true if the client is ingame.
+	 */
+	/*@ pure */public boolean isIngame() {
 		return board != null;
 	}
 
@@ -793,6 +844,9 @@ public class Client extends Thread {
 	 * @param name
 	 *            The name this Client just invited.
 	 */
+	/*@ requires !name.equals("");
+		requires name != null;
+	*/
 	public void addClientInvite(String name) {
 		addClientInvite(name, 7, 6);
 	}
@@ -807,6 +861,11 @@ public class Client extends Thread {
 	 *            The custom Board size's X value.
 	 * @param BoardY
 	 *            The custom Board size's Y value.
+	 */
+	/*@ requires !name.equals("");
+	 	requires name != null;
+	 	requires BoardX > 0;
+	 	requires BoardY > 0;
 	 */
 	public void addClientInvite(String name, int BoardX, int BoardY) {
 		invited.put(name, new Integer[] { BoardX, BoardY });
