@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -25,7 +26,7 @@ import javax.swing.JTextField;
  * @author Theo Ruys
  * @version 2005.02.21
  */
-public class ServerGUI extends JFrame implements ActionListener, ServerView {
+public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 
 	private static final long serialVersionUID = 1L;
 	private JButton bConnect;
@@ -101,7 +102,7 @@ public class ServerGUI extends JFrame implements ActionListener, ServerView {
 			InetAddress iaddr = InetAddress.getLocalHost();
 			return iaddr.getHostAddress();
 		} catch (UnknownHostException e) {
-			return "?unknown?";
+			return "unknown";
 		}
 	}
 
@@ -120,32 +121,25 @@ public class ServerGUI extends JFrame implements ActionListener, ServerView {
 	 * and button should be disabled
 	 */
 	private void startListening() {
+		tfPort.setEditable(false);
+		bConnect.setEnabled(false);
 		int port = 0;
-
 		try {
 			port = Integer.parseInt(tfPort.getText());
 		} catch (NumberFormatException e) {
 			addMessage("ERROR: not a valid portnumber!");
 			return;
 		}
+		try {
+			server = new Server(port, this);
+			server.start();
+			addMessage("Started listening on port " + port + "...");
+		} catch (IOException e) {
+			tfPort.setEditable(true);
+			bConnect.setEnabled(true);
+			addMessage("Error listening on port " + port + ", please select a different one");
+		}
 
-		tfPort.setEditable(false);
-		bConnect.setEnabled(false);
-
-		server = new Server(port, this);
-		server.start();
-
-		addMessage("Started listening on port " + port + "...");
-	}
-
-	/**
-	 * Construct a Server-object, which is waiting for clients. The port field
-	 * and button should be disabled
-	 */
-	public void stopListening() {
-		tfPort.setEditable(true);
-		bConnect.setEnabled(true);
-		addMessage("Stopped listining");
 	}
 
 	/** add a message to the textarea */

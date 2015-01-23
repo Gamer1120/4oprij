@@ -69,15 +69,16 @@ public class Server extends Thread {
 
 	/** The Constant LEADERBOARD. */
 	public static final String FILENAME = "leaderboard.obj";
+
 	/**
 	 * The port of the server.
 	 */
-	private int port;
+	private ServerSocket ss;
 
 	/**
 	 * The User Interface of the server.
 	 */
-	private ServerView mui;
+	private MessageUI mui;
 
 	/** The threads. */
 	private HashSet<ClientHandler> threads;
@@ -95,13 +96,14 @@ public class Server extends Thread {
 	 *            the port of the server
 	 * @param muiArg
 	 *            the view of the server
+	 * @throws IOException
 	 */
 	/*@ requires portArg >= 1 & portArg <= 65535;
 		requires muiArg != null;
 	 */
 	@SuppressWarnings("unchecked")
-	public Server(int portArg, ServerView muiArg) {
-		this.port = portArg;
+	public Server(int portArg, MessageUI muiArg) throws IOException {
+		this.ss = new ServerSocket(portArg);
 		this.mui = muiArg;
 		this.threads = new HashSet<ClientHandler>();
 		this.invites = new HashMap<String[], Integer[]>();
@@ -130,19 +132,16 @@ public class Server extends Thread {
 	 * started that takes care of the further communication with the Client.
 	 */
 	public void run() {
-		try {
-			@SuppressWarnings("resource")
-			ServerSocket ss = new ServerSocket(port);
 			while (true) {
+				try {
 				Socket s = ss.accept();
 				ClientHandler ch = new ClientHandler(this, s);
 				addHandler(ch);
 				ch.start();
+				} catch (IOException e) {
+					mui.addMessage("Error adding client");
+				}
 			}
-		} catch (IOException e) {
-			mui.addMessage("Port unavailable, select a different one");
-			mui.stopListening();
-		}
 	}
 
 	/**
