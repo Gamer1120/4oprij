@@ -1,16 +1,12 @@
-package temp;
+package game;
 
-import game.Board;
-import game.Disc;
-import game.Strategy;
-
-public class MiniMaxStrategy implements Strategy {
+public class MinMaxStrategy implements Strategy {
 	public static final String NAME = "MiniMax";
 
 	private Disc disc;
 	private int maxDepth;
 
-	public MiniMaxStrategy(int maxDepth) {
+	public MinMaxStrategy(int maxDepth) {
 		this.maxDepth = maxDepth;
 	}
 
@@ -25,6 +21,14 @@ public class MiniMaxStrategy implements Strategy {
 		for (int col = 0; col < b.getColumns(); col++) {
 			if (b.isEmptyField(col)) {
 				int row = b.emptyRow(col);
+				b.setField(row, col, d);
+				if (b.isWinner(d)) {
+					return col;
+				}
+				b.setField(row, col, d.other());
+				if (b.isWinner(d.other())) {
+					return col;
+				}
 				b.setField(row, col, d);
 				int newScore = evaluateMove(b, 1, disc);
 				b.setField(row, col, Disc.EMPTY);
@@ -116,7 +120,7 @@ public class MiniMaxStrategy implements Strategy {
 		board.insertDisc(6, Disc.YELLOW);
 
 		System.out.println(board);
-		MiniMaxStrategy minimax = new MiniMaxStrategy(4);
+		MinMaxStrategy minimax = new MinMaxStrategy(8);
 		Disc d = Disc.RED;
 		int col = minimax.determineMove(board, d);
 		System.out.println("Place in column: " + col);
