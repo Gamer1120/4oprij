@@ -1,12 +1,5 @@
 package clientserver;
 
-import game.ComputerPlayer;
-import game.Disc;
-import game.HumanPlayer;
-import game.NaiveStrategy;
-import game.Player;
-import game.SmartStrategy;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,7 +14,7 @@ import java.net.UnknownHostException;
  * 
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
-public class ClientTUI extends Thread implements ClientView {
+public class ClientTUI implements ClientView {
 	/**
 	 * The Client this ClientTUI is made for.
 	 */
@@ -30,41 +23,22 @@ public class ClientTUI extends Thread implements ClientView {
 	 * The reader used to read from System.in.
 	 */
 	private BufferedReader reader;
-	/**
-	 * A boolean to determine whether the server has requested a move.
-	 */
-	private boolean moveRequested;
+
 	/**
 	 * The InetAddress the ClientTUI will be connecting to.
 	 */
-	private InetAddress inet;
+	private InetAddress host;
 	/**
 	 * The port the ClientTUI will be connecting to.
 	 */
 	private int port;
 
-	private Player player;
-
-	/**
-	 * A constant for the default adress to connect to, in this case localhost.
-	 */
-	private static final String DEFAULT_INET = "localhost";
-	private static final int DEFAULT_PORT = 2727;
-
-	
-
 	/**
 	 * Creates a ClientTUI object.
-	 * 
-	 * @param inet
-	 *            The InetAddress this ClientTUI will connect to.
-	 * @param port
-	 *            The port this ClientTUI will connect to.
 	 */
 	public ClientTUI() {
-		this.moveRequested = false;
 		this.reader = new BufferedReader(new InputStreamReader(System.in));
-		this.client = new Client(this);
+		setUpClient();
 	}
 
 	/**
@@ -81,7 +55,7 @@ public class ClientTUI extends Thread implements ClientView {
 	 * This method reads the messages in the InputStream. Then, it decides which
 	 * command was sent, and executes this command.
 	 */
-	public void run() {
+	public void readInput() {
 		while (true) {
 			String input = null;
 			String[] splitInput = null;
@@ -94,24 +68,25 @@ public class ClientTUI extends Thread implements ClientView {
 			}
 			switch (splitInput[0]) {
 			case "QUIT":
-				quit();
+				client.quit();
 				break;
 			case "HELP":
-				help();
+				client.help();
 				break;
 			case "MOVE":
-				move(input, splitInput);
+				client.move(input, splitInput);
 				break;
 			case "INVITE":
-				invite(input, splitInput);
+				client.invite(input, splitInput);
 				break;
 			case "LEADERBOARD":
 				client.sendMessage(Client.REQUEST_LEADERBOARD);
 				break;
 			case "DECLINE":
-				decline(input, splitInput);
+				client.decline(input, splitInput);
 				break;
 			default:
+				//TODO: niet sturen?
 				client.sendMessage(input);
 				break;
 			}
@@ -125,14 +100,7 @@ public class ClientTUI extends Thread implements ClientView {
 	 *            The command line arguments.
 	 */
 	public static void main(String[] args) {
-		// Connects to localhost:2727
-		InetAddress addr = null;
-		try {
-			addr = InetAddress.getByName(DEFAULT_INET);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
-		ClientTUI c = new ClientTUI();
+		new ClientTUI();
 	}
 
 	/**
@@ -143,153 +111,67 @@ public class ClientTUI extends Thread implements ClientView {
 	 * while loop met boolean true totdat connect accept, client maken zonder player etc, in connect accept uiteindelijke naam opvragen en player maken
 	 */
 	@Override
-	public String askName() {
-		addMessage("Please enter your name or -N or -S");
-		try {
-			return reader.readLine();
-		} catch (IOException e) {
-			return null;
-		}
-	}
-
-	/**
-	 * Asks the player to make a move.
-	 */
-	public int makeMove() {
-		this.moveRequested = true;
-		addMessage("[MOVE]Please enter a move...");
-		return -1;
-	}
-
-	/**
-	 * Sends a Client.QUIT message to the server, and then shuts down the
-	 * client.
-	 */
-	private void quit() {
-		client.sendMessage(Client.QUIT + " Disconnected.");
-		client.shutdown();
-	}
-
-	/**
-	 * Shows the commands that are available. In case the client is in-game,
-	 * different commands are shown than when he's not.
-	 */
-	private void help() {
-		if (client.isIngame) {
-			addMessage("[HELP]Available commands are: MOVE <column>, PING and QUIT");
-		} else {
-			addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD, PING and QUIT");
-		}
-	}
-
-	/**
-	 * Forwards the move the player just made to the server, if the move was
-	 * valid, and there was a move requested.
-	 * 
-	 * @param input
-	 *            The raw message the server sent.
-	 * @param splitInput
-	 *            The message the server sent, split up in an array.
-	 */
-	private void move(String input, String[] splitInput) {
-		if (moveRequested) {
-			moveRequested = false;
-			client.sendMessage(input);
-			if (splitInput.length == 2) {
+	public void askName() {
+		while (client.isConnected() == null || !client.isConnected()) {
+			if (client.isConnected() == null) {
+				addMessage("Please enter your name or -N or -S");
 				try {
-					Integer.parseInt(splitInput[1]);
-
-				} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-					addMessage("[ERROR]Please enter a valid move after MOVE.");
+					client.setUpPlayer(reader.readLine());
+				} catch (IOException e) {
+					addMessage("[ERROR]Input disconnected. Shutting down.");
+					System.exit(0);
 				}
-			} else {
-				addMessage("[ERROR]Please enter a valid move after MOVE.");
 			}
-		} else {
-			addMessage("[ERROR]There was no move requested.");
-
 		}
+		readInput();
 	}
 
-	/**
-	 * Forwards the invite the player just made to the server, if the player
-	 * added a name to invite. It saves the invite in the client. This method
-	 * also supports custom board sizes.
-	 * 
-	 * @param input
-	 *            The raw message the server sent.
-	 * @param splitInput
-	 *            The message the server sent, split up in an array.
-	 */
-	private void invite(String input, String[] splitInput) {
-		if (splitInput.length == 1) {
-			addMessage("[ERROR]Please add a player to invite.");
-		} else if (splitInput.length == 2) {
-			client.addClientInvite(splitInput[1]);
-			client.sendMessage(input);
-			addMessage("[INVITE]Tried to invite: " + splitInput[1]
-					+ " with default board size.");
-		} else if (splitInput.length == 3) {
-			addMessage("[ERROR]For a custom board size you need to specify both the BoardX and BoardY");
-		} else if (splitInput.length >= 4) {
+	public InetAddress askHost() {
+		InetAddress host = null;
+		while (host == null) {
+			addMessage("Please enter the IP address you'd like to connect to.");
 			try {
-				client.addClientInvite(splitInput[1],
-						Integer.parseInt(splitInput[2]),
-						Integer.parseInt(splitInput[3]));
-				client.sendMessage(input);
-				addMessage("[INVITE]Tried to invite: " + splitInput[1]
-						+ " with the specified custom board size.");
-			} catch (NumberFormatException e) {
-				addMessage("[INVITE]Please specify the BoardX and BoardY as integers. Invite failed.");
+				host = InetAddress.getByName(reader.readLine());
+			} catch (UnknownHostException e) {
+				addMessage("[ERROR]Unknown host.");
+			} catch (IOException e) {
+				addMessage("[ERROR]Input disconnected. Shutting down.");
+				System.exit(0);
 			}
 		}
+		return host;
 	}
 
-	/**
-	 * Forwards the rejected invite to the Server, if the player specified whose
-	 * invite to decline.
-	 * 
-	 * @param input
-	 *            The raw message the server sent.
-	 * @param splitInput
-	 *            The message the server sent, split up in an array.
-	 */
-	private void decline(String input, String[] splitInput) {
-		if (splitInput.length > 1) {
-			client.removeServerInvite(splitInput[1]);
-			client.sendMessage(input);
-			addMessage("[INVITE]Tried to decline " + splitInput[1]
-					+ "'s invite.");
-		} else {
-			addMessage("[INVITE]Please specify whose invite you'd like to decline.");
+	public int askPort() {
+		int port = 0;
+		while (port == 0) {
+			addMessage("Please enter the port you'd like to connect to.");
+			try {
+				port = (Integer.parseInt(reader.readLine()));
+			} catch (NumberFormatException e) {
+				addMessage("[ERROR]That is not a valid number.");
+			} catch (IOException e) {
+				addMessage("[ERROR]Input disconnected. Shutting down.");
+				System.exit(0);
+			}
 		}
+		return port;
 	}
-	
-	public InetAddress askHost(){
-		addMessage("Please enter the IP address you'd like to connect to.");
-		try {
-			return InetAddress.getByName(reader.readLine());
-		} catch (UnknownHostException e) {
-			addMessage("[ERROR]Unknown host.");
-		} catch (IOException e) {
-			addMessage("[ERROR]Please enter a valid IP address.");
-		}
-		return null;
-	}
-	
-	public int askPort(){
-		addMessage("Please enter the port you'd like to connect to.");
-		try {
-			return (Integer.parseInt(reader.readLine()));
-		} catch (NumberFormatException e) {
-			addMessage("[ERROR]That is not a valid number.");
-		} catch (IOException e) {
-			addMessage("[ERROR]Please enter a valid port.");
-		}
-		return -1;
-	}
-	
-	public void setClient(Client client){
+
+	public void setClient(Client client) {
 		this.client = client;
+	}
+
+	private void setUpClient() {
+		this.host = askHost();
+		this.port = askPort();
+		try {
+			this.client = new Client(host, port, this);
+		} catch (IOException e) {
+			addMessage("[ERROR]Couldn't connect to the server.");
+			setUpClient();
+		}
+		client.start();
+		askName();
 	}
 }

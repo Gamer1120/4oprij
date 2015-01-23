@@ -1,5 +1,7 @@
 package game;
 
+import java.util.Observable;
+
 /**
  * Class for maintaining a ComputerPlayer in Connect4.<br>
  * <br>
@@ -7,7 +9,8 @@ package game;
  * 
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
-public class ComputerPlayer extends Player {
+public class ComputerPlayer extends Observable {
+
 	/**
 	 * The Strategy used by this ComputerPlayer
 	 */
@@ -18,6 +21,21 @@ public class ComputerPlayer extends Player {
 	private Disc d;
 
 	//@ private invariant s != null;
+
+	/**
+	 * Creates a new ComputerPlayer object with a given Disc and a
+	 * SmartStrategy.
+	 * 
+	 * @param disc
+	 *            The Disc this ComputerPlayer should have.
+	 */
+	/*@	requires disc == Disc.YELLOW || disc == Disc.RED;
+	 	ensures getDisc() == disc;
+	 	ensures getStrategy() != null;
+	 */
+	public ComputerPlayer(Disc disc) {
+		this(disc, new SmartStrategy());
+	}
 
 	/**
 	 * Creates a new ComputerPlayer object with a given Disc and Strategy.
@@ -33,24 +51,15 @@ public class ComputerPlayer extends Player {
 	  	ensures getDisc() == disc;
 	 */
 	public ComputerPlayer(Disc disc, Strategy strategy) {
-		super(strategy.getName() + "-Computer-" + disc, disc);
 		s = strategy;
 		d = disc;
 	}
 
 	/**
-	 * Creates a new ComputerPlayer object with a given Disc and a
-	 * SmartStrategy.
-	 * 
-	 * @param disc
-	 *            The Disc this ComputerPlayer should have.
+	 * Returns the disc of the player.
 	 */
-	/*@	requires disc == Disc.YELLOW || disc == Disc.RED;
-	 	ensures getDisc() == disc;
-	 	ensures getStrategy() != null;
-	 */
-	public ComputerPlayer(Disc disc) {
-		this(disc, new SmartStrategy());
+	/*@pure*/public Disc getDisc() {
+		return d;
 	}
 
 	/**
@@ -72,14 +81,19 @@ public class ComputerPlayer extends Player {
 	public void setStrategy(Strategy strategy) {
 		s = strategy;
 	}
-	
+
 	/**
 	 * Determines a move for this ComputerPlayer using it's Strategy.
-	 * @param b The Board the move should be made on.
+	 * 
+	 * @param b
+	 *            The Board the move should be made on.
 	 */
 	//@ requires b != null;
 	//@ ensures b.isField(\result) && b.isEmptyField(\result);
 	public int determineMove(Board b) {
-		return s.determineMove(b, d);
+		int move = s.determineMove(b, d);
+		super.setChanged();
+		super.notifyObservers("Determined a move");
+		return move;
 	}
 }

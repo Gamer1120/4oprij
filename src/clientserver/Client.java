@@ -1,11 +1,9 @@
 package clientserver;
 
 import game.Board;
-import game.Disc;
-import game.HumanPlayer;
 import game.ComputerPlayer;
+import game.Disc;
 import game.NaiveStrategy;
-import game.Player;
 import game.SmartStrategy;
 
 import java.io.BufferedReader;
@@ -15,7 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +23,7 @@ import java.util.Map;
  * 
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
-public class Client {
+public class Client extends Thread {
 	// The protocol, as discussed in our TI-2 group. For further explanation,
 	// you can look at the protocol documentation.
 	public static final String CONNECT = "CONNECT";
@@ -56,8 +53,9 @@ public class Client {
 	 * The User Interface of this Client.
 	 */
 	private ClientTUI mui;
+
 	/**
-	 * The Socket of this Client.
+	 * The Socket
 	 */
 	private Socket sock;
 	/**
@@ -73,11 +71,7 @@ public class Client {
 	 * read from the BufferedReader.
 	 */
 	private boolean loop;
-	/**
-	 * A variable to test if a Player is in-game. If they are, they won't
-	 * receive any invite messages.
-	 */
-	public boolean isIngame;
+
 	/**
 	 * The Board this Client uses for determining their move.
 	 */
@@ -89,16 +83,20 @@ public class Client {
 	/**
 	 * A boolean to determine whether this Client is connected.
 	 */
-	private boolean isConnected;
+	private Boolean isConnected;
 	/**
 	 * The Player this Client is.
 	 */
-	private Player localPlayer;
+	private ComputerPlayer computerPlayer;
 	/**
 	 * If the Client requests the Board from the server, it's saved here that it
 	 * has already been requested, so it's not requested for a second time.
 	 */
-	private boolean requestedBoard;
+	private boolean boardRequested;
+	/**
+	 * A boolean to determine whether the server has requested a move.
+	 */
+	private boolean moveRequested;
 	/**
 	 * A Map of invites this Client is invited by. This map gets emptied every
 	 * time a Game starts.
@@ -109,10 +107,6 @@ public class Client {
 	 * Game starts.
 	 */
 	private Map<String, Integer[]> invited;
-
-	private InetAddress host;
-
-	private int port;
 
 	/*@	private invariant sock != null;
 	 	private invariant mui != null;
@@ -132,50 +126,31 @@ public class Client {
 	 *            The port of this Client
 	 * @param muiArg
 	 *            The MessageUI for this Client
-	 * @param localPlayer
+	 * @param computerPlayer
 	 *            The Player Object to use for this Client
+	 * @throws IOException
 	 */
 	/*@ requires host != null;
 	 	requires port >= 1 & port <= 65535;
 	 	requires muiArg != null;
 	 	requires localPlayer != null;
 	 */
-	public Client(ClientTUI muiArg) {
-		this.isConnected = false;
+	public Client(InetAddress host, int port, ClientTUI muiArg)
+			throws IOException {
+		this.mui = muiArg;
+		this.sock = new Socket(host, port);
+		this.in = new BufferedReader(new InputStreamReader(
+				sock.getInputStream()));
+		this.out = new BufferedWriter(new OutputStreamWriter(
+				sock.getOutputStream()));
+		this.isConnected = null;
 		this.invited = new HashMap<String, Integer[]>();
 		this.invitedBy = new HashMap<String, Integer[]>();
 		this.loop = true;
-
-		this.mui = muiArg;
-		this.clientName = mui.askName();
-		this.localPlayer = null;
-		while (localPlayer == null) {
-			setUpPlayer();
-		}
-		this.host = null;
-		while (host == null) {
-			setUpIP();
-		}
-		this.port = -1;
-		while (port == -1) {
-			setUpPort();
-		}
-		mui.setClient(this);
-		try {
-			this.sock = new Socket(host, port);
-			this.in = new BufferedReader(new InputStreamReader(
-					sock.getInputStream()));
-			this.out = new BufferedWriter(new OutputStreamWriter(
-					sock.getOutputStream()));
-		} catch (IOException e) {
-			// TODO Ask again for IP and port
-			e.printStackTrace();
-		}
-		this.isIngame = false;
-		this.requestedBoard = false;
-		sendMessage(CONNECT + " " + getClientName() + " " + CLIENT_FEATURES);
-		readInput();
-
+		this.board = null;
+		this.boardRequested = false;
+		this.moveRequested = false;
+		this.computerPlayer = null;
 	}
 
 	/**
@@ -183,21 +158,22 @@ public class Client {
 	 * command was sent, and executes this command by calling the method created
 	 * for it.
 	 */
-	public void readInput() {
+	public void run() {
 		while (loop) {
-			String line = "";
+			String line = null;
+			String[] serverMessage = null;
 			try {
 				line = in.readLine();
+				serverMessage = line.split("\\s+");
 			} catch (IOException | NullPointerException e) {
 				shutdown();
+				break;
 			}
 			mui.addMessage("[SERVER]" + line);
-			String[] serverMessage = line.split("\\s+");
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
 				isConnected = true;
 				connect(serverMessage);
-				mui.start();
 				break;
 			case Server.LOBBY:
 				lobby(serverMessage);
@@ -224,7 +200,7 @@ public class Client {
 				//TODO: Zet dit netjes neer.
 				mui.addMessage("[ERROR]" + line.split(" ", 2)[1]);
 				if (!isConnected) {
-					mui.askName();
+					isConnected = null;
 				}
 				break;
 			case Server.BOARD:
@@ -294,7 +270,7 @@ public class Client {
 		String opponentName = serverMessage[1];
 		if (serverMessage.length == 2) {
 			addServerInvite(opponentName);
-			if (!isIngame) {
+			if (!isIngame()) {
 				mui.addMessage("[INVITE]"
 						+ opponentName
 						+ " has invited you to a game of Connect4 (default boardsize)!");
@@ -307,7 +283,7 @@ public class Client {
 				int boardX = Integer.parseInt(serverMessage[2]);
 				int boardY = Integer.parseInt(serverMessage[3]);
 				addServerInvite(opponentName, boardX, boardY);
-				if (!isIngame) {
+				if (!isIngame()) {
 					mui.addMessage("[INVITE]"
 							+ opponentName
 							+ " has invited you to a game of Connect4 with a custom Board size of "
@@ -378,7 +354,6 @@ public class Client {
 			board = new Board(boardSize[1], boardSize[0]);
 		}
 
-		this.isIngame = true;
 		currPlayer = null; // Not set yet.
 		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
 		// 1 > Disc.RED
@@ -398,7 +373,7 @@ public class Client {
 	 	ensures !this.isIngame;
 	 */
 	private void gameEnd(String[] serverMessage) {
-		this.isIngame = false;
+		this.board = null;
 		if (serverMessage.length > 2) {
 			mui.addMessage("[GAME]The winner is: " + serverMessage[2]);
 		} else if (serverMessage.length == 2) {
@@ -426,10 +401,12 @@ public class Client {
 		if (currPlayer == null) {
 			currPlayer = firstPlayer;
 		}
-		if (localPlayer instanceof HumanPlayer) {
-			localPlayer.determineMove(board);
+		if (computerPlayer == null) {
+			moveRequested = true;
+			mui.addMessage("Please enter a move");
+			;
 		} else {
-			int move = localPlayer.determineMove(board);
+			int move = computerPlayer.determineMove(board);
 			sendMessage(MOVE + " " + move);
 		}
 	}
@@ -462,9 +439,9 @@ public class Client {
 				board.insertDisc(move, Disc.YELLOW);
 				currPlayer = secondPlayer;
 			} else {
-				if (!requestedBoard) {
+				if (!boardRequested) {
 					requestBoard();
-					requestedBoard = true;
+					boardRequested = true;
 					try {
 						wait();
 						mui.addMessage("[BOARD]This is the board the server has: ");
@@ -498,9 +475,9 @@ public class Client {
 				board.insertDisc(move, Disc.RED);
 				currPlayer = firstPlayer;
 			} else {
-				if (!requestedBoard) {
+				if (!boardRequested) {
 					requestBoard();
-					requestedBoard = true;
+					boardRequested = true;
 					try {
 						wait();
 						moveOK(serverMessage);
@@ -541,20 +518,29 @@ public class Client {
 		}
 	}
 
+	public Boolean isConnected() {
+		return isConnected;
+	}
+
+	public boolean isIngame() {
+		return board != null;
+	}
+
 	/**
 	 * This method closes the Socket connection and exits the program. On a side
 	 * note, before it does this, it also sets the loop and isIngame variables
 	 * for this Client to false.
 	 */
 	public void shutdown() {
-		loop = false;
-		isIngame = false;
-		try {
-			sock.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (loop) {
+			loop = false;
+			sendMessage(Client.QUIT + " Shutdown");
+			try {
+				sock.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-		System.exit(0);
 	}
 
 	/**
@@ -562,17 +548,6 @@ public class Client {
 	 */
 	/*@ pure */public String getClientName() {
 		return clientName;
-	}
-
-	/**
-	 * This method sets the name for this Client.
-	 * 
-	 * @param name
-	 *            The name this Client should have.
-	 */
-	//@ ensures getClientName().equals(name);
-	public void setClientName(String name) {
-		clientName = name;
 	}
 
 	/**
@@ -712,9 +687,6 @@ public class Client {
 	 *            The full message the server sent.
 	 */
 	public void showLeaderBoard(String[] serverMessage) {
-		// EXAMPLE: LEADERBOARD REQUEST_BOARD 1 0 1 1 WinPlayer 1 0 1 2 LosePlayer 0 1 1 3 SmartPlayer 0 1 1 4
-		// DELEN DOOR 4, dat is aantal Clients dat je moet listen
-		// If it is a valid leaderboard
 		if ((serverMessage.length - 1) % 5 == 0) {
 			int amountOfPlayers = (serverMessage.length - 1) / 5;
 			for (int i = 0; i < amountOfPlayers; i++) {
@@ -731,43 +703,137 @@ public class Client {
 		}
 	}
 
-	public void setPlayer(Player player) {
-		localPlayer = player;
-	}
-
-	public String askName() {
-		return mui.getName();
-	}
-
-	public void setUpPlayer() {
-		String[] splitName = getClientName().split("\\s+");
+	public void setUpPlayer(String askName) {
+		String[] splitName = askName.split("\\s+");
 		if (splitName[0].equals("-N")) {
 			if (splitName.length == 1) {
-				setClientName("NaivePlayer");
-				setPlayer(new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
+				this.clientName = "NaivePlayer";
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new NaiveStrategy());
 			} else {
-				setClientName(splitName[1]);
-				setPlayer(new ComputerPlayer(Disc.YELLOW, new NaiveStrategy()));
+				this.clientName = splitName[1];
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new NaiveStrategy());
 			}
 		} else if (splitName[0].equals("-S")) {
 			if (splitName.length == 1) {
-				setClientName("SmartPlayer");
-				setPlayer(new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
+				this.clientName = "SmartPlayer";
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new SmartStrategy());
 			} else {
-				setClientName(splitName[1]);
-				setPlayer(new ComputerPlayer(Disc.YELLOW, new SmartStrategy()));
+				this.clientName = splitName[1];
+				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+						new SmartStrategy());
 			}
 		} else {
-			setClientName(splitName[0]);
-			setPlayer(new HumanPlayer(Disc.YELLOW, mui));
+			this.clientName = splitName[0];
+			this.computerPlayer = null;
+		}
+		isConnected = false;
+		sendMessage(CONNECT + " " + getClientName() + " " + CLIENT_FEATURES);
+	}
+
+	/**
+	 * Sends a Client.QUIT message to the server, and then shuts down the
+	 * 
+	 */
+	public void quit() {
+		sendMessage(Client.QUIT + " Disconnected.");
+		shutdown();
+	}
+
+	/**
+	 * Shows the commands that are available. In case the client is in-game,
+	 * different commands are shown than when he's not.
+	 */
+	public void help() {
+		if (isIngame()) {
+			mui.addMessage("[HELP]Available commands are: MOVE <column>, PING and QUIT");
+		} else {
+			mui.addMessage("[HELP]Available commands are: INVITE <player>, ACCEPT <player>, DECLINE <player>, CHAT <message>, LOBBY, LEADERBOARD, PING and QUIT");
 		}
 	}
 
-	public void setUpIP() {
-		this.host = mui.askHost();
+	/**
+	 * Forwards the move the player just made to the server, if the move was
+	 * valid, and there was a move requested.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
+	public void move(String input, String[] splitInput) {
+		//TODO: checken of move requested en humanplayer
+		if (moveRequested) {
+			moveRequested = false;
+			sendMessage(input);
+			if (splitInput.length == 2) {
+				try {
+					Integer.parseInt(splitInput[1]);
+
+				} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+					mui.addMessage("[ERROR]Please enter a valid move after MOVE.");
+				}
+			} else {
+				mui.addMessage("[ERROR]Please enter a valid move after MOVE.");
+			}
+		} else {
+			mui.addMessage("[ERROR]There was no move requested.");
+
+		}
 	}
 
-	public void setUpPort() {
-		this.port = mui.askPort();
+	/**
+	 * Forwards the invite the player just made to the server, if the player
+	 * added a name to invite. It saves the invite in the This method also
+	 * supports custom board sizes.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
+	public void invite(String input, String[] splitInput) {
+		if (splitInput.length == 1) {
+			mui.addMessage("[ERROR]Please add a player to invite.");
+		} else if (splitInput.length == 2) {
+			addClientInvite(splitInput[1]);
+			sendMessage(input);
+			mui.addMessage("[INVITE]Tried to invite: " + splitInput[1]
+					+ " with default board size.");
+		} else if (splitInput.length == 3) {
+			mui.addMessage("[ERROR]For a custom board size you need to specify both the BoardX and BoardY");
+		} else if (splitInput.length >= 4) {
+			try {
+				addClientInvite(splitInput[1], Integer.parseInt(splitInput[2]),
+						Integer.parseInt(splitInput[3]));
+				sendMessage(input);
+				mui.addMessage("[INVITE]Tried to invite: " + splitInput[1]
+						+ " with the specified custom board size.");
+			} catch (NumberFormatException e) {
+				mui.addMessage("[INVITE]Please specify the BoardX and BoardY as integers. Invite failed.");
+			}
+		}
+	}
+
+	/**
+	 * Forwards the rejected invite to the Server, if the player specified whose
+	 * invite to decline.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the server sent, split up in an array.
+	 */
+	public void decline(String input, String[] splitInput) {
+		if (splitInput.length > 1) {
+			removeServerInvite(splitInput[1]);
+			sendMessage(input);
+			mui.addMessage("[INVITE]Tried to decline " + splitInput[1]
+					+ "'s invite.");
+		} else {
+			mui.addMessage("[INVITE]Please specify whose invite you'd like to decline.");
+		}
 	}
 }

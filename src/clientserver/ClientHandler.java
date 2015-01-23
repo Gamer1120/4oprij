@@ -132,9 +132,7 @@ public class ClientHandler extends Thread {
 				line = in.readLine();
 				command = line.split("\\s+");
 			} catch (IOException | NullPointerException e) {
-				if (loop) {
-					shutdown();
-				}
+				shutdown();
 				break;
 			}
 			switch (command[0]) {
@@ -143,9 +141,7 @@ public class ClientHandler extends Thread {
 				break;
 			case Client.QUIT:
 				server.print(clientName + ": " + line);
-				if (loop) {
-					shutdown();
-				}
+				shutdown();
 				break;
 			case Client.INVITE:
 				inviteChecks(command);
@@ -233,9 +229,7 @@ public class ClientHandler extends Thread {
 			out.newLine();
 			out.flush();
 		} catch (IOException e) {
-			if (loop) {
-				shutdown();
-			}
+			shutdown();
 		}
 		server.print("ClientHandler to " + clientName + ": " + msg);
 	}
@@ -828,21 +822,23 @@ public class ClientHandler extends Thread {
 	 */
 	//@ ensures !loop;
 	private void shutdown() {
-		// TODO: clients moeten kunnen reconnecten na dc
-		this.loop = false;
-		server.removeInvite(clientName);
-		server.removeHandler(this);
-		try {
-			sock.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (loop) {
+			// TODO: clients moeten kunnen reconnecten na dc
+			this.loop = false;
+			server.removeInvite(clientName);
+			server.removeHandler(this);
+			try {
+				sock.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (inGame()) {
+				server.sendMessage(opponentName, Server.GAME_END + " "
+						+ Game.DISCONNECT);
+			} else if (connected()) {
+				server.broadcastLobby();
+			}
+			server.print("ClientHandler: " + clientName + " has left");
 		}
-		if (inGame()) {
-			server.sendMessage(opponentName, Server.GAME_END + " "
-					+ Game.DISCONNECT);
-		} else if (connected()) {
-			server.broadcastLobby();
-		}
-		server.print("ClientHandler: " + clientName + " has left");
 	}
 }

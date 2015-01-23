@@ -12,14 +12,5 @@ public interface ClientView extends MessageUI {
 	 * Asks for the name of the player.
 	 * @return 
 	 */
-	public String askName();
-
-	/**
-	 * Asks the player to make a move.
-	 * 
-	 * @return In case of a HumanPlayer, -1, since the HumanPlayer just sends
-	 *         the move to the server, and in case of a ComputerPlayer, the
-	 *         move.
-	 */
-	public int makeMove();
+	public void askName();
 }
