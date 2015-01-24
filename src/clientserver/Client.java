@@ -112,6 +112,8 @@ public class Client extends Thread {
 
 	private int myNumber;
 
+	private int[] savedMove;
+
 	/*@	private invariant sock != null;
 	 	private invariant mui != null;
 	 	private invariant in != null;
@@ -153,6 +155,7 @@ public class Client extends Thread {
 		this.boardRequested = false;
 		this.moveRequested = false;
 		this.computerPlayer = null;
+		this.savedMove = null;
 	}
 
 	/**
@@ -488,8 +491,9 @@ public class Client extends Thread {
 	 */
 	//@ requires serverMessage[0].equals(Server.MOVE_OK);
 	//@ ensures currPlayer != null;
-	private synchronized void serverMoveOK(String[] serverMessage) {
+	private void serverMoveOK(String[] serverMessage) {
 		// currPlayer houdt bij wiens beurt het is om een move te doen.
+		// Checken of dubbele move goed gaat.
 		int move = -1;
 		try {
 			move = Integer.parseInt(serverMessage[2]);
@@ -499,14 +503,13 @@ public class Client extends Thread {
 					+ " You didn't send a valid move.");
 			shutdown();
 		}
-		if (board.isField(move) && board.isEmptyField(move)) {
-			if (Integer.parseInt(serverMessage[1]) == myNumber - 1) {
-				board.insertDisc(move, Disc.YELLOW);
-			} else {
-				board.insertDisc(move, Disc.RED);
-			}
+		if (checkMove(move)) {
+			makeMove(Integer.parseInt(serverMessage[1]), move);
+			mui.addMessage(board.toString());
+		} else {
+			savedMove = new int[] { Integer.parseInt(serverMessage[1]), move };
+			clientRequestBoard();
 		}
-		mui.addMessage(board.toString());
 	}
 
 	//END ACCEPTING FROM SERVER
@@ -689,6 +692,20 @@ public class Client extends Thread {
 	//END CLIENT GETTERS
 
 	//USEFUL METHODS
+	private boolean checkMove(int move) {
+		return board.isField(move) && board.isEmptyField(move);
+	}
+
+	private void makeMove(int player, int col) {
+		mui.addMessage(player + " + " + myNumber);
+		if (player == myNumber - 1) {
+			board.insertDisc(col, Disc.YELLOW);
+		} else {
+			board.insertDisc(col, Disc.RED);
+		}
+		savedMove = null;
+	}
+
 	/**
 	 * This method makes a Board out of the packet the server sends when the
 	 * Board is requested.
@@ -701,11 +718,6 @@ public class Client extends Thread {
 	public Board toBoard(String line) {
 		String[] protocol = line.split(" ");
 		Board test = null;
-		//true1 gaat goed
-		//false2 gaat goed
-		//false1 gaat fout
-		//true2 gaat fout
-
 		try {
 			if (myNumber == 1) {
 				int boardColumns = Integer.parseInt(protocol[1]);
@@ -754,6 +766,9 @@ public class Client extends Thread {
 			}
 
 			board = test;
+			makeMove(savedMove[0], savedMove[1]);
+			mui.addMessage("[GAME]Apparently the board I have and the Board on the server are different.");
+			mui.addMessage("I made the move on the board on the server for you:");
 			mui.addMessage(board.toString());
 		} catch (NumberFormatException e) {
 			mui.addMessage("[ERROR]Server sent a wrong board. TERMINATING.");
