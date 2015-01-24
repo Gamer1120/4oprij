@@ -403,18 +403,35 @@ public class ClientHandler extends Thread {
 			sendError(Client.INVITE, "Already invited this client");
 		} else if (server.isInvited(command[1], clientName)) {
 			sendError(Client.INVITE, "The invited client already invited you");
-		} else if (command.length >= 4 && !hasCustomBoardSize()) {
+		} else if (command.length >= 4) {
+			inviteSizeChecks(command);
+		} else {
+			invite(command[1]);
+		}
+	}
+
+	private void inviteSizeChecks(String[] command) {
+		if (!hasCustomBoardSize()) {
 			sendError(
 					Client.INVITE,
 					"Your client doesn't support the "
 							+ Features.CUSTOM_BOARD_SIZE
 							+ " feature. Please add this feature if you want to use extras");
-		} else if (command.length >= 4
-				&& !server.hasCustomBoardSize(command[1])) {
+		} else if (!server.hasCustomBoardSize(command[1])) {
 			sendError(Client.INVITE,
 					"The invited client doesn't support extras");
 		} else {
-			invite(command);
+			try {
+				int boardX = Integer.parseInt(command[2]);
+				int boardY = Integer.parseInt(command[3]);
+				if ((boardX >= Board.CONNECT && boardY >= Board.CONNECT)) {
+					invite(command[1], boardX, boardY);
+				} else {
+					sendError(Server.INVITE, "Board too small");
+				}
+			} catch (NumberFormatException e) {
+				sendError(Server.INVITE, "Could not parse boardsize");
+			}
 		}
 	}
 
@@ -436,25 +453,34 @@ public class ClientHandler extends Thread {
 		requires !server.isInvited(command[1], clientName);
 		ensures server.isInvited(clientName, command[1]);
 	 */
-	private void invite(String[] command) {
-		int boardX = 7;
-		int boardY = 6;
-		if (command.length >= 4) {
-			try {
-				boardX = Integer.parseInt(command[2]);
-				boardY = Integer.parseInt(command[3]);
-			} catch (NumberFormatException e) {
-				sendError(Server.INVITE,
-						"Could not parse boardsize, using default");
-				boardX = 7;
-				boardY = 6;
-			}
-			server.sendMessage(command[1], Server.INVITE + " " + clientName
-					+ " " + boardX + " " + boardY);
-		} else {
-			server.sendMessage(command[1], Server.INVITE + " " + clientName);
-		}
-		server.addInvite(clientName, command[1], boardX, boardY);
+	private void invite(String name) {
+		server.sendMessage(name, Server.INVITE + " " + clientName);
+		server.addInvite(clientName, name, 7, 6);
+	}
+
+	/**
+	 * Invites the player specified in the command and tries to read the board
+	 * size if specified. the invite will be saved on the server.
+	 *
+	 * @param command
+	 *            the command send by the client
+	 */
+	/*@ requires command != null;
+		requires connected();
+		requires command.length >= 2;
+		requires command[0].equals(Client.INVITE);
+		requires server.nameExists(command[1]);
+		requires !inGame();
+		requires !server.inGame(command[1]);
+		requires !server.isInvited(clientName, command[1]);
+		requires !server.isInvited(command[1], clientName);
+		ensures server.isInvited(clientName, command[1]);
+	 */
+	private void invite(String name, int boardX, int boardY) {
+		server.sendMessage(name, Server.INVITE + " " + clientName + " "
+				+ boardX + " " + boardY);
+		server.sendMessage(name, Server.INVITE + " " + clientName);
+		server.addInvite(clientName, name, boardX, boardY);
 	}
 
 	/**
@@ -479,7 +505,7 @@ public class ClientHandler extends Thread {
 		} else if (!server.isInvited(command[1], clientName)) {
 			sendError(Client.ACCEPT_INVITE, "Not invited by this client");
 		} else {
-			accept(command);
+			accept(command[1]);
 		}
 	}
 
@@ -498,12 +524,12 @@ public class ClientHandler extends Thread {
 		requires server.nameExists(command[1]);
 		requires server.isInvited(command[1], clientName);
 	 */
-	private void accept(String[] command) {
+	private void accept(String name) {
 		// TODO: extras verzenden (spectators?)
-		server.generateBoard(command[1], clientName);
-		sendMessage(Server.GAME_START + " " + clientName + " " + command[1]);
-		server.sendMessage(command[1], Server.GAME_START + " " + clientName
-				+ " " + command[1]);
+		server.generateBoard(name, clientName);
+		sendMessage(Server.GAME_START + " " + clientName + " " + name);
+		server.sendMessage(name, Server.GAME_START + " " + clientName + " "
+				+ name);
 		sendMessage(Server.REQUEST_MOVE);
 	}
 
@@ -531,7 +557,7 @@ public class ClientHandler extends Thread {
 				|| !server.isInvited(clientName, command[1])) {
 			sendError(Client.DECLINE_INVITE, "Not invited by this client");
 		} else {
-			decline(command);
+			decline(command[1]);
 		}
 	}
 
@@ -550,10 +576,10 @@ public class ClientHandler extends Thread {
 		requires server.isInvited(command[1], clientName);
 		ensures !server.isInvited(command[1], clientName);
 	 */
-	private void decline(String[] command) {
-		server.removeInvite(command[1], clientName);
-		server.removeInvite(clientName, command[1]);
-		server.sendMessage(command[1], Server.DECLINE_INVITE + " " + clientName);
+	private void decline(String name) {
+		server.removeInvite(name, clientName);
+		server.removeInvite(clientName, name);
+		server.sendMessage(name, Server.DECLINE_INVITE + " " + clientName);
 	}
 
 	/**
