@@ -132,16 +132,16 @@ public class Server extends Thread {
 	 * started that takes care of the further communication with the Client.
 	 */
 	public void run() {
-			while (true) {
-				try {
+		while (true) {
+			try {
 				Socket s = ss.accept();
 				ClientHandler ch = new ClientHandler(this, s);
 				addHandler(ch);
 				ch.start();
-				} catch (IOException e) {
-					mui.addMessage("Error adding client");
-				}
+			} catch (IOException e) {
+				mui.addMessage("Error adding client");
 			}
+		}
 	}
 
 	/**
@@ -238,7 +238,6 @@ public class Server extends Thread {
 	 *            the name
 	 * @return the client
 	 */
-	// TODO: aanpassen voor Game of weghalen
 	/*@ requires name != null;
 		requires nameExists(name);
 	 */
@@ -302,16 +301,10 @@ public class Server extends Thread {
 	public void generateBoard(String name, String invited) {
 		synchronized (invites) {
 			Board board = null;
-			//TODO: getInvite
-			for (String[] invite : invites.keySet()) {
-				if (invite[0].equals(name) && invite[1].equals(invited)) {
-					Integer[] boardSize = invites.get(invite);
-					invites.remove(invite);
-					board = new Board(boardSize[1].intValue(),
-							boardSize[0].intValue());
-					break;
-				}
-			}
+			String[] invite = getInvite(name, invited);
+			Integer[] boardSize = invites.get(invite);
+			invites.remove(invite);
+			board = new Board(boardSize[1].intValue(), boardSize[0].intValue());
 			setBoard(name, board);
 			setBoard(invited, board);
 		}
@@ -329,7 +322,7 @@ public class Server extends Thread {
 		requires nameExists(name);
 	*/
 	private void setBoard(String name, Board board) {
-		// TODO: Game maken inplaats van bord
+		// TODO: Game maken inplaats van bord?
 		getClient(name).setBoard(board);
 		mui.addMessage("Server set board for " + name);
 	}
@@ -375,7 +368,7 @@ public class Server extends Thread {
 	 */
 	/*@ requires handler != null;
 	 */
-	// TODO: ensure de privates
+	// TODO: maak getters voor alle lijsten om te ensuren
 	public void addHandler(ClientHandler handler) {
 		synchronized (threads) {
 			threads.add(handler);
@@ -419,6 +412,19 @@ public class Server extends Thread {
 		synchronized (invites) {
 			invites.put(new String[] { name, invited }, new Integer[] { boardX,
 					boardY });
+		}
+	}
+
+	public String[] getInvite(String name, String invited) {
+		synchronized (invites) {
+			String[] retInvite = null;
+			for (String[] invite : invites.keySet()) {
+				if (invite[0].equals(name) && invite[1].equals(invited)) {
+					retInvite = invite;
+					break;
+				}
+			}
+			return retInvite;
 		}
 	}
 
@@ -530,7 +536,6 @@ public class Server extends Thread {
 	 */
 	/*@ requires name != null;
 	 */
-	// TODO: ensure de privates
 	public void updateLeaderboard(String name, Boolean win) {
 		synchronized (leaderboard) {
 			boolean found = false;

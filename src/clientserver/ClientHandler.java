@@ -309,7 +309,7 @@ public class ClientHandler extends Thread {
 	/*@ requires connected();
 		requires b != null;
 	 */
-	//TODO: board ensures !NULL
+	//TODO: maak getters en setters voor openJML ensures
 	public void setBoard(Board b) {
 		board = b;
 	}
@@ -385,7 +385,6 @@ public class ClientHandler extends Thread {
 	/*@ requires command != null;
 		requires command[0].equals(Client.INVITE);
 	 */
-	//TODO: BoardX > 0 en BoardY > 0;
 	private void inviteChecks(String[] command) {
 		if (!connected()) {
 			sendError(Client.INVITE, "You have to connect first");
@@ -525,7 +524,7 @@ public class ClientHandler extends Thread {
 		requires server.isInvited(command[1], clientName);
 	 */
 	private void accept(String name) {
-		// TODO: extras verzenden (spectators?)
+		// TODO: extras verzenden (game implementatie nodig)?
 		server.generateBoard(name, clientName);
 		sendMessage(Server.GAME_START + " " + clientName + " " + name);
 		server.sendMessage(name, Server.GAME_START + " " + clientName + " "
@@ -594,7 +593,6 @@ public class ClientHandler extends Thread {
 		requires command[0].equals(Client.MOVE);
 	*/
 	private void moveChecks(String[] command) {
-		// TODO: game met meer dan 2 players of spectators
 		synchronized (board) {
 			if (!connected()) {
 				sendError(Client.MOVE, "You have to connect first");
@@ -814,7 +812,6 @@ public class ClientHandler extends Thread {
 	//@ ensures playerNumber == 0 || playerNumber == 1;
 	//@ ensures opponentName != null;
 	private void startGame(String[] command) {
-		// TODO: game maken inplaats bord
 		server.removeInvite(clientName);
 		if (clientName.equals(command[1])) {
 			playerNumber = 0;
@@ -850,7 +847,7 @@ public class ClientHandler extends Thread {
 	//@ ensures !loop;
 	private void shutdown() {
 		if (loop) {
-			// TODO: clients moeten kunnen reconnecten na dc
+			// TODO: clients moeten kunnen reconnecten na dc?
 			this.loop = false;
 			server.removeInvite(clientName);
 			server.removeHandler(this);
