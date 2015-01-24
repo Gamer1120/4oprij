@@ -57,7 +57,7 @@ public class ClientTUI implements ClientView {
 	 * command was sent, and executes this command.
 	 */
 	public void readInput() {
-		while (true) {
+		while (client.isAlive()) {
 			String input = null;
 			String[] splitInput = null;
 			try {
