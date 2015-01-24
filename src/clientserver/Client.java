@@ -4,7 +4,6 @@ import game.Board;
 import game.ComputerPlayer;
 import game.Disc;
 import game.MinMaxStrategy;
-import game.MiniMaxStrategy;
 import game.NaiveStrategy;
 import game.SmartStrategy;
 
@@ -91,11 +90,6 @@ public class Client extends Thread {
 	private ComputerPlayer computerPlayer;
 
 	/**
-	 * If the Client requests the Board from the server, it's saved here that it
-	 * has already been requested, so it's not requested for a second time.
-	 */
-	private boolean boardRequested;
-	/**
 	 * A boolean to determine whether the server has requested a move.
 	 */
 	private boolean moveRequested;
@@ -152,7 +146,6 @@ public class Client extends Thread {
 		this.invitedBy = new HashMap<String, Integer[]>();
 		this.loop = true;
 		this.board = null;
-		this.boardRequested = false;
 		this.moveRequested = false;
 		this.computerPlayer = null;
 		this.savedMove = null;
@@ -477,7 +470,7 @@ public class Client extends Thread {
 			mui.addMessage("Please enter a move");
 			;
 		} else {
-			int move = computerPlayer.determineMove(board);
+			int move = computerPlayer.determineMove(board.deepCopy());
 			sendMessage(MOVE + " " + move);
 		}
 	}
@@ -496,24 +489,22 @@ public class Client extends Thread {
 	private void serverMoveOK(String[] serverMessage) {
 		// currPlayer houdt bij wiens beurt het is om een move te doen.
 		// Checken of dubbele move goed gaat.
-		synchronized (board) {
-			int move = -1;
-			try {
-				move = Integer.parseInt(serverMessage[2]);
-			} catch (NumberFormatException e) {
-				mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
-				sendMessage(ERROR + " " + Server.MOVE_OK
-						+ " You didn't send a valid move.");
-				shutdown();
-			}
-			if (checkMove(move)) {
-				makeMove(Integer.parseInt(serverMessage[1]), move);
-				mui.addMessage(board.toString());
-			} else {
-				savedMove = new int[] { Integer.parseInt(serverMessage[1]),
-						move };
-				clientRequestBoard();
-			}
+		int move = -1;
+		try {
+			move = Integer.parseInt(serverMessage[2]);
+		} catch (NumberFormatException e) {
+			mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
+			sendMessage(ERROR + " " + Server.MOVE_OK
+					+ " You didn't send a valid move.");
+			shutdown();
+		}
+		if (checkMove(move)) {
+			makeMove(Integer.parseInt(serverMessage[1]), move);
+			mui.addMessage(board.toString());
+		} else {
+			savedMove = new int[] { Integer.parseInt(serverMessage[1]), move };
+			clientRequestBoard();
+
 		}
 	}
 
