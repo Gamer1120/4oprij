@@ -391,6 +391,8 @@ public class Board extends Observable {
 		for (Disc[] d : fields) {
 			output += Arrays.toString(d) + "\n";
 		}
+		//TODO: Ondersteun custom board size hiermee.
+		output += "[0  1  2  3  4  5  6]";
 		return output;
 	}
 

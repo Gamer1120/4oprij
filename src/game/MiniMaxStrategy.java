@@ -1,5 +1,6 @@
 package game;
 
+//TODO: Als alle zetten even goed zijn, dan zoveel mogelijk in het midden gooien.
 public class MiniMaxStrategy implements Strategy {
 	public static final String NAME = "MiniMax";
 
