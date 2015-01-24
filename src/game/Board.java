@@ -387,12 +387,17 @@ public class Board extends Observable {
 	 * @return the game situation as String
 	 */
 	public String toString() {
-		String output = "";
+		String output = "[";
+		for (int i = 0; i < columns; i++) {
+			output += i;
+			if (i != columns - 1) {
+				output += ", ";
+			}
+		}
+		output += "]\n";
 		for (Disc[] d : fields) {
 			output += Arrays.toString(d) + "\n";
 		}
-		//TODO: Ondersteun custom board size hiermee.
-		output += "[0  1  2  3  4  5  6]";
 		return output;
 	}
 
