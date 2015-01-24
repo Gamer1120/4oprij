@@ -225,56 +225,58 @@ public class Client extends Thread {
 				break;
 			}
 			mui.addMessage("[SERVER]" + line);
-			switch (serverMessage[0]) {
-			case Server.ACCEPT_CONNECT:
-				isConnected = true;
-				serverConnect(serverMessage);
-				break;
-			case Server.LOBBY:
-				serverLobby(serverMessage);
-				break;
-			case Server.INVITE:
-				serverInvite(serverMessage);
-				break;
-			case Server.DECLINE_INVITE:
-				serverDecline(serverMessage);
-				break;
-			case Server.GAME_START:
-				serverGameStart(serverMessage);
-				break;
-			case Server.GAME_END:
-				serverGameEnd(serverMessage);
-				break;
-			case Server.REQUEST_MOVE:
-				serverRequestMove(serverMessage);
-				break;
-			case Server.MOVE_OK:
-				serverMoveOK(serverMessage);
-				break;
-			case Server.ERROR:
-				//TODO: Zet dit netjes neer.
-				mui.addMessage("[ERROR]" + line.split(" ", 2)[1]);
-				if (!isConnected) {
-					isConnected = null;
+			if (!line.equals("")) {
+				switch (serverMessage[0]) {
+				case Server.ACCEPT_CONNECT:
+					isConnected = true;
+					serverConnect(serverMessage);
+					break;
+				case Server.LOBBY:
+					serverLobby(serverMessage);
+					break;
+				case Server.INVITE:
+					serverInvite(serverMessage);
+					break;
+				case Server.DECLINE_INVITE:
+					serverDecline(serverMessage);
+					break;
+				case Server.GAME_START:
+					serverGameStart(serverMessage);
+					break;
+				case Server.GAME_END:
+					serverGameEnd(serverMessage);
+					break;
+				case Server.REQUEST_MOVE:
+					serverRequestMove(serverMessage);
+					break;
+				case Server.MOVE_OK:
+					serverMoveOK(serverMessage);
+					break;
+				case Server.ERROR:
+					//TODO: Zet dit netjes neer.
+					mui.addMessage("[ERROR]" + line.split(" ", 2)[1]);
+					if (!isConnected) {
+						isConnected = null;
+					}
+					break;
+				case Server.BOARD:
+					board = toBoard(line);
+					//notifyAll();
+					break;
+				case Server.CHAT:
+					mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
+					break;
+				case Server.LEADERBOARD:
+					showLeaderBoard(serverMessage);
+					break;
+				case Server.PONG:
+					mui.addMessage("[PING]Pong!");
+					break;
+				default:
+					sendMessage(ERROR + " " + serverMessage[0]
+							+ " Unknown command.");
+					break;
 				}
-				break;
-			case Server.BOARD:
-				board = toBoard(line);
-				//notifyAll();
-				break;
-			case Server.CHAT:
-				mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
-				break;
-			case Server.LEADERBOARD:
-				showLeaderBoard(serverMessage);
-				break;
-			case Server.PONG:
-				mui.addMessage("[PING]Pong!");
-				break;
-			default:
-				sendMessage(ERROR + " " + serverMessage[0]
-						+ " Unknown command.");
-				break;
 			}
 		}
 	}
