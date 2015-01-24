@@ -128,7 +128,12 @@ public class ClientTUI implements ClientView {
 	public void askName() {
 		while (client.isConnected() == null || !client.isConnected()) {
 			if (client.isConnected() == null) {
-				addMessage("Please enter your name or -N or -S");
+				addMessage("Please enter your name.");
+				addMessage("If you want to use a strategy, and make the computer play for you, use -<LETTER> <NAME>.");
+				addMessage("Available strategies are: ");
+				addMessage("-N for a NaiveStrategy (makes random moves)");
+				addMessage("-S for Smart (thinks ahead 1 turn)");
+				addMessage("-M for Minimax (thinks ahead several turns)");
 				try {
 					client.setUpPlayer(reader.readLine());
 				} catch (IOException e) {
