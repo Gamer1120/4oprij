@@ -494,21 +494,24 @@ public class Client extends Thread {
 	private void serverMoveOK(String[] serverMessage) {
 		// currPlayer houdt bij wiens beurt het is om een move te doen.
 		// Checken of dubbele move goed gaat.
-		int move = -1;
-		try {
-			move = Integer.parseInt(serverMessage[2]);
-		} catch (NumberFormatException e) {
-			mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
-			sendMessage(ERROR + " " + Server.MOVE_OK
-					+ " You didn't send a valid move.");
-			shutdown();
-		}
-		if (checkMove(move)) {
-			makeMove(Integer.parseInt(serverMessage[1]), move);
-			mui.addMessage(board.toString());
-		} else {
-			savedMove = new int[] { Integer.parseInt(serverMessage[1]), move };
-			clientRequestBoard();
+		synchronized (board) {
+			int move = -1;
+			try {
+				move = Integer.parseInt(serverMessage[2]);
+			} catch (NumberFormatException e) {
+				mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
+				sendMessage(ERROR + " " + Server.MOVE_OK
+						+ " You didn't send a valid move.");
+				shutdown();
+			}
+			if (checkMove(move)) {
+				makeMove(Integer.parseInt(serverMessage[1]), move);
+				mui.addMessage(board.toString());
+			} else {
+				savedMove = new int[] { Integer.parseInt(serverMessage[1]),
+						move };
+				clientRequestBoard();
+			}
 		}
 	}
 
