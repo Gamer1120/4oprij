@@ -473,7 +473,7 @@ public class Client extends Thread {
 	private void serverRequestMove(String[] serverMessage) {
 		if (computerPlayer == null) {
 			moveRequested = true;
-			mui.addMoveMessage("Please enter a move");
+			mui.addMoveMessage("Please enter a move.");
 			;
 		} else {
 			int move = computerPlayer.determineMove(board.deepCopy());
