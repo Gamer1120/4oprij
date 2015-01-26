@@ -214,6 +214,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a connect message to the TUI. It prefixes the message with [CONNECT]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addConnectMessage(String message) {
 		addMessage("[CONNECT]" + message);
 	}
@@ -221,6 +222,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds an invite message to the TUI. It prefixes the message with [INVITE]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addInviteMessage(String message) {
 		addMessage("[INVITE]" + message);
 	}
@@ -228,6 +230,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a move message to the TUI. It prefixes the message with [MOVE]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addMoveMessage(String message) {
 		addMessage(message);
 	}
@@ -235,6 +238,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a chat message to the TUI. It prefixes the message with [CHAT]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addChatMessage(String message) {
 		addMessage("[CHAT]" + message);
 	}
@@ -249,12 +253,19 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a lobby message to the TUI. It prefixes the message with [LOBBY]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addLobbyMessage(String message) {
 		addMessage("[LOBBY}" + message);
 	}
 
 	/**
 	 * Adds a line of the leaderboard to the TUI.
+	 */
+	/*@ requires !rank.equals("");
+	  	requires !name.equals("");
+	  	requires !wins.equals("");
+	  	requires !losses.equals("");
+	  	requires !gamesPlayed.equals("");
 	 */
 	/*@ pure */public void addLeaderBoardLine(String rank, String name, String wins,
 			String losses, String gamesPlayed) {
@@ -266,6 +277,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds an error message to the TUI. It prefixes the message with [ERROR]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addErrorMessage(String message) {
 		addMessage("[ERROR]" + message);
 	}
@@ -273,6 +285,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a ping message to the TUI. It prefixes the message with [PING]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addPingMessage(String message) {
 		addMessage("[PING]" + message);
 	}
@@ -280,6 +293,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a help message to the TUI. It prefixes the message with [HELP]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addHelpMessage(String message) {
 		addMessage("[HELP]" + message);
 	}
@@ -296,6 +310,7 @@ public class ClientTUI implements ClientView {
 	 * Adds a features message to the TUI. It prefixes the message with
 	 * [FEATURES]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addFeaturesMessage(String message) {
 		addMessage("[FEATURES]" + message);
 	}
@@ -303,6 +318,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a game message to the TUI. It prefixes the message with [GAME]
 	 */
+	//@ requires !message.equals("");
 	/*@ pure */public void addGameMessage(String message) {
 		addMessage("[GAME]" + message);
 	}
@@ -311,8 +327,8 @@ public class ClientTUI implements ClientView {
 	 * Adds a difficulty message to the TUI. It prefixes the message with
 	 * [DIFFICULTY]
 	 */
-	/*@ pure */public void addDifficultyMessage(boolean succes) {
-		if (succes) {
+	/*@ pure */public void addDifficultyMessage(boolean success) {
+		if (success) {
 			addMessage("Difficulty set");
 		} else {
 			addMessage("Couldn't change the difficulty");
