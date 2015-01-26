@@ -11,13 +11,12 @@ import java.util.Observable;
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
 public class Board extends Observable {
-	// Constants:
+
 	/**
 	 * The amount of discs needed next to each other to win a game. 
 	 */
 	public static final int CONNECT = 4;
 
-	// Instance variables:
 	/** The amount of rows. */
 	public int rows;
 
@@ -33,7 +32,6 @@ public class Board extends Observable {
 		invariant (\forall int i; 0 <= i & i < getRows(); (\forall int j; 0 <= j & j < getColumns(); this.getField(i, j) == Disc.EMPTY || this.getField(i, j) == Disc.YELLOW || this.getField(i, j) == Disc.RED));
 	*/
 
-	// Constructors
 	/**
 	 * Creates an empty board with the default boardsize of 6 rows and 7
 	 * columns.
