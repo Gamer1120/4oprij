@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
 
-// TODO: Auto-generated Javadoc
 /**
  * Server. A Thread class that listens to a socket connection on a specified
  * port. For every socket connection with a Client, a new ClientHandler thread
@@ -347,7 +346,6 @@ public class Server extends Thread {
 	/*@ requires handler != null;
 		ensures getHandlers().contains(handler);
 	 */
-	// TODO: maak getters voor alle lijsten om te ensuren
 	public void addHandler(ClientHandler handler) {
 		synchronized (threads) {
 			threads.add(handler);
@@ -389,9 +387,9 @@ public class Server extends Thread {
 	 * @param invited
 	 *            name of the invited client
 	 * @param boardX
-	 *            the board x
+	 *            the amount of columns the board should have
 	 * @param boardY
-	 *            the board y
+	 *            the amount of rowss the board should have
 	 */
 	/*@ requires name != null;
 		requires nameExists(name);
@@ -399,6 +397,7 @@ public class Server extends Thread {
 		requires nameExists(invited);
 		requires boardX >= 4 & boardX <= 100;
 		requires boardY >= 4 & boardY <= 100;
+		ensures isInvited(name, invited);
 	*/
 	public void addInvite(String name, String invited, int boardX, int boardY) {
 		synchronized (invites) {
@@ -406,6 +405,29 @@ public class Server extends Thread {
 					boardY });
 			mui.addMessage("Added invite from " + name + " to " + invited
 					+ " with boardsize " + boardX + " x " + boardY + ".");
+		}
+	}
+
+	/**
+	 * Checks whether the client is invited.
+	 *
+	 * @param name
+	 *            the name of the client
+	 * @return true, if is invited
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+	*/
+	/*@ pure */public boolean isInvited(String name) {
+		synchronized (invites) {
+			boolean retBool = false;
+			for (String[] invite : invites.keySet()) {
+				if (invite[0].equals(name) || invite[1].equals(name)) {
+					retBool = true;
+					break;
+				}
+			}
+			return retBool;
 		}
 	}
 
@@ -422,7 +444,7 @@ public class Server extends Thread {
 	/*@ requires name != null;
 		requires nameExists(name);
 		requires invited != null;
-		requires nameExists(invited);;
+		requires nameExists(invited);
 	*/
 	/*@ pure */public boolean isInvited(String name, String invited) {
 		synchronized (invites) {
@@ -437,10 +459,31 @@ public class Server extends Thread {
 		}
 	}
 
+	/**
+	 * Gets the map of invites.
+	 * 
+	 * @return the map of invites
+	 */
 	/*@ pure */public HashMap<String[], Integer[]> getInvites() {
 		return invites;
 	}
 
+	/**
+	 * Returns the invite with the specified names.
+	 * 
+	 * @param name
+	 *            name of the client who send the invite
+	 * @param invited
+	 *            name of th client who received the invite
+	 * @return the invite, a String[] with both names
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires invited != null;
+		requires nameExists(invited);
+		requires isInvited(name, invited);
+		ensures getInvites().containsKey(\result);
+	 */
 	/*@ pure */public String[] getInvite(String name, String invited) {
 		synchronized (invites) {
 			String[] retInvite = null;
@@ -462,6 +505,7 @@ public class Server extends Thread {
 	 */
 	/*@ requires name != null;
 		requires nameExists(name);
+		ensures !isInvited(name);
 	*/
 	public void removeInvite(String name) {
 		synchronized (invites) {
@@ -493,7 +537,8 @@ public class Server extends Thread {
 	/*@ requires name != null;
 		requires nameExists(name);
 		requires invited != null;
-		requires nameExists(invited);;
+		requires nameExists(invited);
+		ensures !isInvited(name, invited);
 	*/
 	public void removeInvite(String name, String invited) {
 		synchronized (invites) {
@@ -543,8 +588,7 @@ public class Server extends Thread {
 	 * @param increment
 	 *            Wether to increment or decrement the score
 	 */
-	/*@ requires name != null;
-	 */
+	//@ requires name != null;
 	public void updateLeaderboard(String name, Boolean win) {
 		synchronized (leaderboard) {
 			boolean found = false;
@@ -588,10 +632,23 @@ public class Server extends Thread {
 		}
 	}
 
+	/**
+	 * Gets the leaderboard.
+	 * 
+	 * @return the leaderboard, a TreeSet of LeaderboardPairs
+	 */
 	/*@ pure */public TreeSet<LeaderboardPair> getLeaderboard() {
 		return leaderboard;
 	}
 
+	/**
+	 * Tries to read the leaderboard from the file specified in the FILENAME
+	 * final and creates a TreeSet with the read values.
+	 * 
+	 * @return the created TreeSet
+	 * @throws IOException
+	 *             if the file can't be found
+	 */
 	/*@ pure */public TreeSet<LeaderboardPair> readLeaderboard()
 			throws IOException {
 		TreeSet<LeaderboardPair> leaderboard = new TreeSet<LeaderboardPair>();
@@ -605,8 +662,8 @@ public class Server extends Thread {
 			} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
 				mui.addMessage("Error couldn't read leaderboard entry");
 				/*
-				 * Tries to continue to read entries, if all entries are
-				 * incorrect none will be added.
+				 * Incorrect entry. Tries to continue to read entries, if all entries are
+				 * incorrect none will be added and an empty set will be returned.
 				 */
 				continue;
 			}
@@ -615,6 +672,11 @@ public class Server extends Thread {
 		return leaderboard;
 	}
 
+	/**
+	 * Tries to write the leaderboard to the file specified in the FILENAME
+	 * final. If the write fails an error will be printed, but the server won't
+	 * terminate.
+	 */
 	public void writeLeaderboard() {
 		PrintWriter out = null;
 		try {
