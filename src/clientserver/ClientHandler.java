@@ -12,7 +12,7 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
-// TODO: Auto-generated Javadoc
+// TODO: LOOPINVARIANTEN
 /**
  * The ClientHandler that reads all the input from the Clients and send messages
  * from the Server to the Clients.<br>
@@ -92,12 +92,13 @@ public class ClientHandler extends Thread {
 	 * and the BufferedWriter.
 	 * 
 	 *
-	 * @param serverArg
-	 *            the server arg
-	 * @param sockArg
-	 *            the sock arg
+	 * @param server
+	 *            The server this ClientHandler is for.
+	 * @param sock
+	 *            The socket this ClientHandler uses.
 	 * @throws IOException
-	 *             Signals that an I/O exception has occurred.
+	 *             Gets thrown when the Input- or Outputstream from the Socket
+	 *             can't be get.
 	 */
 	//@ requires server != null && sock != null;
 	public ClientHandler(Server server, Socket sock) throws IOException {
@@ -199,7 +200,7 @@ public class ClientHandler extends Thread {
 	 * @param msg
 	 *            the message
 	 */
-	//@ requires msg != null;
+	//@ requires msg != null & !msg.equals("");
 	public void sendMessage(String msg) {
 		String[] command = msg.split("\\s+");
 		switch (command[0]) {
@@ -221,6 +222,8 @@ public class ClientHandler extends Thread {
 		}
 	}
 
+	//@ requires header != null & !header.equals("");
+	//@ requires msg != null & !msg.equals("");
 	private void sendError(String header, String msg) {
 		write(Server.ERROR + " " + header + " " + msg);
 	}
@@ -231,9 +234,9 @@ public class ClientHandler extends Thread {
 	 * the socket connection has been lost and shutdown() is called.
 	 *
 	 * @param msg
-	 *            the message
+	 *            The message to write.
 	 */
-	//@ requires msg != null;
+	//@ requires msg != null & !msg.equals("");
 	private synchronized void write(String msg) {
 		try {
 			out.write(msg);
@@ -247,45 +250,45 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * returns the name of the client.
+	 * Returns the name of the Client.
 	 *
-	 * @return the name of the client
+	 * @return the name of the Client.
 	 */
 	/*@ pure */public String getClientName() {
 		return clientName;
 	}
 
 	/**
-	 * returns the clientFeatures of the client.
+	 * Returns the clientFeatures of the Client.
 	 *
-	 * @return the clientFeatures of the client
+	 * @return the clientFeatures of the Client.
 	 */
 	/*@ pure */public Set<String> getClientFeatures() {
 		return clientFeatures;
 	}
 
 	/**
-	 * returns wheter this cliens has connected.
+	 * Returns whether this Client has connected.
 	 *
-	 * @return true if the client has a name
+	 * @return true if the Client has a name.
 	 */
 	/*@ pure */public boolean connected() {
 		return clientName != null;
 	}
 
 	/**
-	 * returns wheter the client is playing a game.
+	 * Returns whether the Client is playing a game.
 	 *
-	 * @return true if there is a board
+	 * @return true if there is a Board.
 	 */
 	/*@ pure */public boolean inGame() {
 		return board != null;
 	}
 
 	/**
-	 * returns wheter this cliens has the chat feature.
+	 * Returns whether this Client has the chat feature.
 	 *
-	 * @return true if the client has the chat feature.
+	 * @return true if the Client has the chat feature.
 	 */
 	//@ requires connected();
 	/*@ pure */public boolean hasChat() {
@@ -293,9 +296,9 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * returns wheter this cliens has the custom board size feature.
+	 * Returns whether this Client has the custom board size feature.
 	 *
-	 * @return true if the client has the custom board size feature.
+	 * @return true if the Client has the custom board size feature.
 	 */
 	//@ requires connected();
 	/*@ pure */public boolean hasCustomBoardSize() {
@@ -303,9 +306,9 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * returns wheter this cliens has the leaderboard feature.
+	 * Returns whether this Client has the Leaderboard feature.
 	 *
-	 * @return true if the client has the leaderboard feature.
+	 * @return true if the Client has the Leaderboard feature.
 	 */
 	//@ requires connected();
 	/*@ pure */public boolean hasLeaderboard() {
@@ -313,37 +316,36 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Gets the board of this client.
+	 * Gets the Board of this Client.
 	 *
-	 * @return the board of this client
+	 * @return the Board of this Client.
 	 */
 	/*@ pure */public Board getBoard() {
 		return board;
 	}
 
 	/**
-	 * Sets the board of this client.
+	 * Sets the Board of this Client.
 	 *
 	 * @param b
-	 *            the new board
+	 *            The Board to set for this Client.
 	 */
 	/*@ requires connected();
 		requires b != null;
 	 */
-	//TODO: maak getters en setters voor openJML ensures
 	public void setBoard(Board b) {
 		board = b;
 	}
 
 	/**
-	 * Checks if the client has send a command with valid arguments and with a
-	 * valid name. If this is the case connect will be called to conect the
+	 * Checks if the Client has sent a command with valid arguments and with a
+	 * valid name. If this is the case, connect will be called to connect the
 	 * client
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command sent by the Client.
 	 */
-	/*@ requires command != null;
+	/*@ requires command != null & !command.equals("");
 		requires command[0].equals(Client.CONNECT);
 	 */
 	private void connectChecks(String[] command) {
@@ -359,12 +361,12 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Connects the clients by assigning the name specified in the command and
+	 * Connects the Clients by assigning the name specified in the command and
 	 * storing the clientFeatures. Then it send an ACCEPT_CONNECT with the
-	 * clientFeatures of the client
+	 * clientFeatures of the Client
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command sent by the Client.
 	 */
 	/*@ requires command != null;
 		requires command.length >= 2;
@@ -394,16 +396,16 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the client is connected, if the client send a command with
+	 * Checks if the Client is connected, if the Client sent a command with
 	 * valid arguments, if the opponent exists, if neither player is in a game
-	 * and checks wether there is no invite between both player. If this is the
-	 * case invite will be called and an invite will be send to the opponent
-	 * specified in the command. If this isn't the case an error will be send
+	 * and checks whether there is no invite between both player. If this is the
+	 * case, invite will be called and an invite will be sent to the opponent
+	 * specified in the command. If this isn't the case, an error will be sent
 	 * and the server sends an decline to let the client know the invite has
 	 * been cancelled.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command send by the Client.
 	 */
 	/*@ requires command != null;
 		requires command[0].equals(Client.INVITE);
@@ -440,15 +442,15 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if both client support a custom boardsize and tries to parse the
+	 * Checks if both Clients support a custom board size and tries to parse the
 	 * board size. The amount of rows and columns can't be smaller than 4 or
-	 * larger than 100. then it calls invite to invite the opponent with a
-	 * custom board size. If one of the checks fail an error will be send and
-	 * the invite will be automatically declined to let the client know the
+	 * larger than 100. Then it calls invite to invite the opponent with a
+	 * custom board size. If one of the checks fail an error will be sent and
+	 * the invite will be automatically declined, to let the Client know the
 	 * invite has been cancelled.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
 		requires command[0].equals(Client.INVITE);
@@ -498,7 +500,7 @@ public class ClientHandler extends Thread {
 	 * size if specified. the invite will be saved on the server.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command send by the Client.
 	 */
 	/*@ requires name != null;
 		requires connected();
@@ -515,11 +517,11 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Invites the player specified in the command and tries to read the board
-	 * size if specified. the invite will be saved on the server.
+	 * Invites the player specified in the command and tries to read the Board
+	 * size if specified. The invite will be saved on the Server.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command send by the Client.
 	 */
 	/*@ requires name != null;
 		requires boardX >= 4;
@@ -540,13 +542,13 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the client is connected, if the client send a command with
+	 * Checks if the Client is connected, if the Client send a command with
 	 * valid arguments, if the opponent exists and if the opponent specified in
-	 * the command send an invite to this player. If this is the case accept
+	 * the command sent an invite to this player. If this is the case accept
 	 * will be called to accept the invite.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command sent by the Client.
 	 */
 	/*@ requires command != null;
 		requires command[0].equals(Client.ACCEPT_INVITE);
@@ -566,12 +568,12 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Accepts the invite, creates a board with the size specified in the invite
-	 * and announces the start of the game to this client and the specified
+	 * Accepts the invite, creates a Board with the size specified in the invite
+	 * and announces the start of the game to this Client and the specified
 	 * opponent.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command sent by the Client.
 	 */
 	/*@ requires name != null;
 		requires connected();
@@ -587,14 +589,14 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the client is connected, if the client send a command with
+	 * Checks if the client is connected, if the client sent a command with
 	 * valid arguments, if the opponent exists and if the opponent specified in
 	 * the command send an invite to this player or this player sent an invite
 	 * to the opponent. If this is the case decline will be called to decline
 	 * the invite.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
 		requires command[0].equals(Client.DECLINE_INVITE);
@@ -616,10 +618,10 @@ public class ClientHandler extends Thread {
 
 	/**
 	 * Declines the invite, send a message to the opponent and deletes it from
-	 * the server. You can decline invites sent by you.
+	 * the Server. You can decline invites sent by you.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command sent by the Client.
 	 */
 	/*@ requires name != null;
 		requires connected();
@@ -634,12 +636,12 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the client is connected, if the client is in game and if it's
-	 * the client's turn to move, if this is the case it calls validMove to
+	 * Checks if the Client is connected, if the Client is in game and if it's
+	 * the Client's turn to move, if this is the case it calls validMove to
 	 * check if the move is valid.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command sent by the Client.
 	 */
 	/*@ requires command != null;
 		requires command[0].equals(Client.MOVE);
@@ -659,13 +661,13 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the client send a command with valid arguments, tries to parse
+	 * Checks if the Client sent a command with valid arguments, tries to parse
 	 * the column specified in the command, checks if the column is a valid
 	 * column and if it isn't full. If one of these things fail it sends an
 	 * error and a new move request, otherwise it will call move to do the move.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command send by the Client.
 	 */
 	/*@ requires command != null;
 		requires command[0].equals(Client.MOVE);
@@ -700,12 +702,12 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Does the move on the board, sends the move to the clients in the game and
-	 * checks if the game is over. If it isn't it sends an request to the
+	 * Does the move on the board, sends the move to the Clients in the game and
+	 * checks if the game is over. If it isn't it, sends an request to the
 	 * opponent, otherwise it will send the result of the game.
 	 *
 	 * @param col
-	 *            the col
+	 *            The column to make the move in.
 	 */
 	/*@ requires connected();
 		requires opponentName != null;
@@ -741,11 +743,11 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the client is connected and if the command contains a message,
+	 * Checks if the Client is connected and if the command contains a message,
 	 * if this is the case it calls chat to broadcast the message.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command sent by the Client.
 	 */
 	/*@ requires line != null;
 	*/
@@ -772,7 +774,7 @@ public class ClientHandler extends Thread {
 	 * Broadcasts the message to all connected clients.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command sent by the Client.
 	 */
 	/*@ requires line != null;
 		requires connected();
@@ -784,7 +786,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the client is connected and if the client is in game. If this
+	 * Checks if the Client is connected and if the client is in game. If this
 	 * is the case it calls requestBoard to send the board.
 	 */
 	private void requestBoardChecks() {
@@ -798,7 +800,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Sends the board to the client.
+	 * Sends the board to the Client.
 	 */
 	//@ requires connected();
 	//@ requires inGame();
@@ -807,7 +809,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the client is connected. If this is the case it calls
+	 * Checks if the Client is connected. If this is the case it calls
 	 * requestLobby to send the lobby.
 	 */
 	private void requestLobbyChecks() {
@@ -819,7 +821,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Sends the lobby to the client.
+	 * Sends the lobby to the Client.
 	 */
 	//@ requires connected();
 	private void requestLobby() {
@@ -827,7 +829,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the client is connected. If this is the case it calls
+	 * Checks if the Client is connected. If this is the case it calls
 	 * requestLobby to send the lobby.
 	 */
 	private void requestLeaderboardChecks() {
@@ -845,7 +847,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Sends the leaderboard to the client.
+	 * Sends the leaderboard to the Client.
 	 */
 	//@ requires connected();
 	//@ requires hasLeaderboard();
@@ -859,7 +861,7 @@ public class ClientHandler extends Thread {
 	 * lobby because the client just left the lobby.
 	 *
 	 * @param command
-	 *            the command send by the client
+	 *            The command send by the client.
 	 */
 	//@ ensures playerNumber == 0 || playerNumber == 1;
 	//@ ensures opponentName != null;
@@ -876,7 +878,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * End s the game, resets the values belonging to the game and broadcasts
+	 * Ends the game, resets the values belonging to the game and broadcasts
 	 * the lobby because this client just joined the lobby again.
 	 */
 	//@ ensures playerNumber == -1;
