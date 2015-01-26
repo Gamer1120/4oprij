@@ -388,7 +388,9 @@ public class ClientHandler extends Thread {
 	 * valid arguments, if the opponent exists, if neither player is in a game
 	 * and checks wether there is no invite between both player. If this is the
 	 * case invite will be called and an invite will be send to the opponent
-	 * specified in the command.
+	 * specified in the command. If this isn't the case an error will be send
+	 * and the server sends an decline to let the client know the invite has
+	 * been cancelled.
 	 *
 	 * @param command
 	 *            the command send by the client
@@ -397,22 +399,29 @@ public class ClientHandler extends Thread {
 		requires command[0].equals(Client.INVITE);
 	 */
 	private void inviteChecks(String[] command) {
-		if (!connected()) {
-			sendError(Client.INVITE, "You have to connect first.");
-		} else if (command.length < 2) {
+		if (command.length < 2) {
 			sendError(Client.INVITE, "Invalid arguments.");
+		} else if (!connected()) {
+			sendError(Client.INVITE, "You have to connect first.");
+			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else if (clientName.equals(command[1])) {
 			sendError(Client.INVITE, "You can't invite yourself.");
+			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else if (!server.nameExists(command[1])) {
 			sendError(Client.INVITE, "Name doesn't exist.");
+			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else if (inGame()) {
 			sendError(Client.INVITE, "You are already in a game.");
+			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else if (server.inGame(command[1])) {
 			sendError(Client.INVITE, "The invited client is already in a game.");
+			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else if (server.isInvited(clientName, command[1])) {
 			sendError(Client.INVITE, "Already invited this client.");
+			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else if (server.isInvited(command[1], clientName)) {
 			sendError(Client.INVITE, "The invited client already invited you.");
+			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else if (command.length >= 4) {
 			inviteSizeChecks(command);
 		} else {
@@ -427,9 +436,11 @@ public class ClientHandler extends Thread {
 					"Your client doesn't support the "
 							+ Features.CUSTOM_BOARD_SIZE
 							+ " feature. Please add this feature if you want to use extras.");
+			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else if (!server.hasCustomBoardSize(command[1])) {
 			sendError(Client.INVITE,
 					"The invited client doesn't support extras.");
+			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else {
 			try {
 				int boardX = Integer.parseInt(command[2]);
@@ -875,9 +886,11 @@ public class ClientHandler extends Thread {
 				server.sendMessage(opponentName, Server.GAME_END + " "
 						+ Game.DISCONNECT);
 			} else if (connected()) {
+				server.print("ClientHandler: " + clientName + " has left.");
 				server.broadcastLobby();
+			} else {
+				server.print("ClientHandler: unconnected client has left.");
 			}
-			server.print("ClientHandler: " + clientName + " has left.");
 		}
 	}
 }
