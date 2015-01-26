@@ -32,7 +32,7 @@ public class ClientTUI implements ClientView {
 	 * The port the ClientTUI will be connecting to.
 	 */
 	private int port;
-	
+
 	/**
 	 * Creates a ClientTUI object.
 	 */
@@ -103,6 +103,8 @@ public class ClientTUI implements ClientView {
 				client.clientHelp();
 				break;
 			// END OF CUSTOM COMMANDS
+			case Client.HINT:
+				client.clientHint();
 			default:
 				addMessage("[ERROR]Unknown command.");
 				break;
@@ -203,4 +205,60 @@ public class ClientTUI implements ClientView {
 		client.start();
 		askName();
 	}
+
+	public void addConnectMessage(String message) {
+		addMessage("[CONNECT]" + message);
+	}
+
+	public void addInviteMessage(String message) {
+		addMessage("[INVITE]" + message);
+	}
+
+	public void addMoveMessage(String message) {
+		addMessage(message);
+	}
+
+	public void addChatMessage(String message) {
+		addMessage("[CHAT]" + message);
+	}
+
+	public void addBoard() {
+		addMessage(client.getBoard().toString());
+	}
+
+	public void addLobbyMessage(String message) {
+		addMessage("[LOBBY}" + message);
+	}
+
+	public void addLeaderBoardLine(String rank, String name, String wins,
+			String losses, String gamesPlayed) {
+		addMessage(rank + ". " + name + " Wins: " + wins + " Losses: " + losses
+				+ " Games played: " + gamesPlayed);
+
+	}
+
+	public void addErrorMessage(String message) {
+		addMessage("[ERROR]" + message);
+	}
+
+	public void addPingMessage(String message) {
+		addMessage("[PING]" + message);
+	}
+
+	public void addHelpMessage(String message) {
+		addMessage("[HELP]" + message);
+	}
+
+	public void addHintMessage(int move) {
+		addMessage("[HINT]You could make a move in column: " + move);
+	}
+
+	public void addFeaturesMessage(String message) {
+		addMessage("[FEATURES]" + message);
+	}
+
+	public void addGameMessage(String message) {
+		addMessage("[GAME]" + message);
+	}
+
 }

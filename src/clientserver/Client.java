@@ -42,6 +42,7 @@ public class Client extends Thread {
 	// END OF PROTOCOL
 	// CUSTOM COMMANDS
 	public static final String HELP = "HELP";
+	public static final String HINT = "HINT";
 	// END OF CUSTOM COMMANDS
 
 	private static final String CLIENT_FEATURES = Features.CHAT + " "
@@ -226,8 +227,9 @@ public class Client extends Thread {
 				shutdown();
 				break;
 			}
-			String[] serverMessage = line.split("\\s+");
+			//TODO: later weghalen
 			mui.addMessage("[SERVER]" + line);
+			String[] serverMessage = line.split("\\s+");
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
 				isConnected = true;
@@ -256,23 +258,23 @@ public class Client extends Thread {
 				break;
 			case Server.ERROR:
 				//TODO: Zet dit netjes neer.
-				mui.addMessage("[ERROR]" + line.split(" ", 2)[1]);
+				mui.addErrorMessage(line.split(" ", 2)[1]);
 				if (!isConnected) {
 					isConnected = null;
 				}
 				break;
 			case Server.BOARD:
 				board = toBoard(line);
-				//notifyAll();
 				break;
 			case Server.CHAT:
-				mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
+				//TODO: Laat view [CHAT] ervoor zetten bij ALLE addMessages opsplitsen in juiste categorie.
+				mui.addChatMessage(line.split(" ", 2)[1]);
 				break;
 			case Server.LEADERBOARD:
 				showLeaderBoard(serverMessage);
 				break;
 			case Server.PONG:
-				mui.addMessage("[PING]Pong!");
+				mui.addPingMessage("Pong!");
 				break;
 			default:
 				sendMessage(ERROR + " " + serverMessage[0]
@@ -313,10 +315,10 @@ public class Client extends Thread {
 	 */
 	//@	requires serverMessage[0].equals(Server.ACCEPT_CONNECT);
 	private void serverConnect(String[] serverMessage) {
-		mui.addMessage("[CONNECT]Successfully established connection to server: "
-				// IP of the server
+		mui.addConnectMessage("Successfully established connection to server: "
+		// IP of the server
 				+ sock.getRemoteSocketAddress().toString());
-		mui.addMessage("[FEATURES]The features of this server are:"
+		mui.addFeaturesMessage("The features of this server are:"
 				+ arrayToLine(serverMessage));
 	}
 
@@ -330,7 +332,7 @@ public class Client extends Thread {
 	 */
 	//@ requires serverMessage[0].equals(Server.LOBBY);
 	private void serverLobby(String[] serverMessage) {
-		mui.addMessage("[LOBBY]The people that are currently in the lobby are:"
+		mui.addLobbyMessage("The people that are currently in the lobby are:"
 				+ arrayToLine(serverMessage));
 	}
 
@@ -349,10 +351,9 @@ public class Client extends Thread {
 		if (serverMessage.length == 2) {
 			addServerInvite(opponentName);
 			if (!isIngame()) {
-				mui.addMessage("[INVITE]"
-						+ opponentName
+				mui.addInviteMessage(opponentName
 						+ " has invited you to a game of Connect4 (default boardsize)!");
-				mui.addMessage("Use \"ACCEPT " + opponentName
+				mui.addInviteMessage("Use \"ACCEPT " + opponentName
 						+ "\" to accept this invite or \"DECLINE "
 						+ opponentName + "\" to decline it.");
 			}
@@ -362,16 +363,15 @@ public class Client extends Thread {
 				int boardY = Integer.parseInt(serverMessage[3]);
 				addServerInvite(opponentName, boardX, boardY);
 				if (!isIngame()) {
-					mui.addMessage("[INVITE]"
-							+ opponentName
+					mui.addInviteMessage(opponentName
 							+ " has invited you to a game of Connect4 with a custom Board size of "
 							+ boardX + " x " + boardY + "!");
-					mui.addMessage("Use \"ACCEPT " + opponentName
+					mui.addInviteMessage("Use \"ACCEPT " + opponentName
 							+ "\" to accept this invite or \"DECLINE "
 							+ opponentName + "\" to decline it.");
 				}
 			} catch (NumberFormatException e) {
-				mui.addMessage("[ERROR]The server just sent an invite with an invalid custom board size.");
+				mui.addErrorMessage("The server just sent an invite with an invalid custom board size.");
 				sendMessage(ERROR
 						+ " "
 						+ INVITE
@@ -392,10 +392,10 @@ public class Client extends Thread {
 	private void serverDecline(String[] serverMessage) {
 		if (serverMessage.length > 1) {
 			invited.remove(serverMessage[1]);
-			mui.addMessage("[INVITE]The invite you sent to " + serverMessage[1]
+			mui.addInviteMessage("The invite you sent to " + serverMessage[1]
 					+ " got declined.");
 		} else {
-			mui.addMessage("[INVITE]The server just tried to decline one of your invites, but it didn't send who declined yours.");
+			mui.addInviteMessage("The server just tried to decline one of your invites, but it didn't send who declined yours.");
 			sendMessage(ERROR + " " + serverMessage[0]
 					+ " Your server didn't send me who declined the invite.");
 		}
@@ -418,14 +418,14 @@ public class Client extends Thread {
 	private void serverGameStart(String[] serverMessage) {
 		if (serverMessage[1].equals(getClientName())) {
 			myNumber = 1;
-			mui.addMessage("[GAME]A game between you and " + serverMessage[2]
+			mui.addGameMessage("A game between you and " + serverMessage[2]
 					+ " has started!");
 			Integer[] boardSize = invitedBy.get(serverMessage[2]);
 
 			board = new Board(boardSize[1], boardSize[0]);
 		} else {
 			myNumber = 2;
-			mui.addMessage("[GAME]A game between you and " + serverMessage[1]
+			mui.addGameMessage("A game between you and " + serverMessage[1]
 					+ " has started!");
 			Integer[] boardSize = invited.get(serverMessage[1]);
 			board = new Board(boardSize[1], boardSize[0]);
@@ -433,8 +433,8 @@ public class Client extends Thread {
 
 		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
 		// 1 > Disc.RED
-		mui.addMessage(board.toString());
-		mui.addMessage("[GAME]You are YELLOW");
+		mui.addBoard();
+		mui.addGameMessage("You are YELLOW");
 	}
 
 	/**
@@ -450,12 +450,12 @@ public class Client extends Thread {
 	private void serverGameEnd(String[] serverMessage) {
 		this.board = null;
 		if (serverMessage.length > 2) {
-			mui.addMessage("[GAME]The winner is: " + serverMessage[2]);
+			mui.addGameMessage("The winner is: " + serverMessage[2]);
 		} else if (serverMessage.length == 2) {
 			if (serverMessage[1].equals(Game.DRAW)) {
-				mui.addMessage("[GAME]The game was a draw!");
+				mui.addGameMessage("The game was a draw!");
 			} else {
-				mui.addMessage("[GAME]The game has ended. Reason:"
+				mui.addGameMessage("The game has ended. Reason:"
 						+ arrayToLine(serverMessage));
 			}
 		}
@@ -476,7 +476,7 @@ public class Client extends Thread {
 	private void serverRequestMove(String[] serverMessage) {
 		if (computerPlayer == null) {
 			moveRequested = true;
-			mui.addMessage("Please enter a move");
+			mui.addMoveMessage("Please enter a move");
 			;
 		} else {
 			int move = computerPlayer.determineMove(board.deepCopy());
@@ -502,18 +502,17 @@ public class Client extends Thread {
 		try {
 			move = Integer.parseInt(serverMessage[2]);
 		} catch (NumberFormatException e) {
-			mui.addMessage("[ERROR]Server did not send a valid move. TERMINATING.");
+			mui.addErrorMessage("Server did not send a valid move. TERMINATING.");
 			sendMessage(ERROR + " " + Server.MOVE_OK
 					+ " You didn't send a valid move.");
 			shutdown();
 		}
 		if (checkMove(move)) {
 			makeMove(Integer.parseInt(serverMessage[1]), move);
-			mui.addMessage(board.toString());
+			mui.addBoard();
 		} else {
 			savedMove = new int[] { Integer.parseInt(serverMessage[1]), move };
 			clientRequestBoard();
-
 		}
 	}
 
@@ -535,10 +534,11 @@ public class Client extends Thread {
 	 */
 	public void clientHelp() {
 		if (isIngame()) {
-			mui.addMessage("[HELP]Available commands are: " + Client.MOVE
-					+ " <column>, " + Client.PING + " and " + Client.QUIT + ".");
+			mui.addHelpMessage("Available commands are: " + Client.MOVE
+					+ " <column>, " + Client.HINT + ", " + Client.PING
+					+ " and " + Client.QUIT + ".");
 		} else {
-			mui.addMessage("[HELP]Available commands are: " + Client.INVITE
+			mui.addHelpMessage("Available commands are: " + Client.INVITE
 					+ " <player>, " + Client.ACCEPT_INVITE + " <player>, "
 					+ Client.DECLINE_INVITE + " <player>, " + Client.CHAT
 					+ " <message>, " + Client.REQUEST_LOBBY + ", "
@@ -566,14 +566,14 @@ public class Client extends Thread {
 				try {
 					Integer.parseInt(splitInput[1]);
 				} catch (NumberFormatException e) {
-					mui.addMessage("[ERROR]Please enter a valid move after MOVE.");
+					mui.addErrorMessage("Please enter a valid move after MOVE.");
 				}
 				sendMessage(input);
 			} else {
-				mui.addMessage("[ERROR]Please enter exactly one argument after MOVE.");
+				mui.addErrorMessage("Please enter exactly one argument after MOVE.");
 			}
 		} else {
-			mui.addMessage("[ERROR]There was no move requested.");
+			mui.addErrorMessage("There was no move requested.");
 
 		}
 	}
@@ -593,23 +593,23 @@ public class Client extends Thread {
 	 */
 	public void clientInvite(String input, String[] splitInput) {
 		if (splitInput.length == 1) {
-			mui.addMessage("[ERROR]Please add a player to invite.");
+			mui.addErrorMessage("Please add a player to invite.");
 		} else if (splitInput.length == 2) {
 			addClientInvite(splitInput[1]);
 			sendMessage(input);
-			mui.addMessage("[INVITE]Tried to invite: " + splitInput[1]
+			mui.addInviteMessage("Tried to invite: " + splitInput[1]
 					+ " with default board size.");
 		} else if (splitInput.length == 3) {
-			mui.addMessage("[ERROR]For a custom board size you need to specify both the BoardX and BoardY");
+			mui.addErrorMessage("For a custom board size you need to specify both the BoardX and BoardY");
 		} else if (splitInput.length >= 4) {
 			try {
 				addClientInvite(splitInput[1], Integer.parseInt(splitInput[2]),
 						Integer.parseInt(splitInput[3]));
 				sendMessage(input);
-				mui.addMessage("[INVITE]Tried to invite: " + splitInput[1]
+				mui.addInviteMessage("Tried to invite: " + splitInput[1]
 						+ " with the specified custom board size.");
 			} catch (NumberFormatException e) {
-				mui.addMessage("[INVITE]Please specify the BoardX and BoardY as integers. Invite failed.");
+				mui.addErrorMessage("Please specify the BoardX and BoardY as integers. Invite failed.");
 			}
 		}
 	}
@@ -630,9 +630,9 @@ public class Client extends Thread {
 		if (splitInput.length == 2) {
 			sendMessage(Client.ACCEPT_INVITE + " " + splitInput[1]);
 		} else if (splitInput.length == 1) {
-			mui.addMessage("[ERROR]Please specify whose invite you'd like to decline.");
+			mui.addErrorMessage("Please specify whose invite you'd like to decline.");
 		} else {
-			mui.addMessage("[ERROR]Please use DECLINE <name> to decline an invite.");
+			mui.addErrorMessage("Please use DECLINE <name> to decline an invite.");
 		}
 	}
 
@@ -652,10 +652,19 @@ public class Client extends Thread {
 		if (splitInput.length > 1) {
 			removeServerInvite(splitInput[1]);
 			sendMessage(input);
-			mui.addMessage("[INVITE]Tried to decline " + splitInput[1]
+			mui.addInviteMessage("Tried to decline " + splitInput[1]
 					+ "'s invite.");
 		} else {
-			mui.addMessage("[INVITE]Please specify whose invite you'd like to decline.");
+			mui.addErrorMessage("Please specify whose invite you'd like to decline.");
+		}
+	}
+
+	public void clientHint() {
+		if (isIngame()) {
+			mui.addHintMessage(new MinMaxStrategy(4).determineMove(
+					board.deepCopy(), Disc.YELLOW));
+		} else {
+			mui.addErrorMessage("You're not in-game.");
 		}
 	}
 
@@ -692,6 +701,10 @@ public class Client extends Thread {
 	 */
 	/*@ pure */public String getClientName() {
 		return clientName;
+	}
+
+	/*@ pure */public Board getBoard() {
+		return board;
 	}
 
 	//END CLIENT GETTERS
@@ -772,11 +785,11 @@ public class Client extends Thread {
 
 			board = test;
 			makeMove(savedMove[0], savedMove[1]);
-			mui.addMessage("[GAME]Apparently the board I have and the Board on the server are different.");
-			mui.addMessage("I made the move on the board on the server for you:");
-			mui.addMessage(board.toString());
+			mui.addGameMessage("Apparently the board I have and the Board on the server are different.");
+			mui.addGameMessage("I made the move on the board on the server for you:");
+			mui.addBoard();
 		} catch (NumberFormatException e) {
-			mui.addMessage("[ERROR]Server sent a wrong board. TERMINATING.");
+			mui.addErrorMessage("Server sent a wrong board. TERMINATING.");
 			sendMessage(ERROR + " " + Server.BOARD
 					+ " You sent me an invalid Board. TERMINATING.");
 			shutdown();
@@ -811,14 +824,14 @@ public class Client extends Thread {
 		if ((serverMessage.length - 1) % 5 == 0) {
 			int amountOfPlayers = (serverMessage.length - 1) / 5;
 			for (int i = 0; i < amountOfPlayers; i++) {
-				mui.addMessage(serverMessage[((i * 5) + 5)] + ". "
-						+ serverMessage[((i * 5) + 1)] + " Wins: "
-						+ serverMessage[((i * 5) + 2)] + " Losses: "
-						+ serverMessage[((i * 5) + 3)] + " Games played: "
-						+ serverMessage[((i * 5) + 4)]);
+				mui.addLeaderBoardLine(serverMessage[((i * 5) + 5)],
+						serverMessage[((i * 5) + 1)],
+						serverMessage[((i * 5) + 2)],
+						serverMessage[((i * 5) + 3)],
+						serverMessage[((i * 5) + 4)]);
 			}
 		} else {
-			mui.addMessage("[ERROR]Didn't get a valid Leaderboard from the Server.");
+			mui.addErrorMessage("Didn't get a valid Leaderboard from the Server.");
 			sendMessage(ERROR + " " + Server.LEADERBOARD
 					+ " Didn't get a valid Leaderboard from your Server :(");
 		}
