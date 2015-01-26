@@ -578,8 +578,8 @@ public class Client extends Thread {
 	 * @param splitInput
 	 *            The message the view sent, split up in an array.
 	 */
-	/*@	requires input != null;
-	 	requires splitInput != null;
+	/*@	requires input != null & !input.equals("");
+	 	requires splitInput != null & !splitInput.equals("");
 	 */
 	public void clientMove(String input, String[] splitInput) {
 		if (moveRequested) {
@@ -610,8 +610,8 @@ public class Client extends Thread {
 	 * @param splitInput
 	 *            The message the view sent, split up in an array.
 	 */
-	/*@	requires input != null;
-		requires splitInput != null;
+	/*@	requires input != null & !input.equals("");
+		requires splitInput != null & !splitInput.equals("");
 	 */
 	public void clientInvite(String input, String[] splitInput) {
 		if (splitInput.length >= 4) {
@@ -643,8 +643,8 @@ public class Client extends Thread {
 	 * @param splitInput
 	 *            The message the view sent, split up in an array.
 	 */
-	/*@	requires input != null;
-		requires splitInput != null;
+	/*@	requires input != null & !input.equals("");
+		requires splitInput != null & !splitInput.equals("");
 	 */
 	public void clientAccept(String input, String[] splitInput) {
 		if (splitInput.length == 2) {
@@ -663,8 +663,8 @@ public class Client extends Thread {
 	 * @param splitInput
 	 *            The message the view sent, split up in an array.
 	 */
-	/*@	requires input != null;
-		requires splitInput != null;
+	/*@	requires input != null & !input.equals("");
+		requires splitInput != null & !splitInput.equals("");
 	 */
 	public void clientDecline(String input, String[] splitInput) {
 		if (splitInput.length == 2) {
