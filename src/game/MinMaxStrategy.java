@@ -23,10 +23,12 @@ public class MinMaxStrategy implements Strategy {
 				int row = b.emptyRow(col);
 				b.setField(row, col, d);
 				if (b.isWinner(d)) {
+					b.setField(row, col, Disc.EMPTY);
 					return col;
 				}
 				b.setField(row, col, d.other());
 				if (b.isWinner(d.other())) {
+					b.setField(row, col, Disc.EMPTY);
 					return col;
 				}
 				b.setField(row, col, d);
