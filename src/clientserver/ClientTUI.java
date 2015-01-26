@@ -105,6 +105,7 @@ public class ClientTUI implements ClientView {
 			// END OF CUSTOM COMMANDS
 			case Client.HINT:
 				client.clientHint();
+				break;
 			default:
 				addMessage("[ERROR]Unknown command.");
 				break;
