@@ -268,7 +268,6 @@ public class Client extends Thread {
 				board = toBoard(line);
 				break;
 			case Server.CHAT:
-				//TODO: Laat view [CHAT] ervoor zetten bij ALLE addMessages opsplitsen in juiste categorie.
 				mui.addChatMessage(line.split(" ", 2)[1]);
 				break;
 			case Server.LEADERBOARD:
@@ -700,7 +699,6 @@ public class Client extends Thread {
 	}
 
 	private void makeMove(int player, int col) {
-		mui.addMessage(player + " + " + myNumber);
 		if (player == myNumber - 1) {
 			board.insertDisc(col, Disc.YELLOW);
 		} else {
