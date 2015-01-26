@@ -20,6 +20,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addConnectMessage(String message);
 
 	/**
@@ -28,6 +29,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addInviteMessage(String message);
 
 	/**
@@ -36,6 +38,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addMoveMessage(String message);
 
 	/**
@@ -44,6 +47,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addChatMessage(String message);
 
 	/**
@@ -57,6 +61,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addLobbyMessage(String message);
 
 	/**
@@ -73,6 +78,12 @@ public interface ClientView extends MessageUI {
 	 * @param gamesPlayed
 	 *            The amount of games this player has played.
 	 */
+	/*@	requires rank != null & rank.equals("");
+	  	requires name != null & name.equals("");
+	  	requires wins != null & wins.equals("");
+	  	requires losses != null & losses.equals("");
+	  	requires gamesPlayed != null & gamesPlayed.equals("");
+	 */
 	public void addLeaderBoardLine(String rank, String name, String wins,
 			String losses, String gamesPlayed);
 
@@ -82,6 +93,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addErrorMessage(String message);
 
 	/**
@@ -90,6 +102,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addPingMessage(String message);
 
 	/**
@@ -98,6 +111,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addHelpMessage(String message);
 
 	/**
@@ -114,6 +128,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addFeaturesMessage(String message);
 
 	/**
@@ -122,6 +137,7 @@ public interface ClientView extends MessageUI {
 	 * @param message
 	 *            The message to add.
 	 */
+	//@	requires message != null & message.equals("");
 	public void addGameMessage(String message);
 
 	/**
