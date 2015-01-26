@@ -736,64 +736,58 @@ public class Client extends Thread {
 	public Board toBoard(String line) {
 		String[] protocol = line.split(" ");
 		Board serverBoard = null;
-		//TODO: try catch verkleinen
-		try {
-			if (myNumber == 1) {
-				//TODO: opslpitsen in methode
-				int boardColumns = Integer.parseInt(protocol[1]);
-				int boardRows = Integer.parseInt(protocol[2]);
-
-				serverBoard = new Board(boardRows, boardColumns);
-				int i = 3;
-				for (int row = boardRows - 1; row >= 0; row--) {
-					for (int col = 0; col < boardColumns; col++) {
-						if (Integer.parseInt(protocol[i]) == 0) {
-							//Disc.EMPTY
-							serverBoard.setField(row, col, Disc.EMPTY);
-						} else if (Integer.parseInt(protocol[i]) == 1) {
-							//Disc.YELLOW
-							serverBoard.setField(row, col, Disc.YELLOW);
-						} else if (Integer.parseInt(protocol[i]) == 2) {
-							//Disc.RED
-							serverBoard.setField(row, col, Disc.RED);
-						}
-						i++;
-					}
-				}
-			} else if (myNumber == 2) {
-				int boardColumns = Integer.parseInt(protocol[1]);
-				int boardRows = Integer.parseInt(protocol[2]);
-
-				serverBoard = new Board(boardRows, boardColumns);
-				int i = 3;
-				for (int row = boardRows - 1; row >= 0; row--) {
-					for (int col = 0; col < boardColumns; col++) {
-						if (Integer.parseInt(protocol[i]) == 0) {
-							//Disc.EMPTY
-							serverBoard.setField(row, col, Disc.EMPTY);
-						} else if (Integer.parseInt(protocol[i]) == 1) {
-							//Disc.YELLOW
-							serverBoard.setField(row, col, Disc.RED);
-						} else if (Integer.parseInt(protocol[i]) == 2) {
-							//Disc.RED
-							serverBoard.setField(row, col, Disc.YELLOW);
-						}
-						i++;
-					}
-				}
-			} else {
-				mui.addErrorMessage("Couldn't determine player.");
+		if (myNumber == 1) {
+			try {
+				serverBoard = makeBoard(Integer.parseInt(protocol[2]),
+						Integer.parseInt(protocol[1]), Disc.YELLOW, Disc.RED,
+						line.split(" "));
+			} catch (NumberFormatException e) {
+				mui.addErrorMessage("Server sent a wrong board. TERMINATING.");
+				sendMessage(ERROR + " " + Server.BOARD
+						+ " Couldn't parse Board. TERMINATING.");
+				shutdown();
 			}
 
-			board = serverBoard;
-			makeMove(savedMove[0], savedMove[1]);
-			mui.addGameMessage("Succesfully received the board from the server");
-			mui.addBoard();
-		} catch (NumberFormatException e) {
-			mui.addErrorMessage("Server sent a wrong board. TERMINATING.");
-			sendMessage(ERROR + " " + Server.BOARD
-					+ " Couldn't parse Board. TERMINATING.");
-			shutdown();
+		} else if (myNumber == 2) {
+			try {
+				serverBoard = makeBoard(Integer.parseInt(protocol[2]),
+						Integer.parseInt(protocol[1]), Disc.RED, Disc.YELLOW,
+						line.split(" "));
+			} catch (NumberFormatException e) {
+				mui.addErrorMessage("Server sent a wrong board. TERMINATING.");
+				sendMessage(ERROR + " " + Server.BOARD
+						+ " Couldn't parse Board. TERMINATING.");
+				shutdown();
+			}
+		} else {
+			mui.addErrorMessage("Couldn't determine player.");
+		}
+
+		board = serverBoard;
+		makeMove(savedMove[0], savedMove[1]);
+		mui.addGameMessage("Succesfully received the board from the server");
+		mui.addBoard();
+		return serverBoard;
+	}
+
+	private Board makeBoard(int rows, int columns, Disc myDisc, Disc otherDisc,
+			String[] serverMessage) {
+		Board serverBoard = new Board(rows, columns);
+		int i = 3;
+		for (int row = rows - 1; row >= 0; row--) {
+			for (int col = 0; col < columns; col++) {
+				if (Integer.parseInt(serverMessage[i]) == 0) {
+					//Disc.EMPTY
+					serverBoard.setField(row, col, Disc.EMPTY);
+				} else if (Integer.parseInt(serverMessage[i]) == 1) {
+					//Disc.YELLOW
+					serverBoard.setField(row, col, myDisc);
+				} else if (Integer.parseInt(serverMessage[i]) == 2) {
+					//Disc.RED
+					serverBoard.setField(row, col, otherDisc);
+				}
+				i++;
+			}
 		}
 		return serverBoard;
 	}
