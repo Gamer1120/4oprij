@@ -43,14 +43,10 @@ public class Server extends Thread {
 			+ Features.LEADERBOARD + " " + Features.CUSTOM_BOARD_SIZE;
 	public static final String FILENAME = "leaderboard.txt";
 
-	/**
-	 * The socket of the server.
-	 */
+	/** The socket of the server. */
 	private ServerSocket ss;
 
-	/**
-	 * The User Interface of the server.
-	 */
+	/** The User Interface of the server. */
 	private MessageUI mui;
 
 	/** The set of all the clientHanlders connected to this server. */
@@ -64,7 +60,7 @@ public class Server extends Thread {
 	private HashMap<String[], Integer[]> invites;
 
 	/**
-	 * The sorted leaderboard set, sorting is based on the natural ordering of
+	 * The sorted leaderboard set, the order is based on the natural ordering of
 	 * LeaderboardPair.
 	 */
 	private TreeSet<LeaderboardPair> leaderboard;
@@ -76,7 +72,8 @@ public class Server extends Thread {
 		private invariant leaderboard != null;
 	 */
 	/**
-	 * Constructs a new Server object.
+	 * Constructs a new Server object. Tries to read the leaderboard, if the
+	 * leaderboard file can't be read it creates a new leaderboard.
 	 *
 	 * @param portArg
 	 *            the port of the server
@@ -151,7 +148,7 @@ public class Server extends Thread {
 			String lobby = lobbyToString();
 			mui.addMessage("Lobby:" + lobby);
 			for (ClientHandler ch : threads) {
-				if (!ch.inGame()) {
+				if (ch.connected() && !ch.inGame()) {
 					ch.sendMessage(LOBBY + lobby);
 				}
 			}
@@ -180,22 +177,21 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Print the message on the server ui.
+	 * Print the message on the server view.
 	 *
 	 * @param msg
 	 *            message that is printed
 	 */
-
 	//@ requires msg != null;
 	public void print(String msg) {
 		mui.addMessage(msg);
 	}
 
 	/**
-	 * Checks if the name exists.
+	 * Checks if a client with the specified name exists.
 	 *
 	 * @param name
-	 *            the name
+	 *            name of the client
 	 * @return true, if the name is found
 	 */
 	/*@ pure */public boolean nameExists(String name) {
@@ -215,13 +211,12 @@ public class Server extends Thread {
 	 * Returns the client with the specified name.
 	 *
 	 * @param name
-	 *            the name
+	 *            name of the client
 	 * @return the client
 	 */
 	/*@ requires name != null;
 		requires nameExists(name);
 	 */
-	//@ requires nameExists(name);
 	/*@ pure */public ClientHandler getClient(String name) {
 		synchronized (threads) {
 			ClientHandler client = null;
@@ -257,7 +252,7 @@ public class Server extends Thread {
 	 *
 	 * @param name
 	 *            name of the client
-	 * @return true, if successful
+	 * @return true, if the client has a board
 	 */
 	/*@ requires name != null;
 		requires nameExists(name);
@@ -319,7 +314,6 @@ public class Server extends Thread {
 		requires board != null;
 		ensures getClient(name).getBoard() == board;
 	*/
-	//FIXME
 	private void setBoard(String name, Board board) {
 		// TODO: Game maken inplaats van bord?
 		mui.addMessage("Set board for " + name + ".");
@@ -351,6 +345,7 @@ public class Server extends Thread {
 	 *            ClientHandler that will be added
 	 */
 	/*@ requires handler != null;
+		ensures getHandlers().contains(handler);
 	 */
 	// TODO: maak getters voor alle lijsten om te ensuren
 	public void addHandler(ClientHandler handler) {
@@ -360,6 +355,11 @@ public class Server extends Thread {
 		}
 	}
 
+	/**
+	 * Gets the set of connected Client Handlers.
+	 * 
+	 * @return threads, the set of connected clientHandlers
+	 */
 	/*@ pure */public HashSet<ClientHandler> getHandlers() {
 		return threads;
 	}
@@ -370,7 +370,9 @@ public class Server extends Thread {
 	 * @param handler
 	 *            ClientHandler that will be removed
 	 */
-	//@ requires handler != null;
+	/*@ requires handler != null;
+		ensures !getHandlers().contains(handler);
+	 */
 	public void removeHandler(ClientHandler handler) {
 		synchronized (threads) {
 			threads.remove(handler);
@@ -395,8 +397,8 @@ public class Server extends Thread {
 		requires nameExists(name);
 		requires invited != null;
 		requires nameExists(invited);
-		requires boardX > 0;
-		requires boardY > 0;
+		requires boardX >= 4 & boardX <= 100;
+		requires boardY >= 4 & boardY <= 100;
 	*/
 	public void addInvite(String name, String invited, int boardX, int boardY) {
 		synchronized (invites) {
@@ -602,6 +604,10 @@ public class Server extends Thread {
 						.parseInt(pair[3])));
 			} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
 				mui.addMessage("Error couldn't read leaderboard entry");
+				/*
+				 * Tries to continue to read entries, if all entries are
+				 * incorrect none will be added.
+				 */
 				continue;
 			}
 		}
@@ -619,7 +625,7 @@ public class Server extends Thread {
 		for (LeaderboardPair pair : leaderboard) {
 			out.println(pair);
 		}
-		// checkError also flushes the stream.
+		// checkError() also flushes the stream.
 		if (out.checkError()) {
 			mui.addMessage("Error couldn't save leaderboard.");
 		}

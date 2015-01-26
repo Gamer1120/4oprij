@@ -439,6 +439,26 @@ public class ClientHandler extends Thread {
 		}
 	}
 
+	/**
+	 * Checks if both client support a custom boardsize and tries to parse the
+	 * board size. The amount of rows and columns can't be smaller than 4 or
+	 * larger than 100. then it calls invite to invite the opponent with a
+	 * custom board size. If one of the checks fail an error will be send and
+	 * the invite will be automatically declined to let the client know the
+	 * invite has been cancelled.
+	 *
+	 * @param command
+	 *            the command send by the client
+	 */
+	/*@ requires command != null;
+		requires command[0].equals(Client.INVITE);
+		requires connected();
+		requires server.nameExists(command[1]);
+		requires !inGame();
+		requires !server.inGame(command[1]);
+		requires !server.isInvited(clientName, command[1]);
+		requires !server.isInvited(command[1], clientName);
+	 */
 	private void inviteSizeChecks(String[] command) {
 		if (!hasCustomBoardSize()) {
 			sendError(
@@ -455,10 +475,17 @@ public class ClientHandler extends Thread {
 			try {
 				int boardX = Integer.parseInt(command[2]);
 				int boardY = Integer.parseInt(command[3]);
-				if ((boardX >= Board.CONNECT && boardY >= Board.CONNECT)) {
-					invite(command[1], boardX, boardY);
+				if (boardX < Board.CONNECT || boardY < Board.CONNECT) {
+					sendError(Server.INVITE,
+							"Boardsize too small. Minimun is 4");
+					sendMessage(Server.DECLINE_INVITE + " " + command[1]);
+					//TODO: niet hardcoden
+				} else if (boardX > 100 || boardY > 100) {
+					sendError(Server.INVITE,
+							"Boardsize too big. Maximum is 100");
+					sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 				} else {
-					sendError(Server.INVITE, "Board too small.");
+					invite(command[1], boardX, boardY);
 				}
 			} catch (NumberFormatException e) {
 				sendError(Server.INVITE, "Couldn't parse boardsize.");
