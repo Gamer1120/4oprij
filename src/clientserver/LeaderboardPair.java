@@ -21,8 +21,12 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	private int[] score;
 
 	public LeaderboardPair(String name) {
+		this(name, 0, 0, 0);
+	}
+
+	public LeaderboardPair(String name, int wins, int losses, int games) {
 		this.name = name;
-		this.score = new int[] { 0, 0, 0 };
+		this.score = new int[] { wins, losses, games };
 	}
 
 	public String getName() {
@@ -93,7 +97,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	public boolean equals(Object o) {
 		if (o instanceof LeaderboardPair) {
 			return name.equals(((LeaderboardPair) o).getName())
-					&& score == ((LeaderboardPair) o).getScore();
+					&& equalScore(o);
 		} else {
 			return false;
 		}
@@ -108,5 +112,10 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 		} else {
 			return false;
 		}
+	}
+
+	public String toString() {
+		return getName() + " " + getWins() + " " + getLosses() + " "
+				+ getGames();
 	}
 }

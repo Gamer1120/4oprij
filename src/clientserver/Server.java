@@ -2,13 +2,11 @@ package clientserver;
 
 import game.Board;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -68,7 +66,7 @@ public class Server extends Thread {
 			+ Features.LEADERBOARD + " " + Features.CUSTOM_BOARD_SIZE;
 
 	/** The Constant LEADERBOARD. */
-	public static final String FILENAME = "leaderboard.obj";
+	public static final String FILENAME = "leaderboard.txt";
 
 	/**
 	 * The port of the server.
@@ -101,29 +99,18 @@ public class Server extends Thread {
 	/*@ requires portArg >= 1 & portArg <= 65535;
 		requires muiArg != null;
 	 */
-	@SuppressWarnings("unchecked")
+
 	public Server(int portArg, MessageUI muiArg) throws IOException {
 		this.ss = new ServerSocket(portArg);
 		this.mui = muiArg;
 		this.threads = new HashSet<ClientHandler>();
 		this.invites = new HashMap<String[], Integer[]>();
 		try {
-			ObjectInput in = new ObjectInputStream(
-					new FileInputStream(FILENAME));
-			/*
-			 * It is not possible to use instanceof on a TreeSet<CustomClass>,
-			 * so the cast will always be unchecked. But we assume the file is
-			 * created and written by this server, so it is a instance of
-			 * TreeSet<LeaderboardPair>. But even if it isn't (maybe written by
-			 * another program) we also catch a ClassCastException and create a
-			 * new leaderboard, so it should be fine, that's why the unchecked
-			 * warning is suppressed
-			 */
-			this.leaderboard = (TreeSet<LeaderboardPair>) in.readObject();
-			in.close();
+			this.leaderboard = readLeaderboard();
 			mui.addMessage("Read leaderboard.");
-		} catch (IOException | ClassNotFoundException | ClassCastException e) {
+		} catch (IOException e) {
 			this.leaderboard = new TreeSet<LeaderboardPair>();
+			mui.addMessage("Created new leaderboard.");
 		}
 	}
 
@@ -532,9 +519,7 @@ public class Server extends Thread {
 						rank++;
 						oldPair = pair;
 					}
-					scores += " " + pair.getName() + " " + pair.getWins() + " "
-							+ pair.getLosses() + " " + pair.getGames() + " "
-							+ rank;
+					scores += " " + pair + " " + rank;
 				} else {
 					break;
 				}
@@ -594,16 +579,42 @@ public class Server extends Thread {
 				}
 				leaderboard.add(pair);
 			}
+			writeLeaderboard();
+		}
+	}
+
+	public TreeSet<LeaderboardPair> readLeaderboard() throws IOException {
+		TreeSet<LeaderboardPair> leaderboard = new TreeSet<LeaderboardPair>();
+		BufferedReader in = new BufferedReader(new FileReader(FILENAME));
+		while (in.ready()) {
+			String[] pair = in.readLine().split("\\s+");
 			try {
-				ObjectOutput out = new ObjectOutputStream(new FileOutputStream(
-						FILENAME));
-				out.writeObject(leaderboard);
-				out.flush();
-				out.close();
-				mui.addMessage("Saved leaderboard.");
-			} catch (IOException e) {
-				mui.addMessage("Error couldn't save leaderboard.");
+				leaderboard.add(new LeaderboardPair(pair[0], Integer
+						.parseInt(pair[1]), Integer.parseInt(pair[2]), Integer
+						.parseInt(pair[3])));
+			} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+				mui.addMessage("Error couldn't read leaderboard entry");
+				continue;
 			}
 		}
+		in.close();
+		return leaderboard;
+	}
+
+	public void writeLeaderboard() {
+		PrintWriter out = null;
+		try {
+			out = new PrintWriter(FILENAME);
+		} catch (FileNotFoundException e) {
+			mui.addMessage("Error couldn't save leaderboard.");
+		}
+		for (LeaderboardPair pair : leaderboard) {
+			out.println(pair);
+		}
+		// checkError also flushes the stream.
+		if (out.checkError()) {
+			mui.addMessage("Error couldn't save leaderboard.");
+		}
+		out.close();
 	}
 }

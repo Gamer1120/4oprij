@@ -3,7 +3,7 @@
 *.classpath
 *.project
 *.checkstyle
-*.obj
-~$*
-test.txt
 *.tmp
+~$*
+leaderboard.txt
+test.txt
