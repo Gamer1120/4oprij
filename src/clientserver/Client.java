@@ -327,7 +327,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	//@	requires serverMessage[0].equals(Server.ACCEPT_CONNECT);
+	//@	requires serverMessage != null & serverMessage[0].equals(Server.ACCEPT_CONNECT);
 	private void serverConnect(String[] serverMessage) {
 		mui.addConnectMessage("Successfully established connection to server: "
 		// IP of the server
@@ -344,7 +344,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	//@ requires serverMessage[0].equals(Server.LOBBY);
+	//@ requires serverMessage != null & serverMessage[0].equals(Server.LOBBY);
 	private void serverLobby(String[] serverMessage) {
 		mui.addLobbyMessage("The people that are currently in the lobby are:"
 				+ arrayToLine(serverMessage));
@@ -359,7 +359,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	//@ requires serverMessage[0].equals(Server.INVITE);
+	//@ requires serverMessage != null & serverMessage[0].equals(Server.INVITE);
 	private void serverInvite(String[] serverMessage) {
 		String opponentName = serverMessage[1];
 		if (serverMessage.length == 2) {
@@ -398,7 +398,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full messsage the server sent.
 	 */
-	//@ requires serverMessage[0].equals(Server.DECLINE_INVITE);
+	//@ requires serverMessage != null & serverMessage[0].equals(Server.DECLINE_INVITE);
 	private void serverDecline(String[] serverMessage) {
 		if (serverMessage.length > 1) {
 			invited.remove(serverMessage[1]);
@@ -421,7 +421,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	/*@ requires serverMessage[0].equals(Server.GAME_START);
+	/*@ requires serverMessage != null & serverMessage[0].equals(Server.GAME_START);
 	 	ensures board != null;
 	 	ensures myNumber != -1;
 	 */
@@ -452,7 +452,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	/*@	requires serverMessage[0].equals(Server.GAME_END);
+	/*@	requires serverMessage != null & serverMessage[0].equals(Server.GAME_END);
 		ensures this.board == null;
 	*/
 	private void serverGameEnd(String[] serverMessage) {
@@ -479,7 +479,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	/*@ requires serverMessage[0].equals(Server.REQUEST_MOVE);
+	/*@ requires serverMessage != null & serverMessage[0].equals(Server.REQUEST_MOVE);
 	 	ensures moveRequested;
 	 */
 	private void serverRequestMove(String[] serverMessage) {
@@ -502,7 +502,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	//@ requires serverMessage[0].equals(Server.MOVE_OK);
+	//@ requires serverMessage != null & serverMessage[0].equals(Server.MOVE_OK);
 	private void serverMoveOK(String[] serverMessage) {
 		int move = -1;
 		try {
@@ -529,7 +529,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	//@ requires serverMessage[0].equals(Server.LEADERBOARD);
+	//@ requires serverMessage != null & serverMessage[0].equals(Server.LEADERBOARD);
 	public void serverShowLeaderboard(String[] serverMessage) {
 		if ((serverMessage.length - 1) % 5 == 0) {
 			int amountOfPlayers = (serverMessage.length - 1) / 5;
