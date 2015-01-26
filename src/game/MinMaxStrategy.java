@@ -6,12 +6,24 @@ public class MinMaxStrategy implements Strategy {
 	private Disc disc;
 	private int maxDepth;
 
+	public MinMaxStrategy() {
+		this(4);
+	}
+
 	public MinMaxStrategy(int maxDepth) {
 		this.maxDepth = maxDepth;
 	}
 
 	public String getName() {
 		return NAME;
+	}
+
+	public int getDepth() {
+		return maxDepth;
+	}
+
+	public void setDepth(int maxDepth) {
+		this.maxDepth = maxDepth;
 	}
 
 	public int determineMove(Board b, Disc d) {
@@ -73,18 +85,6 @@ public class MinMaxStrategy implements Strategy {
 		return result;
 	}
 
-	private int fieldsLeft(Board b) {
-		int fields = 0;
-		for (int row = 0; row < b.getRows(); row++) {
-			for (int col = 0; col < b.getColumns(); col++) {
-				if (b.getField(row, col) == Disc.EMPTY) {
-					fields++;
-				}
-			}
-		}
-		return fields;
-	}
-
 	public static void main(String[] args) {
 		Board board = new Board();
 		board.insertDisc(0, Disc.RED);
@@ -122,7 +122,7 @@ public class MinMaxStrategy implements Strategy {
 		board.insertDisc(6, Disc.YELLOW);
 
 		System.out.println(board);
-		MinMaxStrategy minimax = new MinMaxStrategy(8);
+		MinMaxStrategy minimax = new MinMaxStrategy(4);
 		Disc d = Disc.RED;
 		int col = minimax.determineMove(board, d);
 		System.out.println("Place in column: " + col);

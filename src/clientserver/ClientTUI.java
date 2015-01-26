@@ -102,10 +102,13 @@ public class ClientTUI implements ClientView {
 			case Client.HELP:
 				client.clientHelp();
 				break;
-			// END OF CUSTOM COMMANDS
 			case Client.HINT:
 				client.clientHint();
 				break;
+			case Client.DIFFICULTY:
+				client.clientDifficulty(splitInput[1]);
+				break;
+			// END OF CUSTOM COMMANDS
 			default:
 				addMessage("[ERROR]Unknown command.");
 				break;
@@ -262,4 +265,11 @@ public class ClientTUI implements ClientView {
 		addMessage("[GAME]" + message);
 	}
 
+	public void addDifficultyMessage(boolean succes) {
+		if (succes) {
+			addMessage("Difficulty set");
+		} else {
+			addMessage("Couldn't change the difficulty");
+		}
+	}
 }

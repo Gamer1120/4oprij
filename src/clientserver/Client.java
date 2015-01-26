@@ -43,6 +43,7 @@ public class Client extends Thread {
 	// CUSTOM COMMANDS
 	public static final String HELP = "HELP";
 	public static final String HINT = "HINT";
+	public static final String DIFFICULTY = "DIFFICULTY";
 	// END OF CUSTOM COMMANDS
 
 	private static final String CLIENT_FEATURES = Features.CHAT + " "
@@ -928,6 +929,23 @@ public class Client extends Thread {
 				e.printStackTrace();
 			}
 			System.exit(0);
+		}
+	}
+
+	public void clientDifficulty(String input) {
+		if (computerPlayer.getStrategy() instanceof MinMaxStrategy) {
+			try {
+				int depth = Integer.parseInt(input);
+				((MinMaxStrategy) computerPlayer.getStrategy()).setDepth(depth);
+				mui.addDifficultyMessage(true);
+			} catch (NumberFormatException e) {
+				mui.addErrorMessage("Can't parse difficulty");
+				mui.addDifficultyMessage(false);
+			}
+			
+		} else {
+			mui.addErrorMessage("Only the difficulty of the MinMaxPlayer can be changed");
+			mui.addDifficultyMessage(false);
 		}
 	}
 

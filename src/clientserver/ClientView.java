@@ -41,4 +41,6 @@ public interface ClientView extends MessageUI {
 	public void addFeaturesMessage(String message);
 
 	public void addGameMessage(String message);
+
+	public void addDifficultyMessage(boolean succes);
 }
