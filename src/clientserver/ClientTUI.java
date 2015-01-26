@@ -48,7 +48,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to print.
 	 */
 	//@ requires msg != null;
-	/*@ pure */public void addMessage(String msg) {
+	/*@ pure */@Override
+	public void addMessage(String msg) {
 		System.out.println(msg);
 	}
 
@@ -218,7 +219,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message !=null & !message.equals("");
-	/*@ pure */public void addConnectMessage(String message) {
+	/*@ pure */@Override
+	public void addConnectMessage(String message) {
 		addMessage("[CONNECT]" + message);
 	}
 
@@ -229,7 +231,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message !=null & !message.equals("");
-	/*@ pure */public void addInviteMessage(String message) {
+	/*@ pure */@Override
+	public void addInviteMessage(String message) {
 		addMessage("[INVITE]" + message);
 	}
 
@@ -240,7 +243,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message !=null & !message.equals("");
-	/*@ pure */public void addMoveMessage(String message) {
+	/*@ pure */@Override
+	public void addMoveMessage(String message) {
 		addMessage(message);
 	}
 
@@ -251,14 +255,16 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message !=null & !message.equals("");
-	/*@ pure */public void addChatMessage(String message) {
+	/*@ pure */@Override
+	public void addChatMessage(String message) {
 		addMessage("[CHAT]" + message);
 	}
 
 	/**
 	 * Adds the current board to the TUI.
 	 */
-	/*@ pure */public void addBoard() {
+	/*@ pure */@Override
+	public void addBoard() {
 		addMessage(client.getBoard().toString());
 	}
 
@@ -269,7 +275,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message !=null & !message.equals("");
-	/*@ pure */public void addLobbyMessage(String message) {
+	/*@ pure */@Override
+	public void addLobbyMessage(String message) {
 		addMessage("[LOBBY}" + message);
 	}
 
@@ -293,7 +300,8 @@ public class ClientTUI implements ClientView {
 	  	requires !losses.equals("");
 	  	requires !gamesPlayed.equals("");
 	 */
-	/*@ pure */public void addLeaderBoardLine(String rank, String name,
+	/*@ pure */@Override
+	public void addLeaderBoardLine(String rank, String name,
 			String wins, String losses, String gamesPlayed) {
 		addMessage(rank + ". " + name + " Wins: " + wins + " Losses: " + losses
 				+ " Games played: " + gamesPlayed);
@@ -307,7 +315,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message != null & !message.equals("");
-	/*@ pure */public void addErrorMessage(String message) {
+	/*@ pure */@Override
+	public void addErrorMessage(String message) {
 		addMessage("[ERROR]" + message);
 	}
 
@@ -318,7 +327,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message != null & !message.equals("");
-	/*@ pure */public void addPingMessage(String message) {
+	/*@ pure */@Override
+	public void addPingMessage(String message) {
 		addMessage("[PING]" + message);
 	}
 
@@ -329,7 +339,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message != null & !message.equals("");
-	/*@ pure */public void addHelpMessage(String message) {
+	/*@ pure */@Override
+	public void addHelpMessage(String message) {
 		addMessage("[HELP]" + message);
 	}
 
@@ -340,7 +351,8 @@ public class ClientTUI implements ClientView {
 	 * @param move
 	 *            The move to suggest.
 	 */
-	/*@ pure */public void addHintMessage(int move) {
+	/*@ pure */@Override
+	public void addHintMessage(int move) {
 		addMessage("[HINT]You could make a move in column: " + move);
 	}
 
@@ -352,7 +364,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message != null & !message.equals("");
-	/*@ pure */public void addFeaturesMessage(String message) {
+	/*@ pure */@Override
+	public void addFeaturesMessage(String message) {
 		addMessage("[FEATURES]" + message);
 	}
 
@@ -363,7 +376,8 @@ public class ClientTUI implements ClientView {
 	 *            The message to add.
 	 */
 	//@ requires message != null & !message.equals("");
-	/*@ pure */public void addGameMessage(String message) {
+	/*@ pure */@Override
+	public void addGameMessage(String message) {
 		addMessage("[GAME]" + message);
 	}
 
@@ -374,7 +388,8 @@ public class ClientTUI implements ClientView {
 	 * @param success
 	 *            To determine whether the difficulty was successfully switched.
 	 */
-	/*@ pure */public void addDifficultyMessage(boolean success) {
+	/*@ pure */@Override
+	public void addDifficultyMessage(boolean success) {
 		if (success) {
 			addMessage("Difficulty set");
 		} else {

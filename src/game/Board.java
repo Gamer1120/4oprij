@@ -386,6 +386,7 @@ public class Board extends Observable {
 	 * 
 	 * @return the game situation as String
 	 */
+	@Override
 	public String toString() {
 		String output = "[";
 		for (int i = 0; i < columns; i++) {

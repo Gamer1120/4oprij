@@ -36,6 +36,7 @@ public enum Disc {
 	 * Returns a better String representation of the Disc, for the toString in
 	 * Board.
 	 */
+	@Override
 	public String toString() {
 		if (this == RED) {
 			return "R";

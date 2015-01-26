@@ -42,10 +42,12 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		setVisible(true);
 
 		addWindowListener(new WindowAdapter() {
+			@Override
 			public void windowClosing(WindowEvent e) {
 				e.getWindow().dispose();
 			}
 
+			@Override
 			public void windowClosed(WindowEvent e) {
 				System.exit(0);
 			}
@@ -111,6 +113,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	/**
 	 * listener for the "Start Listening" button
 	 */
+	@Override
 	public void actionPerformed(ActionEvent ev) {
 		Object src = ev.getSource();
 		if (src == bConnect) {
@@ -145,6 +148,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	}
 
 	/** add a message to the textarea */
+	@Override
 	public void addMessage(String msg) {
 		taMessages.append(msg + "\n");
 	}

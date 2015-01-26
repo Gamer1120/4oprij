@@ -124,6 +124,7 @@ public class ClientHandler extends Thread {
 	 * NullPointerException is thrown, the method concludes that the socket
 	 * connection is broken and shutdown() will be called.
 	 */
+	@Override
 	public void run() {
 		while (loop) {
 			String line = "";

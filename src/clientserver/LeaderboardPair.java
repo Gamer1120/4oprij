@@ -67,6 +67,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 		score[2]++;
 	}
 
+	@Override
 	public int compareTo(LeaderboardPair pair) {
 		// Highest combined score
 		if (this.getPoints() > pair.getPoints()) {
@@ -94,6 +95,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 		}
 	}
 
+	@Override
 	public boolean equals(Object o) {
 		if (o instanceof LeaderboardPair) {
 			return name.equals(((LeaderboardPair) o).getName())
@@ -114,6 +116,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 		}
 	}
 
+	@Override
 	public String toString() {
 		return getName() + " " + getWins() + " " + getLosses() + " "
 				+ getGames();

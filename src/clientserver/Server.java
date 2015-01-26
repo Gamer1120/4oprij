@@ -108,6 +108,7 @@ public class Server extends Thread {
 	 * to connect. For every new socket connection a new ClientHandler thread is
 	 * started that takes care of the further communication with the Client.
 	 */
+	@Override
 	public void run() {
 		while (true) {
 			try {

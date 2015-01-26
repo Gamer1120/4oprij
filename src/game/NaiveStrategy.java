@@ -19,7 +19,8 @@ public class NaiveStrategy implements Strategy {
 	/**
 	 * Returns the name this Strategy has.
 	 */
-	/*@ pure */public String getName() {
+	/*@ pure */@Override
+	public String getName() {
 		return NAME;
 	}
 
@@ -32,6 +33,7 @@ public class NaiveStrategy implements Strategy {
 	 *            The Disc to make the move for.
 	 */
 	//@ requires b != null;
+	@Override
 	public int determineMove(Board b, Disc d) {
 		ArrayList<Integer> empty = new ArrayList<Integer>();
 		for (int col = 0; col < b.getColumns(); col++) {

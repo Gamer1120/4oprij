@@ -14,6 +14,7 @@ public class MinMaxStrategy implements Strategy {
 		this.maxDepth = maxDepth;
 	}
 
+	@Override
 	public String getName() {
 		return NAME;
 	}
@@ -26,6 +27,7 @@ public class MinMaxStrategy implements Strategy {
 		this.maxDepth = maxDepth;
 	}
 
+	@Override
 	public int determineMove(Board b, Disc d) {
 		this.disc = d;
 		int c = -1;

@@ -19,7 +19,8 @@ public class SmartStrategy implements Strategy {
 	/**
 	 * Returns the name this Strategy has.
 	 */
-	/*@ pure */public String getName() {
+	/*@ pure */@Override
+	public String getName() {
 		return NAME;
 	}
 
@@ -34,6 +35,7 @@ public class SmartStrategy implements Strategy {
 	 *            The Disc to make the move for.
 	 */
 	//@ requires b != null;
+	@Override
 	public int determineMove(Board b, Disc d) {
 		ArrayList<Integer> empty = new ArrayList<Integer>();
 		for (int i = 0; i < b.getColumns(); i++) {

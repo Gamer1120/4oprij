@@ -221,6 +221,7 @@ public class Client extends Thread {
 	 * command was sent, and executes this command by calling the method created
 	 * for it.
 	 */
+	@Override
 	public void run() {
 		while (loop) {
 			String line = "";
