@@ -313,6 +313,15 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
+	 * Gets the board of this client.
+	 *
+	 * @return the board of this client
+	 */
+	/*@ pure */public Board getBoard() {
+		return board;
+	}
+
+	/**
 	 * Sets the board of this client.
 	 *
 	 * @param b

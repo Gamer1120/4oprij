@@ -123,14 +123,6 @@ public class Server extends Thread {
 		}
 	}
 
-	/*@ pure */public ServerSocket getSocket() {
-		return ss;
-	}
-
-	/*@ pure */public MessageUI getView() {
-		return mui;
-	}
-
 	/**
 	 * Sends a message using the collection of connected ClientHandlers to all
 	 * connected Clients.
