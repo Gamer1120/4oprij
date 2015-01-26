@@ -546,7 +546,6 @@ public class ClientHandler extends Thread {
 		requires server.isInvited(command[1], clientName);
 	 */
 	private void accept(String name) {
-		// TODO: extras verzenden (game implementatie nodig)?
 		server.generateBoard(name, clientName);
 		sendMessage(Server.GAME_START + " " + clientName + " " + name);
 		server.sendMessage(name, Server.GAME_START + " " + clientName + " "
@@ -568,7 +567,6 @@ public class ClientHandler extends Thread {
 		requires command[0].equals(Client.DECLINE_INVITE);
 	*/
 	private void declineChecks(String[] command) {
-		//FIXME
 		if (!connected()) {
 			sendError(Client.DECLINE_INVITE, "You have to connect first.");
 		} else if (command.length != 2) {
@@ -872,7 +870,6 @@ public class ClientHandler extends Thread {
 	//@ ensures !loop;
 	private void shutdown() {
 		if (loop) {
-			// TODO: clients moeten kunnen reconnecten na dc?
 			this.loop = false;
 			server.removeInvite(clientName);
 			server.removeHandler(this);
