@@ -136,10 +136,10 @@ public class Client extends Thread {
 	 * @param port
 	 *            The port of this Client
 	 * @param muiArg
-	 *            The MessageUI for this Client
-	 * @param computerPlayer
-	 *            The Player Object to use for this Client
+	 *            The ClientTUI for this Client
 	 * @throws IOException
+	 *             When it can't get the socket's in or outputstream, or the
+	 *             socket can't connect to the server.
 	 */
 	/*@ requires host != null;
 	 	requires port >= 1 & port <= 65535;
@@ -743,6 +743,8 @@ public class Client extends Thread {
 
 	/**
 	 * This method returns the name of this Client.
+	 * 
+	 * @return The name of this Client.
 	 */
 	/*@ pure */public String getClientName() {
 		return clientName;

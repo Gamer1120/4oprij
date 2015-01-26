@@ -371,8 +371,8 @@ public class ClientTUI implements ClientView {
 	 * Adds a difficulty message to the TUI. It prefixes the message with
 	 * [DIFFICULTY]
 	 * 
-	 * @param message
-	 *            The message to add.
+	 * @param success
+	 *            To determine whether the difficulty was successfully switched.
 	 */
 	/*@ pure */public void addDifficultyMessage(boolean success) {
 		if (success) {

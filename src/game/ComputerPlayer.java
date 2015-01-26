@@ -56,7 +56,9 @@ public class ComputerPlayer extends Observable {
 	}
 
 	/**
-	 * Returns the disc of the player.
+	 * Returns the disc of this player.
+	 * 
+	 * @return The Disc of this player.
 	 */
 	/*@pure*/public Disc getDisc() {
 		return d;
@@ -87,6 +89,7 @@ public class ComputerPlayer extends Observable {
 	 * 
 	 * @param b
 	 *            The Board the move should be made on.
+	 * @return A move determined by the Strategy this ComputerPlayer has.
 	 */
 	//@ requires b != null;
 	//@ ensures b.isField(\result) && b.isEmptyField(\result);
