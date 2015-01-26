@@ -144,6 +144,8 @@ public class Client extends Thread {
 	/*@ requires host != null;
 	 	requires port >= 1 & port <= 65535;
 	 	requires muiArg != null;
+	 	ensures isConnected() == null;
+	 	ensures getBoard() == null;
 	 */
 	public Client(InetAddress host, int port, ClientTUI muiArg)
 			throws IOException {
@@ -420,7 +422,7 @@ public class Client extends Thread {
 	 */
 	/*@ requires serverMessage[0].equals(Server.GAME_START);
 	 	ensures board != null;
-	 	ensures currPlayer == null;
+	 	ensures myNumber != -1;
 	 */
 	private void serverGameStart(String[] serverMessage) {
 		if (serverMessage[1].equals(getClientName())) {
@@ -477,7 +479,7 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	/*@ requires serverMessage[0].equals(Server.REQUEST_MOVE);
-	 	ensures currPlayer != null;
+	 	ensures moveRequested;
 	 */
 	private void serverRequestMove(String[] serverMessage) {
 		if (computerPlayer == null) {
@@ -499,9 +501,7 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	/*@ requires serverMessage[0].equals(Server.MOVE_OK);
-		ensures currPlayer != null;
-	*/
+	//@ requires serverMessage[0].equals(Server.MOVE_OK);
 	private void serverMoveOK(String[] serverMessage) {
 		int move = -1;
 		try {
@@ -680,7 +680,7 @@ public class Client extends Thread {
 	 * Gives the Client a suggested move (does not actually do the move) using
 	 * it's view.
 	 */
-	public void clientHint() {
+	/*@ pure */public void clientHint() {
 		if (isIngame()) {
 			mui.addHintMessage(new MinMaxStrategy(4).determineMove(
 					board.deepCopy(), Disc.YELLOW));
@@ -767,7 +767,7 @@ public class Client extends Thread {
 	 *            The move to be made.
 	 * @return If that move is valid.
 	 */
-	private boolean checkMove(int move) {
+	/*@ pure */private boolean checkMove(int move) {
 		return board.isField(move) && board.isEmptyField(move);
 	}
 
@@ -965,8 +965,8 @@ public class Client extends Thread {
 
 	/**
 	 * This method closes the Socket connection and exits the program. On a side
-	 * note, before it does this, it also sets the loop and isIngame variables
-	 * for this Client to false.
+	 * note, before it does this, it also sets the loop variable for this Client
+	 * to false.
 	 */
 	public void shutdown() {
 		if (loop) {
