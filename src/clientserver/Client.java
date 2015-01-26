@@ -351,26 +351,22 @@ public class Client extends Thread {
 		String opponentName = serverMessage[1];
 		if (serverMessage.length == 2) {
 			addServerInvite(opponentName);
-			if (!isIngame()) {
-				mui.addInviteMessage(opponentName
-						+ " has invited you to a game of Connect4 (default boardsize)!");
-				mui.addInviteMessage("Use \"ACCEPT " + opponentName
-						+ "\" to accept this invite or \"DECLINE "
-						+ opponentName + "\" to decline it.");
-			}
+			mui.addInviteMessage(opponentName
+					+ " has invited you to a game of Connect4 (default boardsize)!");
+			mui.addInviteMessage("Use \"ACCEPT " + opponentName
+					+ "\" to accept this invite or \"DECLINE " + opponentName
+					+ "\" to decline it.");
 		} else if (serverMessage.length >= 4) {
 			try {
 				int boardX = Integer.parseInt(serverMessage[2]);
 				int boardY = Integer.parseInt(serverMessage[3]);
 				addServerInvite(opponentName, boardX, boardY);
-				if (!isIngame()) {
-					mui.addInviteMessage(opponentName
-							+ " has invited you to a game of Connect4 with a custom Board size of "
-							+ boardX + " x " + boardY + "!");
-					mui.addInviteMessage("Use \"ACCEPT " + opponentName
-							+ "\" to accept this invite or \"DECLINE "
-							+ opponentName + "\" to decline it.");
-				}
+				mui.addInviteMessage(opponentName
+						+ " has invited you to a game of Connect4 with a custom Board size of "
+						+ boardX + " x " + boardY + "!");
+				mui.addInviteMessage("Use \"ACCEPT " + opponentName
+						+ "\" to accept this invite or \"DECLINE "
+						+ opponentName + "\" to decline it.");
 			} catch (NumberFormatException e) {
 				mui.addErrorMessage("The server just sent an invite with an invalid custom board size.");
 				sendMessage(ERROR
@@ -504,14 +500,14 @@ public class Client extends Thread {
 			move = Integer.parseInt(serverMessage[2]);
 		} catch (NumberFormatException e) {
 			mui.addErrorMessage("Server did not send a valid move. TERMINATING.");
-			sendMessage(ERROR + " " + Server.MOVE_OK
-					+ " You didn't send a valid move.");
+			sendMessage(ERROR + " " + Server.MOVE_OK + " Couldn't parse move.");
 			shutdown();
 		}
 		if (checkMove(move)) {
 			makeMove(Integer.parseInt(serverMessage[1]), move);
 			mui.addBoard();
 		} else {
+			mui.addErrorMessage("Couldn't do the move, requesting board from server");
 			savedMove = new int[] { Integer.parseInt(serverMessage[1]), move };
 			clientRequestBoard();
 		}
@@ -520,14 +516,6 @@ public class Client extends Thread {
 	//END ACCEPTING FROM SERVER
 
 	//ACCEPTING FROM VIEW
-	/**
-	 * Sends a Client.QUIT message to the server, and then shuts down the
-	 * Client.
-	 */
-	public void clientQuit() {
-		sendMessage(Client.QUIT + " Disconnected.");
-		shutdown();
-	}
 
 	/**
 	 * Shows the commands that are available. In case the client is in-game,
@@ -593,16 +581,7 @@ public class Client extends Thread {
 		requires splitInput != null;
 	 */
 	public void clientInvite(String input, String[] splitInput) {
-		if (splitInput.length == 1) {
-			mui.addErrorMessage("Please add a player to invite.");
-		} else if (splitInput.length == 2) {
-			addClientInvite(splitInput[1]);
-			sendMessage(input);
-			mui.addInviteMessage("Tried to invite: " + splitInput[1]
-					+ " with default board size.");
-		} else if (splitInput.length == 3) {
-			mui.addErrorMessage("For a custom board size you need to specify both the BoardX and BoardY");
-		} else if (splitInput.length >= 4) {
+		if (splitInput.length >= 4) {
 			try {
 				addClientInvite(splitInput[1], Integer.parseInt(splitInput[2]),
 						Integer.parseInt(splitInput[3]));
@@ -612,6 +591,13 @@ public class Client extends Thread {
 			} catch (NumberFormatException e) {
 				mui.addErrorMessage("Please specify the BoardX and BoardY as integers. Invite failed.");
 			}
+		} else if (splitInput.length >= 2) {
+			addClientInvite(splitInput[1]);
+			sendMessage(input);
+			mui.addInviteMessage("Tried to invite: " + splitInput[1]
+					+ " with default board size.");
+		} else {
+			mui.addErrorMessage("Invalid arguments, couldn't send invite");
 		}
 	}
 
@@ -630,10 +616,8 @@ public class Client extends Thread {
 	public void clientAccept(String input, String[] splitInput) {
 		if (splitInput.length == 2) {
 			sendMessage(Client.ACCEPT_INVITE + " " + splitInput[1]);
-		} else if (splitInput.length == 1) {
-			mui.addErrorMessage("Please specify whose invite you'd like to decline.");
 		} else {
-			mui.addErrorMessage("Please use DECLINE <name> to decline an invite.");
+			mui.addErrorMessage("Please use ACCEPT <name> to accept an invite.");
 		}
 	}
 
@@ -650,13 +634,13 @@ public class Client extends Thread {
 		requires splitInput != null;
 	 */
 	public void clientDecline(String input, String[] splitInput) {
-		if (splitInput.length > 1) {
+		if (splitInput.length == 2) {
 			removeServerInvite(splitInput[1]);
 			sendMessage(input);
 			mui.addInviteMessage("Tried to decline " + splitInput[1]
 					+ "'s invite.");
 		} else {
-			mui.addErrorMessage("Please specify whose invite you'd like to decline.");
+			mui.addErrorMessage("Please use DECLINE <name> to decline an invite.");
 		}
 	}
 
@@ -736,25 +720,27 @@ public class Client extends Thread {
 	//@ requires line != null;
 	public Board toBoard(String line) {
 		String[] protocol = line.split(" ");
-		Board test = null;
+		Board serverBoard = null;
+		//TODO: try catch verkleinen
 		try {
 			if (myNumber == 1) {
+				//TODO: opslpitsen in methode
 				int boardColumns = Integer.parseInt(protocol[1]);
 				int boardRows = Integer.parseInt(protocol[2]);
 
-				test = new Board(boardRows, boardColumns);
+				serverBoard = new Board(boardRows, boardColumns);
 				int i = 3;
 				for (int row = boardRows - 1; row >= 0; row--) {
 					for (int col = 0; col < boardColumns; col++) {
 						if (Integer.parseInt(protocol[i]) == 0) {
 							//Disc.EMPTY
-							test.setField(row, col, Disc.EMPTY);
+							serverBoard.setField(row, col, Disc.EMPTY);
 						} else if (Integer.parseInt(protocol[i]) == 1) {
 							//Disc.YELLOW
-							test.setField(row, col, Disc.YELLOW);
+							serverBoard.setField(row, col, Disc.YELLOW);
 						} else if (Integer.parseInt(protocol[i]) == 2) {
 							//Disc.RED
-							test.setField(row, col, Disc.RED);
+							serverBoard.setField(row, col, Disc.RED);
 						}
 						i++;
 					}
@@ -763,39 +749,38 @@ public class Client extends Thread {
 				int boardColumns = Integer.parseInt(protocol[1]);
 				int boardRows = Integer.parseInt(protocol[2]);
 
-				test = new Board(boardRows, boardColumns);
+				serverBoard = new Board(boardRows, boardColumns);
 				int i = 3;
 				for (int row = boardRows - 1; row >= 0; row--) {
 					for (int col = 0; col < boardColumns; col++) {
 						if (Integer.parseInt(protocol[i]) == 0) {
 							//Disc.EMPTY
-							test.setField(row, col, Disc.EMPTY);
+							serverBoard.setField(row, col, Disc.EMPTY);
 						} else if (Integer.parseInt(protocol[i]) == 1) {
 							//Disc.YELLOW
-							test.setField(row, col, Disc.RED);
+							serverBoard.setField(row, col, Disc.RED);
 						} else if (Integer.parseInt(protocol[i]) == 2) {
 							//Disc.RED
-							test.setField(row, col, Disc.YELLOW);
+							serverBoard.setField(row, col, Disc.YELLOW);
 						}
 						i++;
 					}
 				}
 			} else {
-				mui.addMessage("Something derped up here.");
+				mui.addErrorMessage("Couldn't determine player.");
 			}
 
-			board = test;
+			board = serverBoard;
 			makeMove(savedMove[0], savedMove[1]);
-			mui.addGameMessage("Apparently the board I have and the Board on the server are different.");
-			mui.addGameMessage("I made the move on the board on the server for you:");
+			mui.addGameMessage("Succesfully received the board from the server");
 			mui.addBoard();
 		} catch (NumberFormatException e) {
 			mui.addErrorMessage("Server sent a wrong board. TERMINATING.");
 			sendMessage(ERROR + " " + Server.BOARD
-					+ " You sent me an invalid Board. TERMINATING.");
+					+ " Couldn't parse Board. TERMINATING.");
 			shutdown();
 		}
-		return test;
+		return serverBoard;
 	}
 
 	/**
@@ -942,7 +927,7 @@ public class Client extends Thread {
 				mui.addErrorMessage("Can't parse difficulty");
 				mui.addDifficultyMessage(false);
 			}
-			
+
 		} else {
 			mui.addErrorMessage("Only the difficulty of the MinMaxPlayer can be changed");
 			mui.addDifficultyMessage(false);

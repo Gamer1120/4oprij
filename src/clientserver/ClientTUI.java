@@ -69,7 +69,7 @@ public class ClientTUI implements ClientView {
 			}
 			switch (splitInput[0]) {
 			case Client.QUIT:
-				client.clientQuit();
+				client.shutdown();
 				break;
 			case Client.INVITE:
 				client.clientInvite(input, splitInput);
