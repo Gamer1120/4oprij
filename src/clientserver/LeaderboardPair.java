@@ -56,10 +56,10 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 *            The amount of games this LeaderboardPair has played.
 	 */
 	/*@ ensures this.getName() == name;
- 	ensures this.getWins() == wins;
-  	ensures this.getLosses() == losses;
-  	ensures this.getGames() == games;
- */
+	ensures this.getWins() == wins;
+	ensures this.getLosses() == losses;
+	ensures this.getGames() == games;
+	*/
 	public LeaderboardPair(String name, int wins, int losses, int games) {
 		this.name = name;
 		this.score = new int[] { wins, losses, games };
@@ -144,16 +144,19 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 
 	/**
 	 * Compares a LeaderboardPair to another one. This method is used to
-	 * determine the order in which the Leaderboard needs to be given. First,
-	 * the highest combined score is checked. If those are the same, the most
-	 * wins are checked. If those are also the same, the least losses is
-	 * checked. If that fails, the highest total games is checked. If that
-	 * fails, it's sorted in alphabetical order (using it's name).
+	 * determine the order in which the Leaderboard needs to be given. The
+	 * leaderboard has an ascending order, so when this pair has a larger score
+	 * this method will return a negative value (smaller). First, the highest
+	 * combined score is checked. If those are the same, the most wins are
+	 * checked. If those are also the same, the least losses is checked. If that
+	 * fails, the highest total games is checked. If that fails, it's sorted in
+	 * alphabetical order (using it's name).
 	 * 
 	 * @param pair
 	 *            The LeaderboardPair to compare this LeaderboardPair to.
-	 * @return -1 if the LeaderboardPair is smaller than this, 1 if the
-	 *         LeaderboardPair is bigger, 0 if they are the same.
+	 * @return -1 if the this LeaderboardPair is smaller (higher score, more
+	 *         wins, less losses, more games or alphabetical order), 1 if this
+	 *         LeaderboardPair is bigger, or 0 if they are the same.
 	 */
 	//@ requires pair != null;
 	@Override
@@ -185,11 +188,12 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	}
 
 	/**
-	 * Checks if 2 LeaderboardPairs are the same.
+	 * Checks if this Leaderboardpair is the same as the specified Object, if
+	 * the Object isn't a Leaderboardpair false will be returned.
 	 * 
 	 * @param o
 	 *            The object to compare to this LeaderboardPair.
-	 * @return Whether these two LeaderboardPairs are the same.
+	 * @return Whether these two Objects are the same.
 	 */
 	//@ requires o != null;
 	@Override
