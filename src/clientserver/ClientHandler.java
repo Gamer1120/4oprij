@@ -184,7 +184,7 @@ public class ClientHandler extends Thread {
 				sendMessage(Server.PONG);
 				break;
 			default:
-				sendError(command[0], "Invalid command");
+				sendError(command[0], "Invalid command.");
 				break;
 			}
 
@@ -338,11 +338,11 @@ public class ClientHandler extends Thread {
 	 */
 	private void connectChecks(String[] command) {
 		if (command.length < 2) {
-			sendError(Client.CONNECT, "Invalid arguments");
+			sendError(Client.CONNECT, "Invalid arguments.");
 		} else if (command[1].length() > 15) {
-			sendError(Client.CONNECT, "Name too long");
+			sendError(Client.CONNECT, "Name too long.");
 		} else if (server.nameExists(command[1])) {
-			sendError(Client.CONNECT, "Name in use");
+			sendError(Client.CONNECT, "Name in use.");
 		} else {
 			connect(command);
 		}
@@ -375,11 +375,11 @@ public class ClientHandler extends Thread {
 					}
 				}
 				sendError(Server.ACCEPT_CONNECT, "Feature " + command[i]
-						+ " unknown, not added to the feature list");
+						+ " unknown, not added to the feature list.");
 			}
 		}
 		sendMessage(Server.ACCEPT_CONNECT + " " + Server.FEATURES);
-		server.print("ClientHandler: " + clientName + " has joined");
+		server.print("ClientHandler: " + clientName + " has joined.");
 		server.broadcastLobby();
 	}
 
@@ -398,21 +398,21 @@ public class ClientHandler extends Thread {
 	 */
 	private void inviteChecks(String[] command) {
 		if (!connected()) {
-			sendError(Client.INVITE, "You have to connect first");
+			sendError(Client.INVITE, "You have to connect first.");
 		} else if (command.length < 2) {
-			sendError(Client.INVITE, "Invalid arguments");
+			sendError(Client.INVITE, "Invalid arguments.");
 		} else if (clientName.equals(command[1])) {
-			sendError(Client.INVITE, "You can't invite yourself");
+			sendError(Client.INVITE, "You can't invite yourself.");
 		} else if (!server.nameExists(command[1])) {
-			sendError(Client.INVITE, "Name doesn't exist");
+			sendError(Client.INVITE, "Name doesn't exist.");
 		} else if (inGame()) {
-			sendError(Client.INVITE, "You are already in a game");
+			sendError(Client.INVITE, "You are already in a game.");
 		} else if (server.inGame(command[1])) {
-			sendError(Client.INVITE, "The invited client is already in a game");
+			sendError(Client.INVITE, "The invited client is already in a game.");
 		} else if (server.isInvited(clientName, command[1])) {
-			sendError(Client.INVITE, "Already invited this client");
+			sendError(Client.INVITE, "Already invited this client.");
 		} else if (server.isInvited(command[1], clientName)) {
-			sendError(Client.INVITE, "The invited client already invited you");
+			sendError(Client.INVITE, "The invited client already invited you.");
 		} else if (command.length >= 4) {
 			inviteSizeChecks(command);
 		} else {
@@ -426,10 +426,10 @@ public class ClientHandler extends Thread {
 					Client.INVITE,
 					"Your client doesn't support the "
 							+ Features.CUSTOM_BOARD_SIZE
-							+ " feature. Please add this feature if you want to use extras");
+							+ " feature. Please add this feature if you want to use extras.");
 		} else if (!server.hasCustomBoardSize(command[1])) {
 			sendError(Client.INVITE,
-					"The invited client doesn't support extras");
+					"The invited client doesn't support extras.");
 		} else {
 			try {
 				int boardX = Integer.parseInt(command[2]);
@@ -437,10 +437,10 @@ public class ClientHandler extends Thread {
 				if ((boardX >= Board.CONNECT && boardY >= Board.CONNECT)) {
 					invite(command[1], boardX, boardY);
 				} else {
-					sendError(Server.INVITE, "Board too small");
+					sendError(Server.INVITE, "Board too small.");
 				}
 			} catch (NumberFormatException e) {
-				sendError(Server.INVITE, "Could not parse boardsize");
+				sendError(Server.INVITE, "Couldn't parse boardsize.");
 			}
 		}
 	}
@@ -507,13 +507,13 @@ public class ClientHandler extends Thread {
 	*/
 	private void acceptChecks(String[] command) {
 		if (!connected()) {
-			sendError(Client.ACCEPT_INVITE, "You have to connect first");
+			sendError(Client.ACCEPT_INVITE, "You have to connect first.");
 		} else if (command.length != 2) {
-			sendError(Client.ACCEPT_INVITE, "Invalid arguments");
+			sendError(Client.ACCEPT_INVITE, "Invalid arguments.");
 		} else if (!server.nameExists(command[1])) {
-			sendError(Client.ACCEPT_INVITE, "Name doesn't exist");
+			sendError(Client.ACCEPT_INVITE, "Name doesn't exist.");
 		} else if (!server.isInvited(command[1], clientName)) {
-			sendError(Client.ACCEPT_INVITE, "Not invited by this client");
+			sendError(Client.ACCEPT_INVITE, "Not invited by this client.");
 		} else {
 			accept(command[1]);
 		}
@@ -557,15 +557,16 @@ public class ClientHandler extends Thread {
 		requires command[0].equals(Client.DECLINE_INVITE);
 	*/
 	private void declineChecks(String[] command) {
+		//FIXME
 		if (!connected()) {
-			sendError(Client.DECLINE_INVITE, "You have to connect first");
+			sendError(Client.DECLINE_INVITE, "You have to connect first.");
 		} else if (command.length != 2) {
-			sendError(Client.DECLINE_INVITE, "Invalid arguments");
+			sendError(Client.DECLINE_INVITE, "Invalid arguments.");
 		} else if (!server.nameExists(command[1])) {
-			sendError(Client.DECLINE_INVITE, "Name doesn't exist");
-		} else if (!server.isInvited(command[1], clientName)
-				|| !server.isInvited(clientName, command[1])) {
-			sendError(Client.DECLINE_INVITE, "Not invited by this client");
+			sendError(Client.DECLINE_INVITE, "Name doesn't exist.");
+		} else if (!(server.isInvited(command[1], clientName) || server
+				.isInvited(clientName, command[1]))) {
+			sendError(Client.DECLINE_INVITE, "Not invited by this client.");
 		} else {
 			decline(command[1]);
 		}
@@ -606,11 +607,11 @@ public class ClientHandler extends Thread {
 	private void moveChecks(String[] command) {
 		synchronized (board) {
 			if (!connected()) {
-				sendError(Client.MOVE, "You have to connect first");
+				sendError(Client.MOVE, "You have to connect first.");
 			} else if (!inGame()) {
-				sendError(Client.MOVE, "You aren't in a game");
+				sendError(Client.MOVE, "You aren't in a game.");
 			} else if (!move) {
-				sendError(Client.MOVE, "It's not your turn to move");
+				sendError(Client.MOVE, "It's not your turn to move.");
 			} else {
 				validMove(command);
 			}
@@ -636,21 +637,21 @@ public class ClientHandler extends Thread {
 	private void validMove(String[] command) {
 		move = false;
 		if (command.length != 2) {
-			sendError(Client.MOVE, "Invalid arguments");
+			sendError(Client.MOVE, "Invalid arguments.");
 			sendMessage(Server.REQUEST_MOVE);
 		} else {
 			int col = -1;
 			try {
 				col = Integer.parseInt(command[1]);
 			} catch (NumberFormatException e) {
-				sendError(Client.MOVE, "Can't parse move");
+				sendError(Client.MOVE, "Can't parse move.");
 				sendMessage(Server.REQUEST_MOVE);
 			}
 			if (!board.isField(col)) {
-				sendError(Client.MOVE, "That column doesn't exist");
+				sendError(Client.MOVE, "That column doesn't exist.");
 				sendMessage(Server.REQUEST_MOVE);
 			} else if (!board.isEmptyField(col)) {
-				sendError(Client.MOVE, "That column is full");
+				sendError(Client.MOVE, "That column is full.");
 				sendMessage(Server.REQUEST_MOVE);
 			} else {
 				move(col);
@@ -712,15 +713,17 @@ public class ClientHandler extends Thread {
 	private void chatChecks(String line) {
 		//TODO: niet hardcoden
 		if (!connected()) {
-			sendError(Server.CHAT, "You have to connect first");
+			sendError(Server.CHAT, "You have to connect first.");
 		} else if (line.length() <= 5) {
-			sendError(Server.CHAT, "Invalid arguments");
+			sendError(Server.CHAT, "Invalid arguments.");
 		} else if (!hasChat()) {
-			sendError(Server.CHAT, "Your client doesn't support the "
-					+ Features.CHAT
-					+ " feature. Please add this feature if you want to use it");
+			sendError(
+					Server.CHAT,
+					"Your client doesn't support the "
+							+ Features.CHAT
+							+ " feature. Please add this feature if you want to use it.");
 		} else if (line.length() > 517) {
-			sendError(Server.CHAT, "Message longer than 512 characters");
+			sendError(Server.CHAT, "Message longer than 512 characters.");
 		} else {
 			chat(line);
 		}
@@ -748,9 +751,9 @@ public class ClientHandler extends Thread {
 	 */
 	private void requestBoardChecks() {
 		if (!connected()) {
-			sendError(Client.REQUEST_BOARD, "You have to connect first");
+			sendError(Client.REQUEST_BOARD, "You have to connect first.");
 		} else if (!inGame()) {
-			sendError(Client.REQUEST_BOARD, "You aren't in a game");
+			sendError(Client.REQUEST_BOARD, "You aren't in a game.");
 		} else {
 			requestBoard();
 		}
@@ -771,7 +774,7 @@ public class ClientHandler extends Thread {
 	 */
 	private void requestLobbyChecks() {
 		if (!connected()) {
-			sendError(Client.REQUEST_LOBBY, "You have to connect first");
+			sendError(Client.REQUEST_LOBBY, "You have to connect first.");
 		} else {
 			requestLobby();
 		}
@@ -791,13 +794,13 @@ public class ClientHandler extends Thread {
 	 */
 	private void requestLeaderboardChecks() {
 		if (!connected()) {
-			sendError(Client.REQUEST_LEADERBOARD, "You have to connect first");
+			sendError(Client.REQUEST_LEADERBOARD, "You have to connect first.");
 		} else if (!hasLeaderboard()) {
 			sendError(
 					Client.REQUEST_LEADERBOARD,
 					"Your client doesn't support the "
 							+ Features.LEADERBOARD
-							+ " feature. Please add this feature if you want to use it");
+							+ " feature. Please add this feature if you want to use it.");
 		} else {
 			requestLeaderboard();
 		}
@@ -865,7 +868,8 @@ public class ClientHandler extends Thread {
 			try {
 				sock.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+				server.print("Couldn't close sock.");
+				System.exit(1);
 			}
 			if (inGame()) {
 				server.sendMessage(opponentName, Server.GAME_END + " "
@@ -873,7 +877,7 @@ public class ClientHandler extends Thread {
 			} else if (connected()) {
 				server.broadcastLobby();
 			}
-			server.print("ClientHandler: " + clientName + " has left");
+			server.print("ClientHandler: " + clientName + " has left.");
 		}
 	}
 }
