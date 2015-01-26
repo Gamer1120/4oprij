@@ -463,16 +463,14 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires command != null;
+	/*@ requires name != null;
 		requires connected();
-		requires command.length >= 2;
-		requires command[0].equals(Client.INVITE);
-		requires server.nameExists(command[1]);
+		requires server.nameExists(name);
 		requires !inGame();
-		requires !server.inGame(command[1]);
-		requires !server.isInvited(clientName, command[1]);
-		requires !server.isInvited(command[1], clientName);
-		ensures server.isInvited(clientName, command[1]);
+		requires !server.inGame(name);
+		requires !server.isInvited(clientName, name);
+		requires !server.isInvited(name, clientName);
+		ensures server.isInvited(clientName, name);
 	 */
 	private void invite(String name) {
 		server.sendMessage(name, Server.INVITE + " " + clientName);
@@ -486,16 +484,16 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires command != null;
+	/*@ requires name != null;
+		requires boardX >= 4;
+		requires boardY >= 4;
 		requires connected();
-		requires command.length >= 2;
-		requires command[0].equals(Client.INVITE);
-		requires server.nameExists(command[1]);
+		requires server.nameExists(name);
 		requires !inGame();
-		requires !server.inGame(command[1]);
-		requires !server.isInvited(clientName, command[1]);
-		requires !server.isInvited(command[1], clientName);
-		ensures server.isInvited(clientName, command[1]);
+		requires !server.inGame(name);
+		requires !server.isInvited(clientName, name);
+		requires !server.isInvited(name, clientName);
+		ensures server.isInvited(clientName, name);
 	 */
 	private void invite(String name, int boardX, int boardY) {
 		server.sendMessage(name, Server.INVITE + " " + clientName + " "
@@ -538,12 +536,10 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires command != null;
+	/*@ requires name != null;
 		requires connected();
-		requires command.length == 2;
-		requires command[0].equals(Client.ACCEPT_INVITE);
-		requires server.nameExists(command[1]);
-		requires server.isInvited(command[1], clientName);
+		requires server.nameExists(name);
+		requires server.isInvited(name, clientName);
 	 */
 	private void accept(String name) {
 		server.generateBoard(name, clientName);
@@ -588,13 +584,11 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires command != null;
+	/*@ requires name != null;
 		requires connected();
-		requires command.length == 2;
-		requires command[0].equals(Client.DECLINE_INVITE);
-		requires server.nameExists(command[1]);
-		requires server.isInvited(command[1], clientName);
-		ensures !server.isInvited(command[1], clientName);
+		requires server.nameExists(name);
+		requires server.isInvited(name, clientName);
+		ensures !server.isInvited(name, clientName);
 	 */
 	private void decline(String name) {
 		server.removeInvite(name, clientName);
@@ -716,8 +710,7 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires command != null;
-		requires command[0].equals(Client.CHAT);
+	/*@ requires line != null;
 	*/
 	private void chatChecks(String line) {
 		//TODO: niet hardcoden
@@ -744,10 +737,9 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            the command send by the client
 	 */
-	/*@ requires command != null;
+	/*@ requires line != null;
 		requires connected();
-		requires command.length >= 2;
-		requires command[0].equals(Client.CHAT);
+		requires line.length() > 5 & line.length() <= 517;
 	 */
 	private void chat(String line) {
 		server.broadcastChat(Server.CHAT + " " + clientName + " "
@@ -794,7 +786,7 @@ public class ClientHandler extends Thread {
 	 */
 	//@ requires connected();
 	private void requestLobby() {
-		sendMessage(Server.LOBBY + server.getLobby());
+		sendMessage(Server.LOBBY + server.lobbyToString());
 	}
 
 	/**
@@ -821,7 +813,7 @@ public class ClientHandler extends Thread {
 	//@ requires connected();
 	//@ requires hasLeaderboard();
 	private void requestLeaderboard() {
-		sendMessage(Server.LEADERBOARD + server.getLeaderboard());
+		sendMessage(Server.LEADERBOARD + server.leaderboardToString());
 	}
 
 	/**
