@@ -33,6 +33,11 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * @param name
 	 *            The name for this Leaderboardpair.
 	 */
+	/*@ ensures this.getName() == name;
+	 	ensures this.getWins() == 0;
+	  	ensures this.getLosses() == 0;
+	  	ensures this.getGames() == 0;
+	 */
 	public LeaderboardPair(String name) {
 		this(name, 0, 0, 0);
 	}
@@ -50,6 +55,11 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * @param games
 	 *            The amount of games this LeaderboardPair has played.
 	 */
+	/*@ ensures this.getName() == name;
+ 	ensures this.getWins() == wins;
+  	ensures this.getLosses() == losses;
+  	ensures this.getGames() == games;
+ */
 	public LeaderboardPair(String name, int wins, int losses, int games) {
 		this.name = name;
 		this.score = new int[] { wins, losses, games };
@@ -60,7 +70,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * 
 	 * @return The name for this LeaderboardPair.
 	 */
-	public String getName() {
+	/*@ pure */public String getName() {
 		return name;
 	}
 
@@ -69,7 +79,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * 
 	 * @return The score this LeaderboardPair has.
 	 */
-	public int[] getScore() {
+	/*@ pure */public int[] getScore() {
 		return score;
 	}
 
@@ -78,7 +88,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * 
 	 * @return The amount of wins this LeaderboardPair has.
 	 */
-	public int getWins() {
+	/*@ pure */public int getWins() {
 		return score[0];
 	}
 
@@ -87,7 +97,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * 
 	 * @return The amount of losses this LeaderboardPair has.
 	 */
-	public int getLosses() {
+	/*@ pure */public int getLosses() {
 		return score[1];
 	}
 
@@ -96,7 +106,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * 
 	 * @return The amount of games this LeaderboardPair has played.
 	 */
-	public int getGames() {
+	/*@ pure */public int getGames() {
 		return score[2];
 	}
 
@@ -105,14 +115,14 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * 
 	 * @return The amount of games this LeaderboardPair has played.
 	 */
-	public int getPoints() {
+	/*@ pure */public int getPoints() {
 		return score[0] - score[1];
 	}
 
 	/**
 	 * Updates this LeaderboardPair, adding a win and a game played.
 	 */
-	public void updateWin() {
+	/*@ pure */public void updateWin() {
 		score[0]++;
 		score[2]++;
 	}
@@ -120,7 +130,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	/**
 	 * Updates this LeaderboardPair, adding a loss and a game played.
 	 */
-	public void updateLoss() {
+	/*@ pure */public void updateLoss() {
 		score[1]++;
 		score[2]++;
 	}
@@ -128,7 +138,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	/**
 	 * Updates this LeaderboardPair, adding a game played.
 	 */
-	public void updateDraw() {
+	/*@ pure */public void updateDraw() {
 		score[2]++;
 	}
 
@@ -140,11 +150,12 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * checked. If that fails, the highest total games is checked. If that
 	 * fails, it's sorted in alphabetical order (using it's name).
 	 * 
-	 * @param The
-	 *            LeaderboardPair to compare this LeaderboardPair to.
+	 * @param pair
+	 *            The LeaderboardPair to compare this LeaderboardPair to.
 	 * @return -1 if the LeaderboardPair is smaller than this, 1 if the
 	 *         LeaderboardPair is bigger, 0 if they are the same.
 	 */
+	//@ requires pair != null;
 	@Override
 	public int compareTo(LeaderboardPair pair) {
 		// Highest combined score
@@ -180,6 +191,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 *            The object to compare to this LeaderboardPair.
 	 * @return Whether these two LeaderboardPairs are the same.
 	 */
+	//@ requires o != null;
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof LeaderboardPair) {
@@ -197,6 +209,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 *            The object to compare to this LeaderboardPair.
 	 * @return Whether these two LeaderboardPairs have the same score.
 	 */
+	//@ requires o != null;
 	public boolean equalScore(Object o) {
 		if (o instanceof LeaderboardPair) {
 			LeaderboardPair pair = (LeaderboardPair) o;
@@ -212,7 +225,7 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 * Returns a String representation of this LeaderboardPair.
 	 */
 	@Override
-	public String toString() {
+	/*@ pure */public String toString() {
 		return getName() + " " + getWins() + " " + getLosses() + " "
 				+ getGames();
 	}
