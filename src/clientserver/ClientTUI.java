@@ -213,6 +213,9 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds a connect message to the TUI. It prefixes the message with [CONNECT]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addConnectMessage(String message) {
@@ -221,6 +224,9 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds an invite message to the TUI. It prefixes the message with [INVITE]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addInviteMessage(String message) {
@@ -229,6 +235,9 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds a move message to the TUI. It prefixes the message with [MOVE]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addMoveMessage(String message) {
@@ -237,6 +246,9 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds a chat message to the TUI. It prefixes the message with [CHAT]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addChatMessage(String message) {
@@ -252,6 +264,9 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds a lobby message to the TUI. It prefixes the message with [LOBBY]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addLobbyMessage(String message) {
@@ -260,6 +275,17 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds a line of the leaderboard to the TUI.
+	 * 
+	 * @param rank
+	 *            The rank this player is.
+	 * @param name
+	 *            The name of this player.
+	 * @param wins
+	 *            The amount of wins this player has.
+	 * @param losses
+	 *            The amount of losses this player has.
+	 * @param gamesPlayed
+	 *            The amount of games this player has played.
 	 */
 	/*@ requires !rank.equals("");
 	  	requires !name.equals("");
@@ -267,8 +293,8 @@ public class ClientTUI implements ClientView {
 	  	requires !losses.equals("");
 	  	requires !gamesPlayed.equals("");
 	 */
-	/*@ pure */public void addLeaderBoardLine(String rank, String name, String wins,
-			String losses, String gamesPlayed) {
+	/*@ pure */public void addLeaderBoardLine(String rank, String name,
+			String wins, String losses, String gamesPlayed) {
 		addMessage(rank + ". " + name + " Wins: " + wins + " Losses: " + losses
 				+ " Games played: " + gamesPlayed);
 
@@ -276,6 +302,9 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds an error message to the TUI. It prefixes the message with [ERROR]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addErrorMessage(String message) {
@@ -284,6 +313,9 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds a ping message to the TUI. It prefixes the message with [PING]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addPingMessage(String message) {
@@ -292,6 +324,9 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds a help message to the TUI. It prefixes the message with [HELP]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addHelpMessage(String message) {
@@ -301,6 +336,9 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a hint message to the TUI. It prefixes the message with [HINT]You
 	 * could make a move in column:
+	 * 
+	 * @param move
+	 *            The move to suggest.
 	 */
 	/*@ pure */public void addHintMessage(int move) {
 		addMessage("[HINT]You could make a move in column: " + move);
@@ -309,6 +347,9 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a features message to the TUI. It prefixes the message with
 	 * [FEATURES]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addFeaturesMessage(String message) {
@@ -317,6 +358,9 @@ public class ClientTUI implements ClientView {
 
 	/**
 	 * Adds a game message to the TUI. It prefixes the message with [GAME]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	//@ requires !message.equals("");
 	/*@ pure */public void addGameMessage(String message) {
@@ -326,6 +370,9 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds a difficulty message to the TUI. It prefixes the message with
 	 * [DIFFICULTY]
+	 * 
+	 * @param message
+	 *            The message to add.
 	 */
 	/*@ pure */public void addDifficultyMessage(boolean success) {
 		if (success) {
