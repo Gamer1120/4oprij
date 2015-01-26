@@ -2,6 +2,7 @@ package game;
 
 import java.util.ArrayList;
 import java.util.Random;
+
 /**
  * NaiveStrategy for the Connect4 according to the protocol of the TI-2 group.<br>
  * <br>
@@ -10,12 +11,27 @@ import java.util.Random;
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
 public class NaiveStrategy implements Strategy {
+	/**
+	 * The name this strategy has.
+	 */
 	public final static String NAME = "Naive";
 
-	public String getName() {
+	/**
+	 * Returns the name this Strategy has.
+	 */
+	/*@ pure */public String getName() {
 		return NAME;
 	}
 
+	/**
+	 * Determines a random move on a given Board with a given Disc.
+	 * 
+	 * @param b
+	 *            The Board to make the move on.
+	 * @param d
+	 *            The Disc to make the move for.
+	 */
+	//@ requires b != null;
 	public int determineMove(Board b, Disc d) {
 		ArrayList<Integer> empty = new ArrayList<Integer>();
 		for (int col = 0; col < b.getColumns(); col++) {

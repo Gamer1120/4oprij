@@ -24,8 +24,7 @@ import javax.swing.JTextField;
  * A GUI for the server, as provided in the files in week 7 for the Multiclient
  * chat.
  * 
- * @author Theo Ruys
- * @version 2005.02.21
+ * @author Theo Ruys, modified by Michael Koopman s1401335 and Sven Konings s1534130
  */
 public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 

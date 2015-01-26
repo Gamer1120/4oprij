@@ -11,8 +11,11 @@ import java.util.Observable;
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
 public class Board extends Observable {
+	//TODO: Discuss whether too keep //Constants, //Constructors etc.
 	// Constants:
-	/** the amount of discs needed next to eachother to win. */
+	/**
+	 * The amount of discs needed next to each other to win a game. 
+	 */
 	public static final int CONNECT = 4;
 
 	// Instance variables:
