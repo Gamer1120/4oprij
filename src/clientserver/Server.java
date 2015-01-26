@@ -117,7 +117,7 @@ public class Server extends Thread {
 			 * TreeSet<LeaderboardPair>. But even if it isn't (maybe written by
 			 * another program) we also catch a ClassCastException and create a
 			 * new leaderboard, so it should be fine, that's why the unchecked
-			 * warning is supressed
+			 * warning is suppressed
 			 */
 			this.leaderboard = (TreeSet<LeaderboardPair>) in.readObject();
 			in.close();
