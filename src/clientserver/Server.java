@@ -121,6 +121,7 @@ public class Server extends Thread {
 			 */
 			this.leaderboard = (TreeSet<LeaderboardPair>) in.readObject();
 			in.close();
+			mui.addMessage("Read leaderboard.");
 		} catch (IOException | ClassNotFoundException | ClassCastException e) {
 			this.leaderboard = new TreeSet<LeaderboardPair>();
 		}
@@ -139,7 +140,8 @@ public class Server extends Thread {
 				addHandler(ch);
 				ch.start();
 			} catch (IOException e) {
-				mui.addMessage("Error adding client");
+				mui.addMessage("Error adding client.");
+				continue;
 			}
 		}
 	}
@@ -154,12 +156,12 @@ public class Server extends Thread {
 	//@ requires msg != null;
 	public void broadcast(String msg) {
 		synchronized (threads) {
+			mui.addMessage("Broadcast: " + msg);
 			for (ClientHandler ch : threads) {
 				if (ch.connected()) {
 					ch.sendMessage(msg);
 				}
 			}
-			mui.addMessage("Broadcast: " + msg);
 		}
 	}
 
@@ -169,12 +171,13 @@ public class Server extends Thread {
 	 */
 	public void broadcastLobby() {
 		synchronized (threads) {
+			String lobby = getLobby();
+			mui.addMessage("Lobby:" + lobby);
 			for (ClientHandler ch : threads) {
 				if (!ch.inGame()) {
-					ch.sendMessage(LOBBY + getLobby());
+					ch.sendMessage(LOBBY + lobby);
 				}
 			}
-			mui.addMessage("Lobby:" + getLobby());
 		}
 	}
 
@@ -190,12 +193,12 @@ public class Server extends Thread {
 	 */
 	public void broadcastChat(String msg) {
 		synchronized (threads) {
+			mui.addMessage("Chat: " + msg);
 			for (ClientHandler ch : threads) {
 				if (ch.connected() && ch.hasChat()) {
 					ch.sendMessage(msg);
 				}
 			}
-			mui.addMessage("Chat: " + msg);
 		}
 	}
 
@@ -267,8 +270,8 @@ public class Server extends Thread {
 		requires msg != null;
 	 */
 	public void sendMessage(String name, String msg) {
+		mui.addMessage("Message to " + name + ": " + msg);
 		getClient(name).sendMessage(msg);
-		mui.addMessage("Server send message to " + name + ": " + msg);
 	}
 
 	/**
@@ -323,8 +326,8 @@ public class Server extends Thread {
 	*/
 	private void setBoard(String name, Board board) {
 		// TODO: Game maken inplaats van bord?
+		mui.addMessage("Set board for " + name + ".");
 		getClient(name).setBoard(board);
-		mui.addMessage("Server set board for " + name);
 	}
 
 	/**
@@ -372,6 +375,7 @@ public class Server extends Thread {
 	public void addHandler(ClientHandler handler) {
 		synchronized (threads) {
 			threads.add(handler);
+			mui.addMessage("Added clientHandler.");
 		}
 	}
 
@@ -385,6 +389,7 @@ public class Server extends Thread {
 	public void removeHandler(ClientHandler handler) {
 		synchronized (threads) {
 			threads.remove(handler);
+			mui.addMessage("Removed clientHandler.");
 		}
 	}
 
@@ -412,6 +417,8 @@ public class Server extends Thread {
 		synchronized (invites) {
 			invites.put(new String[] { name, invited }, new Integer[] { boardX,
 					boardY });
+			mui.addMessage("Added invite from " + name + " to " + invited
+					+ " with boardsize " + boardX + " x " + boardY + ".");
 		}
 	}
 
@@ -467,13 +474,18 @@ public class Server extends Thread {
 	*/
 	public void removeInvite(String name) {
 		synchronized (invites) {
+			mui.addMessage("removing all invites with " + name + ".");
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name)) {
 					sendMessage(invite[1], Server.DECLINE_INVITE + " " + name);
 					invites.remove(invite);
+					mui.addMessage("Server removed invite from " + invite[0]
+							+ " to " + invite[1] + ".");
 				} else if (invite[1].equals(name)) {
 					sendMessage(invite[0], Server.DECLINE_INVITE + " " + name);
 					invites.remove(invite);
+					mui.addMessage("Server removed invite from " + invite[0]
+							+ " to " + invite[1] + ".");
 				}
 			}
 		}
@@ -497,6 +509,8 @@ public class Server extends Thread {
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
 					invites.remove(invite);
+					mui.addMessage("Server removed invite from " + name
+							+ " to " + invited + ".");
 					break;
 				}
 			}
@@ -510,14 +524,20 @@ public class Server extends Thread {
 		synchronized (leaderboard) {
 			String scores = "";
 			int rank = 0;
+			int entry = 0;
 			LeaderboardPair oldPair = null;
 			for (LeaderboardPair pair : leaderboard) {
-				if (!pair.equalScore(oldPair)) {
-					rank++;
-					oldPair = pair;
+				if (++entry <= 50) {
+					if (!pair.equalScore(oldPair)) {
+						rank++;
+						oldPair = pair;
+					}
+					scores += " " + pair.getName() + " " + pair.getWins() + " "
+							+ pair.getLosses() + " " + pair.getGames() + " "
+							+ rank;
+				} else {
+					break;
 				}
-				scores += " " + pair.getName() + " " + pair.getWins() + " "
-						+ pair.getLosses() + " " + pair.getGames() + " " + rank;
 			}
 			return scores;
 		}
@@ -543,10 +563,16 @@ public class Server extends Thread {
 				if (pair.getName().equals(name)) {
 					if (win == null) {
 						pair.updateDraw();
+						mui.addMessage("Leaderboard: Added draw to " + name
+								+ ".");
 					} else if (win) {
 						pair.updateWin();
+						mui.addMessage("Leaderboard: Added win to " + name
+								+ ".");
 					} else {
 						pair.updateLoss();
+						mui.addMessage("Leaderboard: Added loss to " + name
+								+ ".");
 					}
 					found = true;
 					break;
@@ -554,12 +580,17 @@ public class Server extends Thread {
 			}
 			if (!found) {
 				LeaderboardPair pair = new LeaderboardPair(name);
+				mui.addMessage("Leaderboard: Created new entry for " + name
+						+ ".");
 				if (win == null) {
 					pair.updateDraw();
+					mui.addMessage("Leaderboard: Added draw to " + name + ".");
 				} else if (win) {
 					pair.updateWin();
+					mui.addMessage("Leaderboard: Added win to " + name + ".");
 				} else {
 					pair.updateLoss();
+					mui.addMessage("Leaderboard: Added loss to " + name + ".");
 				}
 				leaderboard.add(pair);
 			}
@@ -569,8 +600,9 @@ public class Server extends Thread {
 				out.writeObject(leaderboard);
 				out.flush();
 				out.close();
+				mui.addMessage("Saved leaderboard.");
 			} catch (IOException e) {
-				mui.addMessage("Error couldn't save leaderboard");
+				mui.addMessage("Error couldn't save leaderboard.");
 			}
 		}
 	}
