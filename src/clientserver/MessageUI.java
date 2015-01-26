@@ -15,5 +15,6 @@ interface MessageUI {
 	 * @param msg
 	 *            The message to add.
 	 */
+	//@ requires msg != null & !msg.equals("");
 	public void addMessage(String msg);
 }

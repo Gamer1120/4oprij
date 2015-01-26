@@ -22,7 +22,7 @@ import javax.swing.JTextField;
 
 /**
  * A GUI for the server, as provided in the files in week 7 for the Multiclient
- * chat.
+ * chat. Limited Javadoc/OpenJML is provided in this class.
  * 
  * @author Theo Ruys, modified by Michael Koopman s1401335 and Sven Konings s1534130
  */

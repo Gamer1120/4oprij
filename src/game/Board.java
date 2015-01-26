@@ -13,7 +13,7 @@ import java.util.Observable;
 public class Board extends Observable {
 
 	/**
-	 * The amount of discs needed next to each other to win a game. 
+	 * The amount of discs needed next to each other to win a game.
 	 */
 	public static final int CONNECT = 4;
 
