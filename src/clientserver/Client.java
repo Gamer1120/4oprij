@@ -659,6 +659,23 @@ public class Client extends Thread {
 		sendMessage(REQUEST_BOARD);
 	}
 
+	public void clientDifficulty(String input) {
+		if (computerPlayer.getStrategy() instanceof MinMaxStrategy) {
+			try {
+				int depth = Integer.parseInt(input);
+				((MinMaxStrategy) computerPlayer.getStrategy()).setDepth(depth);
+				mui.addDifficultyMessage(true);
+			} catch (NumberFormatException e) {
+				mui.addErrorMessage("Can't parse difficulty");
+				mui.addDifficultyMessage(false);
+			}
+
+		} else {
+			mui.addErrorMessage("Only the difficulty of the MinMaxPlayer can be changed");
+			mui.addDifficultyMessage(false);
+		}
+	}
+
 	//END ACCEPTING FROM VIEW
 
 	//CLIENT GETTERS
@@ -914,22 +931,4 @@ public class Client extends Thread {
 			System.exit(0);
 		}
 	}
-
-	public void clientDifficulty(String input) {
-		if (computerPlayer.getStrategy() instanceof MinMaxStrategy) {
-			try {
-				int depth = Integer.parseInt(input);
-				((MinMaxStrategy) computerPlayer.getStrategy()).setDepth(depth);
-				mui.addDifficultyMessage(true);
-			} catch (NumberFormatException e) {
-				mui.addErrorMessage("Can't parse difficulty");
-				mui.addDifficultyMessage(false);
-			}
-
-		} else {
-			mui.addErrorMessage("Only the difficulty of the MinMaxPlayer can be changed");
-			mui.addDifficultyMessage(false);
-		}
-	}
-
 }
