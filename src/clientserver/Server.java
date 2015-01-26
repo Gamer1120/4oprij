@@ -195,7 +195,7 @@ public class Server extends Thread {
 					ch.sendMessage(msg);
 				}
 			}
-			mui.addMessage("Broadcast: " + msg);
+			mui.addMessage("Chat: " + msg);
 		}
 	}
 
@@ -570,7 +570,7 @@ public class Server extends Thread {
 				out.flush();
 				out.close();
 			} catch (IOException e) {
-				print("Error couldn't save leaderboard");
+				mui.addMessage("Error couldn't save leaderboard");
 			}
 		}
 	}

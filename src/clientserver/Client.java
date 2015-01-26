@@ -208,68 +208,76 @@ public class Client extends Thread {
 	 */
 	public void run() {
 		while (loop) {
-			String line = null;
-			String[] serverMessage = null;
+			String line = "";
+			String input = "";
 			try {
-				line = in.readLine();
-				serverMessage = line.split("\\s+");
+				while (!input.equals("") || line.equals("")) {
+					input = in.readLine();
+					line += input;
+				}
+				/*
+				 * Calling in.readLine() when the connection is lost gives an
+				 * IOException, but when in.readLine() has already been called
+				 * and the connection is lost in.readLine will result in null and
+				 * input.equals() will result in an NullPointerException. If the
+				 * connection is lost the clienthandler shuts down
+				 */
 			} catch (IOException | NullPointerException e) {
 				shutdown();
 				break;
 			}
+			String[] serverMessage = line.split("\\s+");
 			mui.addMessage("[SERVER]" + line);
-			if (!line.equals("")) {
-				switch (serverMessage[0]) {
-				case Server.ACCEPT_CONNECT:
-					isConnected = true;
-					serverConnect(serverMessage);
-					break;
-				case Server.LOBBY:
-					serverLobby(serverMessage);
-					break;
-				case Server.INVITE:
-					serverInvite(serverMessage);
-					break;
-				case Server.DECLINE_INVITE:
-					serverDecline(serverMessage);
-					break;
-				case Server.GAME_START:
-					serverGameStart(serverMessage);
-					break;
-				case Server.GAME_END:
-					serverGameEnd(serverMessage);
-					break;
-				case Server.REQUEST_MOVE:
-					serverRequestMove(serverMessage);
-					break;
-				case Server.MOVE_OK:
-					serverMoveOK(serverMessage);
-					break;
-				case Server.ERROR:
-					//TODO: Zet dit netjes neer.
-					mui.addMessage("[ERROR]" + line.split(" ", 2)[1]);
-					if (!isConnected) {
-						isConnected = null;
-					}
-					break;
-				case Server.BOARD:
-					board = toBoard(line);
-					//notifyAll();
-					break;
-				case Server.CHAT:
-					mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
-					break;
-				case Server.LEADERBOARD:
-					showLeaderBoard(serverMessage);
-					break;
-				case Server.PONG:
-					mui.addMessage("[PING]Pong!");
-					break;
-				default:
-					sendMessage(ERROR + " " + serverMessage[0]
-							+ " Unknown command.");
-					break;
+			switch (serverMessage[0]) {
+			case Server.ACCEPT_CONNECT:
+				isConnected = true;
+				serverConnect(serverMessage);
+				break;
+			case Server.LOBBY:
+				serverLobby(serverMessage);
+				break;
+			case Server.INVITE:
+				serverInvite(serverMessage);
+				break;
+			case Server.DECLINE_INVITE:
+				serverDecline(serverMessage);
+				break;
+			case Server.GAME_START:
+				serverGameStart(serverMessage);
+				break;
+			case Server.GAME_END:
+				serverGameEnd(serverMessage);
+				break;
+			case Server.REQUEST_MOVE:
+				serverRequestMove(serverMessage);
+				break;
+			case Server.MOVE_OK:
+				serverMoveOK(serverMessage);
+				break;
+			case Server.ERROR:
+				//TODO: Zet dit netjes neer.
+				mui.addMessage("[ERROR]" + line.split(" ", 2)[1]);
+				if (!isConnected) {
+					isConnected = null;
 				}
+				break;
+			case Server.BOARD:
+				board = toBoard(line);
+				//notifyAll();
+				break;
+			case Server.CHAT:
+				mui.addMessage("[CHAT]" + line.split(" ", 2)[1]);
+				break;
+			case Server.LEADERBOARD:
+				showLeaderBoard(serverMessage);
+				break;
+			case Server.PONG:
+				mui.addMessage("[PING]Pong!");
+				break;
+			default:
+				sendMessage(ERROR + " " + serverMessage[0]
+						+ " Unknown command.");
+				break;
 			}
 		}
 	}
@@ -285,6 +293,7 @@ public class Client extends Thread {
 	public void sendMessage(String msg) {
 		try {
 			out.write(msg);
+			out.newLine();
 			out.newLine();
 			out.flush();
 		} catch (IOException e) {

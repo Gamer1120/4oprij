@@ -127,14 +127,24 @@ public class ClientHandler extends Thread {
 	public void run() {
 		while (loop) {
 			String line = "";
-			String[] command = null;
+			String input = "";
 			try {
-				line = in.readLine();
-				command = line.split("\\s+");
+				while (!input.equals("") || line.equals("")) {
+					input = in.readLine();
+					line += input;
+				}
+				/*
+				 * Calling in.readLine() when the connection is lost gives an
+				 * IOException, but when in.readLine() has already been called
+				 * and the connection is lost in.readLine will result in null and
+				 * input.equals() will result in an NullPointerException. If the
+				 * connection is lost the clienthandler shuts down
+				 */
 			} catch (IOException | NullPointerException e) {
 				shutdown();
 				break;
 			}
+			String[] command = line.split("\\s+");
 			switch (command[0]) {
 			case Client.CONNECT:
 				connectChecks(command);
@@ -226,6 +236,7 @@ public class ClientHandler extends Thread {
 	private synchronized void write(String msg) {
 		try {
 			out.write(msg);
+			out.newLine();
 			out.newLine();
 			out.flush();
 		} catch (IOException e) {
