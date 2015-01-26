@@ -46,6 +46,9 @@ public class Client extends Thread {
 	public static final String DIFFICULTY = "DIFFICULTY";
 	// END OF CUSTOM COMMANDS
 
+	/**
+	 * The features this client has.
+	 */
 	private static final String CLIENT_FEATURES = Features.CHAT + " "
 			+ Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD;
 
@@ -106,8 +109,15 @@ public class Client extends Thread {
 	 */
 	private Map<String, Integer[]> invited;
 
+	/**
+	 * The number of this Client in a game, as stored on the Server.
+	 */
 	private int myNumber;
 
+	/**
+	 * An array with a move. This is used if the move can't be made on the
+	 * Board, and the Board needs to be requested from the Server.
+	 */
 	private int[] savedMove;
 
 	/*@	private invariant sock != null;
@@ -161,8 +171,9 @@ public class Client extends Thread {
 	 * @param name
 	 *            The String returned by askName.
 	 */
-	//@ requires !name.equals("");
-	//@ requires name != null;
+	/*@ requires !name.equals("");
+	 	requires name != null;
+	 */
 	public void setUpPlayer(String name) {
 		String[] splitName = name.split("\\s+");
 		if (splitName[0].equals("-N")) {
@@ -271,7 +282,7 @@ public class Client extends Thread {
 				mui.addChatMessage(line.split(" ", 2)[1]);
 				break;
 			case Server.LEADERBOARD:
-				showLeaderBoard(serverMessage);
+				serverShowLeaderboard(serverMessage);
 				break;
 			case Server.PONG:
 				mui.addPingMessage("Pong!");
@@ -426,9 +437,6 @@ public class Client extends Thread {
 			Integer[] boardSize = invited.get(serverMessage[1]);
 			board = new Board(boardSize[1], boardSize[0]);
 		}
-
-		// DEFINITION: currPlayer == 0 > Disc.YELLOW, currPlayer ==
-		// 1 > Disc.RED
 		mui.addBoard();
 		mui.addGameMessage("You are YELLOW");
 	}
@@ -441,8 +449,9 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	//@	requires serverMessage[0].equals(Server.GAME_END);
-	//@ ensures this.board == null;
+	/*@	requires serverMessage[0].equals(Server.GAME_END);
+		ensures this.board == null;
+	*/
 	private void serverGameEnd(String[] serverMessage) {
 		this.board = null;
 		if (serverMessage.length > 2) {
@@ -467,8 +476,9 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	//@ requires serverMessage[0].equals(Server.REQUEST_MOVE);
-	//@ ensures currPlayer != null;
+	/*@ requires serverMessage[0].equals(Server.REQUEST_MOVE);
+	 	ensures currPlayer != null;
+	 */
 	private void serverRequestMove(String[] serverMessage) {
 		if (computerPlayer == null) {
 			moveRequested = true;
@@ -489,11 +499,10 @@ public class Client extends Thread {
 	 * @param serverMessage
 	 *            The full message the server sent.
 	 */
-	//@ requires serverMessage[0].equals(Server.MOVE_OK);
-	//@ ensures currPlayer != null;
+	/*@ requires serverMessage[0].equals(Server.MOVE_OK);
+		ensures currPlayer != null;
+	*/
 	private void serverMoveOK(String[] serverMessage) {
-		// currPlayer houdt bij wiens beurt het is om een move te doen.
-		// Checken of dubbele move goed gaat.
 		int move = -1;
 		try {
 			move = Integer.parseInt(serverMessage[2]);
@@ -512,10 +521,34 @@ public class Client extends Thread {
 		}
 	}
 
+	/**
+	 * If the server sent a valid Leaderboard, this method adds the formatted
+	 * leaderboard to the View.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	//@ requires serverMessage[0].equals(Server.LEADERBOARD);
+	public void serverShowLeaderboard(String[] serverMessage) {
+		if ((serverMessage.length - 1) % 5 == 0) {
+			int amountOfPlayers = (serverMessage.length - 1) / 5;
+			for (int i = 0; i < amountOfPlayers; i++) {
+				mui.addLeaderBoardLine(serverMessage[((i * 5) + 5)],
+						serverMessage[((i * 5) + 1)],
+						serverMessage[((i * 5) + 2)],
+						serverMessage[((i * 5) + 3)],
+						serverMessage[((i * 5) + 4)]);
+			}
+		} else {
+			mui.addErrorMessage("Didn't get a valid Leaderboard from the Server.");
+			sendMessage(ERROR + " " + Server.LEADERBOARD
+					+ " Didn't get a valid Leaderboard from your Server :(");
+		}
+	}
+
 	//END ACCEPTING FROM SERVER
 
 	//ACCEPTING FROM VIEW
-
 	/**
 	 * Shows the commands that are available. In case the client is in-game,
 	 * different commands are shown than when he's not.
@@ -540,9 +573,9 @@ public class Client extends Thread {
 	 * valid, and there was a move requested.
 	 * 
 	 * @param input
-	 *            The raw message the server sent.
+	 *            The raw message the view sent.
 	 * @param splitInput
-	 *            The message the server sent, split up in an array.
+	 *            The message the view sent, split up in an array.
 	 */
 	/*@	requires input != null;
 	 	requires splitInput != null;
@@ -572,9 +605,9 @@ public class Client extends Thread {
 	 * This method also supports custom board sizes.
 	 * 
 	 * @param input
-	 *            The raw message the server sent.
+	 *            The raw message the view sent.
 	 * @param splitInput
-	 *            The message the server sent, split up in an array.
+	 *            The message the view sent, split up in an array.
 	 */
 	/*@	requires input != null;
 		requires splitInput != null;
@@ -607,7 +640,7 @@ public class Client extends Thread {
 	 * @param input
 	 *            The raw message the server sent.
 	 * @param splitInput
-	 *            The message the server sent, split up in an array.
+	 *            The message the view sent, split up in an array.
 	 */
 	/*@	requires input != null;
 		requires splitInput != null;
@@ -627,7 +660,7 @@ public class Client extends Thread {
 	 * @param input
 	 *            The raw message the server sent.
 	 * @param splitInput
-	 *            The message the server sent, split up in an array.
+	 *            The message the view sent, split up in an array.
 	 */
 	/*@	requires input != null;
 		requires splitInput != null;
@@ -643,6 +676,10 @@ public class Client extends Thread {
 		}
 	}
 
+	/**
+	 * Gives the Client a suggested move (does not actually do the move) using
+	 * it's view.
+	 */
 	public void clientHint() {
 		if (isIngame()) {
 			mui.addHintMessage(new MinMaxStrategy(4).determineMove(
@@ -659,6 +696,13 @@ public class Client extends Thread {
 		sendMessage(REQUEST_BOARD);
 	}
 
+	/**
+	 * Method to set the difficulty of a MinMaxStrategy. The difficulty is the
+	 * amount of turns the strategy will think ahead.
+	 * 
+	 * @param input
+	 *            The raw message the view sent.
+	 */
 	public void clientDifficulty(String input) {
 		if (computerPlayer.getStrategy() instanceof MinMaxStrategy) {
 			try {
@@ -704,6 +748,11 @@ public class Client extends Thread {
 		return clientName;
 	}
 
+	/**
+	 * This method returns the Board object stored for this Client.
+	 * 
+	 * @return The Board object stored for this Client.
+	 */
 	/*@ pure */public Board getBoard() {
 		return board;
 	}
@@ -711,10 +760,25 @@ public class Client extends Thread {
 	//END CLIENT GETTERS
 
 	//USEFUL METHODS
+	/**
+	 * Checks if a move is valid on the stored Board.
+	 * 
+	 * @param move
+	 *            The move to be made.
+	 * @return If that move is valid.
+	 */
 	private boolean checkMove(int move) {
 		return board.isField(move) && board.isEmptyField(move);
 	}
 
+	/**
+	 * Makes a move on the Board.
+	 * 
+	 * @param player
+	 *            The number of the player.
+	 * @param col
+	 *            The column to throw the Disc in.
+	 */
 	private void makeMove(int player, int col) {
 		if (player == myNumber - 1) {
 			board.insertDisc(col, Disc.YELLOW);
@@ -770,8 +834,23 @@ public class Client extends Thread {
 		return serverBoard;
 	}
 
-	private Board makeBoard(int rows, int columns, Disc myDisc, Disc otherDisc,
-			String[] serverMessage) {
+	/**
+	 * This method is used by toBoard to create a Board.
+	 * 
+	 * @param rows
+	 *            The amount of rows the Board has.
+	 * @param columns
+	 *            The amount of columns the Board has.
+	 * @param firstDisc
+	 *            The Disc the first player uses.
+	 * @param secondDisc
+	 *            The Disc the second player uses.
+	 * @param serverMessage
+	 *            The board as sent by the server.
+	 * @return A valid Board constructed from these parameters.
+	 */
+	private Board makeBoard(int rows, int columns, Disc firstDisc,
+			Disc secondDisc, String[] serverMessage) {
 		Board serverBoard = new Board(rows, columns);
 		int i = 3;
 		for (int row = rows - 1; row >= 0; row--) {
@@ -781,10 +860,10 @@ public class Client extends Thread {
 					serverBoard.setField(row, col, Disc.EMPTY);
 				} else if (Integer.parseInt(serverMessage[i]) == 1) {
 					//Disc.YELLOW
-					serverBoard.setField(row, col, myDisc);
+					serverBoard.setField(row, col, firstDisc);
 				} else if (Integer.parseInt(serverMessage[i]) == 2) {
 					//Disc.RED
-					serverBoard.setField(row, col, otherDisc);
+					serverBoard.setField(row, col, secondDisc);
 				}
 				i++;
 			}
@@ -806,30 +885,6 @@ public class Client extends Thread {
 			retLine += " " + array[i];
 		}
 		return retLine;
-	}
-
-	/**
-	 * If the server sent a valid Leaderboard, this method adds the formatted
-	 * leaderboard to the View.
-	 * 
-	 * @param serverMessage
-	 *            The full message the server sent.
-	 */
-	public void showLeaderBoard(String[] serverMessage) {
-		if ((serverMessage.length - 1) % 5 == 0) {
-			int amountOfPlayers = (serverMessage.length - 1) / 5;
-			for (int i = 0; i < amountOfPlayers; i++) {
-				mui.addLeaderBoardLine(serverMessage[((i * 5) + 5)],
-						serverMessage[((i * 5) + 1)],
-						serverMessage[((i * 5) + 2)],
-						serverMessage[((i * 5) + 3)],
-						serverMessage[((i * 5) + 4)]);
-			}
-		} else {
-			mui.addErrorMessage("Didn't get a valid Leaderboard from the Server.");
-			sendMessage(ERROR + " " + Server.LEADERBOARD
-					+ " Didn't get a valid Leaderboard from your Server :(");
-		}
 	}
 
 	//END USEFUL METHODS

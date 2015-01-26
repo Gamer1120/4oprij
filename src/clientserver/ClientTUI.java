@@ -48,13 +48,14 @@ public class ClientTUI implements ClientView {
 	 *            The message to print.
 	 */
 	//@ requires msg != null;
-	public void addMessage(String msg) {
+	/*@ pure */public void addMessage(String msg) {
 		System.out.println(msg);
 	}
 
 	/**
 	 * This method reads the messages in the InputStream. Then, it decides which
-	 * command was sent, and executes this command.
+	 * command was sent, and executes this command by forwarding it to the
+	 * Client.
 	 */
 	public void readInput() {
 		while (client.isAlive()) {
@@ -120,7 +121,7 @@ public class ClientTUI implements ClientView {
 	 * The main method to start a new ClientTUI.
 	 * 
 	 * @param args
-	 *            The command line arguments.
+	 *            The command line arguments. These aren't used.
 	 */
 	public static void main(String[] args) {
 		new ClientTUI();
@@ -210,62 +211,107 @@ public class ClientTUI implements ClientView {
 		askName();
 	}
 
-	public void addConnectMessage(String message) {
+	/**
+	 * Adds a connect message to the TUI. It prefixes the message with [CONNECT]
+	 */
+	/*@ pure */public void addConnectMessage(String message) {
 		addMessage("[CONNECT]" + message);
 	}
 
-	public void addInviteMessage(String message) {
+	/**
+	 * Adds an invite message to the TUI. It prefixes the message with [INVITE]
+	 */
+	/*@ pure */public void addInviteMessage(String message) {
 		addMessage("[INVITE]" + message);
 	}
 
-	public void addMoveMessage(String message) {
+	/**
+	 * Adds a move message to the TUI. It prefixes the message with [MOVE]
+	 */
+	/*@ pure */public void addMoveMessage(String message) {
 		addMessage(message);
 	}
 
-	public void addChatMessage(String message) {
+	/**
+	 * Adds a chat message to the TUI. It prefixes the message with [CHAT]
+	 */
+	/*@ pure */public void addChatMessage(String message) {
 		addMessage("[CHAT]" + message);
 	}
 
-	public void addBoard() {
+	/**
+	 * Adds the current board to the TUI.
+	 */
+	/*@ pure */public void addBoard() {
 		addMessage(client.getBoard().toString());
 	}
 
-	public void addLobbyMessage(String message) {
+	/**
+	 * Adds a lobby message to the TUI. It prefixes the message with [LOBBY]
+	 */
+	/*@ pure */public void addLobbyMessage(String message) {
 		addMessage("[LOBBY}" + message);
 	}
 
-	public void addLeaderBoardLine(String rank, String name, String wins,
+	/**
+	 * Adds a line of the leaderboard to the TUI.
+	 */
+	/*@ pure */public void addLeaderBoardLine(String rank, String name, String wins,
 			String losses, String gamesPlayed) {
 		addMessage(rank + ". " + name + " Wins: " + wins + " Losses: " + losses
 				+ " Games played: " + gamesPlayed);
 
 	}
 
-	public void addErrorMessage(String message) {
+	/**
+	 * Adds an error message to the TUI. It prefixes the message with [ERROR]
+	 */
+	/*@ pure */public void addErrorMessage(String message) {
 		addMessage("[ERROR]" + message);
 	}
 
-	public void addPingMessage(String message) {
+	/**
+	 * Adds a ping message to the TUI. It prefixes the message with [PING]
+	 */
+	/*@ pure */public void addPingMessage(String message) {
 		addMessage("[PING]" + message);
 	}
 
-	public void addHelpMessage(String message) {
+	/**
+	 * Adds a help message to the TUI. It prefixes the message with [HELP]
+	 */
+	/*@ pure */public void addHelpMessage(String message) {
 		addMessage("[HELP]" + message);
 	}
 
-	public void addHintMessage(int move) {
+	/**
+	 * Adds a hint message to the TUI. It prefixes the message with [HINT]You
+	 * could make a move in column:
+	 */
+	/*@ pure */public void addHintMessage(int move) {
 		addMessage("[HINT]You could make a move in column: " + move);
 	}
 
-	public void addFeaturesMessage(String message) {
+	/**
+	 * Adds a features message to the TUI. It prefixes the message with
+	 * [FEATURES]
+	 */
+	/*@ pure */public void addFeaturesMessage(String message) {
 		addMessage("[FEATURES]" + message);
 	}
 
-	public void addGameMessage(String message) {
+	/**
+	 * Adds a game message to the TUI. It prefixes the message with [GAME]
+	 */
+	/*@ pure */public void addGameMessage(String message) {
 		addMessage("[GAME]" + message);
 	}
 
-	public void addDifficultyMessage(boolean succes) {
+	/**
+	 * Adds a difficulty message to the TUI. It prefixes the message with
+	 * [DIFFICULTY]
+	 */
+	/*@ pure */public void addDifficultyMessage(boolean succes) {
 		if (succes) {
 			addMessage("Difficulty set");
 		} else {
