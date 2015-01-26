@@ -1,4 +1,8 @@
-package game;
+package temp;
+
+import game.Board;
+import game.Disc;
+import game.Strategy;
 
 //TODO: Als alle zetten even goed zijn, dan zoveel mogelijk in het midden gooien.
 public class MiniMaxStrategy implements Strategy {
