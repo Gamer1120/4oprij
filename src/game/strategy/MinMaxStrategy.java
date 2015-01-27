@@ -1,4 +1,4 @@
-package strategy;
+package game.strategy;
 
 import game.Board;
 import game.Disc;

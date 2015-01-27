@@ -142,7 +142,7 @@ public class ClientTUI implements ClientView {
 		while (client.isConnected() == null || !client.isConnected()) {
 			if (client.isConnected() == null) {
 				addMessage("Please enter your name.");
-				addMessage("If you want to use a strategy, and make the computer play for you, use -<LETTER> <NAME>.");
+				addMessage("If you want to use a game.strategy, and make the computer play for you, use -<LETTER> <NAME>.");
 				addMessage("Available strategies are: ");
 				addMessage("-N for a NaiveStrategy (makes random moves)");
 				addMessage("-S for Smart (thinks ahead 1 turn)");

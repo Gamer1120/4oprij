@@ -19,8 +19,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <class id="3" language="java" name="strategy.SmartStrategy" project="4oprij" 
-    file="/4oprij/src/strategy/SmartStrategy.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="3" language="java" name="game.strategy.SmartStrategy" project="4oprij" 
+    file="/4oprij/src/game/strategy/SmartStrategy.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="135" width="174" x="1265" y="2654"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -46,8 +46,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="6" language="java" name="strategy.ComputerPlayer" project="4oprij" 
-    file="/4oprij/src/strategy/ComputerPlayer.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="6" language="java" name="game.strategy.ComputerPlayer" project="4oprij" 
+    file="/4oprij/src/game/strategy/ComputerPlayer.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="171" width="175" x="828" y="2654"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -91,8 +91,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </enumeration>  
-  <class id="11" language="java" name="strategy.MinMaxStrategy" project="4oprij" 
-    file="/4oprij/src/strategy/MinMaxStrategy.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="11" language="java" name="game.strategy.MinMaxStrategy" project="4oprij" 
+    file="/4oprij/src/game/strategy/MinMaxStrategy.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="243" width="182" x="1043" y="2654"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -127,8 +127,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </class>  
-  <interface id="15" language="java" name="strategy.Strategy" project="4oprij" file="/4oprij/src/strategy/Strategy.java" 
-    binary="false" corner="BOTTOM_RIGHT">    
+  <interface id="15" language="java" name="game.strategy.Strategy" project="4oprij" 
+    file="/4oprij/src/game/strategy/Strategy.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="99" width="174" x="1153" y="3261"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      
@@ -136,8 +136,8 @@
       <operations public="true" package="true" protected="true" private="true" static="true"/>    
     </display>  
   </interface>  
-  <class id="16" language="java" name="strategy.NaiveStrategy" project="4oprij" 
-    file="/4oprij/src/strategy/NaiveStrategy.java" binary="false" corner="BOTTOM_RIGHT">    
+  <class id="16" language="java" name="game.strategy.NaiveStrategy" project="4oprij" 
+    file="/4oprij/src/game/strategy/NaiveStrategy.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="135" width="174" x="1479" y="2654"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
       sort-features="false" accessors="true" visibility="true">      

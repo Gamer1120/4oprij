@@ -1,4 +1,4 @@
-package strategy;
+package game.strategy;
 
 import game.Board;
 import game.Disc;
@@ -15,7 +15,7 @@ import java.util.Random;
  */
 public class NaiveStrategy implements Strategy {
 	/**
-	 * The name this strategy has.
+	 * The name this game.strategy has.
 	 */
 	public final static String NAME = "Naive";
 

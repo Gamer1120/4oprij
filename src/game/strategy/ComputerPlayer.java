@@ -1,4 +1,4 @@
-package strategy;
+package game.strategy;
 
 import game.Board;
 import game.Disc;
@@ -47,12 +47,12 @@ public class ComputerPlayer extends Observable {
 	 * 
 	 * @param disc
 	 *            The Disc this ComputerPlayer should have.
-	 * @param strategy
+	 * @param game.strategy
 	 *            The Strategy this ComputerPlayer should use.
 	 */
 	/*@	requires disc == Disc.YELLOW || disc == Disc.RED;
-	  	requires strategy != null;
-	  	ensures getStrategy() == strategy;
+	  	requires game.strategy != null;
+	  	ensures getStrategy() == game.strategy;
 	  	ensures getDisc() == disc;
 	 */
 	public ComputerPlayer(Disc disc, Strategy strategy) {
@@ -81,10 +81,10 @@ public class ComputerPlayer extends Observable {
 	/**
 	 * Sets the Strategy for this ComputerPlayer
 	 * 
-	 * @param strategy
+	 * @param game.strategy
 	 *            The Strategy this ComputerPlayer should have.
 	 */
-	//@ ensures getStrategy() == strategy;
+	//@ ensures getStrategy() == game.strategy;
 	public void setStrategy(Strategy strategy) {
 		s = strategy;
 	}

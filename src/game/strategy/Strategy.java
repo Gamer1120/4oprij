@@ -1,4 +1,4 @@
-package strategy;
+package game.strategy;
 
 import game.Board;
 import game.Disc;
@@ -15,7 +15,7 @@ public interface Strategy {
 	/**
 	 * Returns the name this Strategy has.
 	 * 
-	 * @return The name this strategy has.
+	 * @return The name this game.strategy has.
 	 */
 	/*@ pure */public String getName();
 
@@ -26,7 +26,7 @@ public interface Strategy {
 	 *            The Board to make a move on.
 	 * @param d
 	 *            The Disc to make a move for.
-	 * @return The move determined by the strategy.
+	 * @return The move determined by the game.strategy.
 	 */
 	/*@	requires b != null;
 	 	requires d == Disc.YELLOW || d == Disc.RED;

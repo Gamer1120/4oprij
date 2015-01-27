@@ -2,6 +2,10 @@ package client;
 
 import game.Board;
 import game.Disc;
+import game.strategy.ComputerPlayer;
+import game.strategy.MinMaxStrategy;
+import game.strategy.NaiveStrategy;
+import game.strategy.SmartStrategy;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,10 +19,6 @@ import java.util.Map;
 
 import server.ClientHandler;
 import server.Server;
-import strategy.ComputerPlayer;
-import strategy.MinMaxStrategy;
-import strategy.NaiveStrategy;
-import strategy.SmartStrategy;
 
 /**
  * client program for the Connect4 according to the protocol of the TI-2 group.<br>
@@ -704,7 +704,7 @@ public class Client extends Thread {
 
 	/**
 	 * Method to set the difficulty of a MinMaxStrategy. The difficulty is the
-	 * amount of turns the strategy will think ahead.
+	 * amount of turns the game.strategy will think ahead.
 	 * 
 	 * @param input
 	 *            The raw message the view sent.
