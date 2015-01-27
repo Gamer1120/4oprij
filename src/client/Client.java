@@ -532,7 +532,7 @@ public class Client extends Thread {
 	 *            The full message the server sent.
 	 */
 	//@ requires serverMessage != null & serverMessage[0].equals(Server.LEADERBOARD);
-	public void serverShowLeaderboard(String[] serverMessage) {
+	private void serverShowLeaderboard(String[] serverMessage) {
 		if ((serverMessage.length - 1) % 5 == 0) {
 			int amountOfPlayers = (serverMessage.length - 1) / 5;
 			//@ loop_invariant 0 <= i & i <= amountOfPlayers;
@@ -759,6 +759,7 @@ public class Client extends Thread {
 	 * 
 	 * @return The Board object stored for this client.
 	 */
+	//@ requires isIngame();
 	/*@ pure */public Board getBoard() {
 		return board;
 	}
@@ -773,6 +774,7 @@ public class Client extends Thread {
 	 *            The move to be made.
 	 * @return If that move is valid.
 	 */
+	//@ requires isIngame();
 	/*@ pure */private boolean checkMove(int move) {
 		return board.isField(move) && board.isEmptyField(move);
 	}
@@ -785,6 +787,7 @@ public class Client extends Thread {
 	 * @param col
 	 *            The column to throw the Disc in.
 	 */
+	//@ requires isIngame();
 	private void makeMove(int player, int col) {
 		if (player == myNumber - 1) {
 			board.insertDisc(col, Disc.YELLOW);
@@ -803,6 +806,7 @@ public class Client extends Thread {
 	 * @return A new Board object with the Board as sent by the Server.
 	 */
 	//@ requires line != null;
+	//@ requires isIngame();
 	public Board toBoard(String line) {
 		String[] protocol = line.split(" ");
 		Board serverBoard = null;
@@ -817,6 +821,10 @@ public class Client extends Thread {
 						+ " Couldn't parse Board. TERMINATING.");
 				shutdown();
 			}
+			board = serverBoard;
+			makeMove(savedMove[0], savedMove[1]);
+			mui.addGameMessage("Succesfully received the board from the server");
+			mui.addBoard();
 		} else if (myNumber == 2) {
 			try {
 				serverBoard = makeBoard(Integer.parseInt(protocol[2]),
@@ -828,6 +836,10 @@ public class Client extends Thread {
 						+ " Couldn't parse Board. TERMINATING.");
 				shutdown();
 			}
+			board = serverBoard;
+			makeMove(savedMove[0], savedMove[1]);
+			mui.addGameMessage("Succesfully received the board from the server");
+			mui.addBoard();
 		} else {
 			mui.addErrorMessage("Couldn't determine player.");
 		}
@@ -853,7 +865,8 @@ public class Client extends Thread {
 	 *            The board as sent by the server.
 	 * @return A valid Board constructed from these parameters.
 	 */
-	private Board makeBoard(int rows, int columns, Disc firstDisc,
+	//@ requires isIngame();
+	public Board makeBoard(int rows, int columns, Disc firstDisc,
 			Disc secondDisc, String[] serverMessage) {
 		Board serverBoard = new Board(rows, columns);
 		int i = 3;
