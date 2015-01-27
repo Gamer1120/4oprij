@@ -16,7 +16,12 @@ public class MinMaxStrategy implements Strategy {
 	 * The name of this Strategy.
 	 */
 	public static final String NAME = "MiniMax";
-
+	/**
+	 * The amount of multiplication used for calculating the score, if pow is 2
+	 * than the score of a win on a depth of 3 will be twice the score of a win
+	 * on depth 4.
+	 */
+	public final static int BASE = 8;
 	/**
 	 * The Disc this MinMaxStrategy uses.
 	 */
@@ -138,9 +143,9 @@ public class MinMaxStrategy implements Strategy {
 	private int evaluateMove(Board b, int depth, Disc d) {
 		if (b.isWinner(d)) {
 			if (d == disc) {
-				return twoPow(maxDepth - depth);
+				return pow(maxDepth - depth);
 			} else {
-				return -twoPow(maxDepth - depth);
+				return -pow(maxDepth - depth);
 			}
 			/*
 			 * Shouldn't be larger, except when the user changes the
@@ -165,20 +170,21 @@ public class MinMaxStrategy implements Strategy {
 	}
 
 	/**
-	 * This method calculates 2^exp. This is used to calculate the score.
+	 * This method calculates BASE^exp. This is used to calculate the score.
 	 * 
 	 * @param exp
 	 *            The exponent.
-	 * @return 2^exp.
+	 * @return BASE^exp.
 	 */
 	/*@ requires exp >= 0;
-		ensures \result == Math.pow(2, exp);
+		requires BASE >= 0;
+		ensures \result == Math.pow(BASE, exp);
 	 */
-	private int twoPow(int exp) {
+	private int pow(int exp) {
 		int result = 1;
 		//@ loop_invariant 0 <= i && i <= exp;
 		for (int i = 0; i < exp; i++) {
-			result *= 2;
+			result *= BASE;
 		}
 		return result;
 	}
