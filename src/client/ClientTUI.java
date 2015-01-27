@@ -43,7 +43,6 @@ public class ClientTUI implements ClientView {
 	 */
 	public ClientTUI() {
 		this.reader = new BufferedReader(new InputStreamReader(System.in));
-		setUpClient();
 	}
 
 	/**
@@ -130,7 +129,7 @@ public class ClientTUI implements ClientView {
 	 *            The command line arguments. These aren't used.
 	 */
 	public static void main(String[] args) {
-		new ClientTUI();
+		new ClientTUI().setUpClient();
 	}
 
 	/**
@@ -191,6 +190,10 @@ public class ClientTUI implements ClientView {
 			addMessage("Please enter the port you'd like to connect to.");
 			try {
 				port = (Integer.parseInt(reader.readLine()));
+				if (!(port >= 1 & port <= 65535)) {
+					addMessage("[ERROR]That is not a valid port number.");
+					port = 0;
+				}
 			} catch (NumberFormatException e) {
 				addMessage("[ERROR]That is not a valid number.");
 			} catch (IOException e) {
@@ -204,8 +207,8 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Creates a new client with the host and port specified.
 	 */
-	//@ ensures client != null;
-	private void setUpClient() {
+	//@ ensures getClient() != null;
+	public void setUpClient() {
 		this.host = askHost();
 		this.port = askPort();
 		try {
@@ -270,6 +273,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * Adds the current board to the TUI.
 	 */
+	//@ requires getClient().isIngame();
 	/*@ pure */@Override
 	public void addBoard() {
 		addMessage(client.getBoard().toString());
@@ -402,5 +406,9 @@ public class ClientTUI implements ClientView {
 		} else {
 			addMessage("Couldn't change the difficulty");
 		}
+	}
+	
+	public Client getClient(){
+		return client;
 	}
 }
