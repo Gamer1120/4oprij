@@ -931,6 +931,12 @@ public class ClientHandler extends Thread {
 	private void shutdown() {
 		if (loop) {
 			this.loop = false;
+			server.removeHandler(this);
+			try {
+				sock.close();
+			} catch (IOException e) {
+				server.print("Couldn't close sock.");
+			}
 			if (inGame()) {
 				server.sendMessage(opponentName, Server.GAME_END + " "
 						+ DISCONNECT);
@@ -942,12 +948,6 @@ public class ClientHandler extends Thread {
 				server.broadcastLobby();
 			} else {
 				server.print("ClientHandler: unconnected client has left.");
-			}
-			server.removeHandler(this);
-			try {
-				sock.close();
-			} catch (IOException e) {
-				server.print("Couldn't close sock.");
 			}
 		}
 	}
