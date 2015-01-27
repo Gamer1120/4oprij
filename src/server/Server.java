@@ -301,6 +301,8 @@ public class Server extends Thread {
 			invites.remove(invite);
 			board = new Board(boardSize[1].intValue(), boardSize[0].intValue());
 			board.addObserver(mui);
+			mui.addMessage("Created a board for " + name + " and " + invited
+					+ " with code " + board.hashCode());
 			setBoard(name, board);
 			setBoard(invited, board);
 		}
