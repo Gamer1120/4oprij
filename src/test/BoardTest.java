@@ -1,6 +1,8 @@
-package game;
+package test;
 
 import static org.junit.Assert.*;
+import game.Board;
+import game.Disc;
 
 import org.junit.Before;
 import org.junit.Test;
