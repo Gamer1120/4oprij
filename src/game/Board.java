@@ -53,7 +53,9 @@ public class Board extends Observable {
 		this.rows = rowsArg;
 		this.columns = columnsArg;
 		fields = new Disc[rows][columns];
+		//@ loop_invariant row <= rows;
 		for (int row = 0; row < rows; row++) {
+			//@ loop_invariant col <= columns;
 			for (int col = 0; col < columns; col++) {
 				setField(row, col, Disc.EMPTY);
 			}
@@ -89,7 +91,9 @@ public class Board extends Observable {
 	*/
 	public Board deepCopy() {
 		Board board = new Board(rows, columns);
+		//@ loop_invariant row <= rows;
 		for (int row = 0; row < rows; row++) {
+			//@ loop_invariant col <= columns;
 			for (int col = 0; col < columns; col++) {
 				board.setField(row, col, getField(row, col));
 			}
@@ -107,6 +111,7 @@ public class Board extends Observable {
 	//@requires isField(col);
 	/*@pure*/public int emptyRow(int col) {
 		int emptyRow = -1;
+		//@ loop_invariant row >= -1 & row <= rows - 1;
 		for (int row = rows - 1; row >= 0; row--) {
 			if (getField(row, col) == Disc.EMPTY) {
 				emptyRow = row;
@@ -126,6 +131,7 @@ public class Board extends Observable {
 	//@requires isField(col);
 	/*@pure*/public int fullRow(int col) {
 		int fullRow = -1;
+		//@ loop_invariant row <= rows;
 		for (int row = 0; row < rows; row++) {
 			if (getField(row, col) != Disc.EMPTY) {
 				fullRow = row;
@@ -189,6 +195,7 @@ public class Board extends Observable {
 	*/
 	/*@pure*/public boolean isEmptyField(int col) {
 		boolean hasEmpty = false;
+		//@ loop_invariant row <= rows;
 		for (int row = 0; row < rows; row++) {
 			if (isEmptyField(row, col)) {
 				hasEmpty = true;
@@ -222,7 +229,11 @@ public class Board extends Observable {
 	//@ensures \result == (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) != Disc.EMPTY));
 	/*@pure*/public boolean isFull() {
 		boolean isFull = true;
+		// JML doesn't recognize this loop since loop: is in front of the loop.
+		// If you put JML after the loop:, the loop: can't be found.
+		// loop_invariant row <= rows;
 		loop: for (int row = 0; row < rows; row++) {
+			//@ loop_invariant col <= columns;
 			for (int col = 0; col < columns; col++) {
 				if (getField(row, col) == Disc.EMPTY) {
 					isFull = false;
@@ -254,8 +265,12 @@ public class Board extends Observable {
 	//@ requires d == Disc.YELLOW | d == Disc.RED;
 	/*@pure*/public boolean hasRow(Disc d) {
 		boolean hasRow = false;
+		// JML doesn't recognize this loop since loop: is in front of the loop.
+		// If you put JML after the loop:, the loop: can't be found.
+		// loop_invariant row <= rows;
 		loop: for (int row = 0; row < rows; row++) {
 			int count = 0;
+			//@ loop_invariant 0 <= col && col <= columns + count - CONNECT;
 			for (int col = 0; columns + count - col >= CONNECT; col++) {
 				if (getField(row, col) == d) {
 					if (++count >= CONNECT) {
@@ -280,8 +295,12 @@ public class Board extends Observable {
 	//@ requires d == Disc.YELLOW | d == Disc.RED;
 	/*@pure*/public boolean hasColumn(Disc d) {
 		boolean hasColumn = false;
+		// JML doesn't recognize this loop since loop: is in front of the loop.
+		// If you put JML after the loop:, the loop: can't be found.
+		// loop_invariant col <= columns;
 		loop: for (int col = 0; col < columns; col++) {
 			int count = 0;
+			//@ loop_invariant 0 <= row && row <= rows + count - CONNECT;
 			for (int row = 0; rows + count - row >= CONNECT; row++) {
 				if (getField(row, col) == d) {
 					if (++count >= CONNECT) {
@@ -308,6 +327,9 @@ public class Board extends Observable {
 		boolean hasDiagonal = false;
 		int r = rows - CONNECT;
 		int c = 0;
+		// JML doesn't recognize this loop since loop: is in front of the loop.
+		// If you put JML after the loop:, the loop: can't be found.
+		// loop_invariant c <= columns;
 		loop: while (c < columns) {
 			int row = r;
 			int col = c;
@@ -389,6 +411,7 @@ public class Board extends Observable {
 	@Override
 	public String toString() {
 		String output = "[";
+		//@ loop_invariant i <= columns;
 		for (int i = 0; i < columns; i++) {
 			output += i;
 			if (i != columns - 1) {
@@ -409,8 +432,9 @@ public class Board extends Observable {
 	 */
 	public String toProtocol() {
 		String output = columns + " " + rows;
-		// TODO: constantes?
+		//@ loop_invariant 0 <= row & row <= rows - 1;
 		for (int row = rows - 1; row >= 0; row--) {
+			//@ loop_invariant 0 <= col & col <= columns;
 			for (int col = 0; col < columns; col++) {
 				if (getField(row, col) == Disc.EMPTY) {
 					output += " " + 0;
@@ -430,7 +454,9 @@ public class Board extends Observable {
 	 */
 	//@ensures (\forall int i; 0 <= i & i < rows; (\forall int j; 0 <= j & j < columns; this.getField(i, j) == Disc.EMPTY));
 	public void reset() {
+		//@ loop_invariant row <= rows;
 		for (int row = 0; row < rows; row++) {
+			//@ loop_invariant col <= columns;
 			for (int col = 0; col < columns; col++) {
 				setField(row, col, Disc.EMPTY);
 			}
@@ -486,7 +512,9 @@ public class Board extends Observable {
 		int columns = this.getColumns();
 		int rows = this.getRows();
 		if (columns == compareTo.getColumns() && rows == compareTo.getRows()) {
+			//@ loop_invariant col <= columns;
 			for (int col = 0; col < columns; col++) {
+				//@ loop_invariant row <= rows;
 				for (int row = 0; row < rows; row++) {
 					if (this.getField(row, col) != compareTo.getField(row, col)) {
 						equals = false;

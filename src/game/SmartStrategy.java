@@ -38,6 +38,7 @@ public class SmartStrategy implements Strategy {
 	@Override
 	public int determineMove(Board b, Disc d) {
 		ArrayList<Integer> empty = new ArrayList<Integer>();
+		//@ loop_invariant 0 <= i & i <= b.getColumns();
 		for (int i = 0; i < b.getColumns(); i++) {
 			if (b.isEmptyField(i)) {
 				empty.add(i);

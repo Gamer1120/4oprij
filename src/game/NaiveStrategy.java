@@ -36,6 +36,7 @@ public class NaiveStrategy implements Strategy {
 	@Override
 	public int determineMove(Board b, Disc d) {
 		ArrayList<Integer> empty = new ArrayList<Integer>();
+		//@ loop_invariant 0 <= col & col <= b.getColumns();
 		for (int col = 0; col < b.getColumns(); col++) {
 			if (b.isEmptyField(col)) {
 				empty.add(col);
