@@ -546,7 +546,6 @@ public class ClientHandler extends Thread {
 	private void invite(String name, int boardX, int boardY) {
 		server.sendMessage(name, Server.INVITE + " " + clientName + " "
 				+ boardX + " " + boardY);
-		server.sendMessage(name, Server.INVITE + " " + clientName);
 		server.addInvite(clientName, name, boardX, boardY);
 	}
 
