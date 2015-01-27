@@ -262,7 +262,8 @@ public class ClientTUI implements ClientView {
 	//@ requires message !=null & !message.equals("");
 	/*@ pure */@Override
 	public void addChatMessage(String message) {
-		addMessage("[CHAT]" + message);
+		String[] split = message.split("\\s+");
+		addMessage("[CHAT]" + split[0] + ":" + client.arrayToLine(split));
 	}
 
 	/**
