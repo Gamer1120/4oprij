@@ -557,15 +557,17 @@ public class Client extends Thread {
 	public void clientHelp() {
 		if (isIngame()) {
 			mui.addHelpMessage("Available commands are: " + Client.MOVE
-					+ " <column>, " + Client.HINT + ", " + Client.PING
+					+ " <column>, " + Client.HINT + ", " + Client.PING + ", "
+					+ Client.HELP + ", " + Client.DIFFICULTY + " <number>"
 					+ " and " + Client.QUIT + ".");
 		} else {
 			mui.addHelpMessage("Available commands are: " + Client.INVITE
 					+ " <player>, " + Client.ACCEPT_INVITE + " <player>, "
 					+ Client.DECLINE_INVITE + " <player>, " + Client.CHAT
 					+ " <message>, " + Client.REQUEST_LOBBY + ", "
-					+ Client.REQUEST_LEADERBOARD + ", " + Client.PING + " and "
-					+ Client.QUIT + ".");
+					+ Client.REQUEST_LEADERBOARD + ", " + Client.PING + ", "
+					+ Client.HELP + ", " + Client.DIFFICULTY + " <number>"
+					+ " and " + Client.QUIT + ".");
 		}
 	}
 

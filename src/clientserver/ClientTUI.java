@@ -32,7 +32,7 @@ public class ClientTUI implements ClientView {
 	 * The port the ClientTUI will be connecting to.
 	 */
 	private int port;
-	
+
 	/*@	private invariant this.reader != null;
 	  	private invariant client != null;
 	  	private invariant host != null;
@@ -155,6 +155,7 @@ public class ClientTUI implements ClientView {
 				}
 			}
 		}
+		client.clientHelp();
 		readInput();
 	}
 
@@ -307,8 +308,8 @@ public class ClientTUI implements ClientView {
 	  	requires !gamesPlayed.equals("");
 	 */
 	/*@ pure */@Override
-	public void addLeaderBoardLine(String rank, String name,
-			String wins, String losses, String gamesPlayed) {
+	public void addLeaderBoardLine(String rank, String name, String wins,
+			String losses, String gamesPlayed) {
 		addMessage(rank + ". " + name + " Wins: " + wins + " Losses: " + losses
 				+ " Games played: " + gamesPlayed);
 
