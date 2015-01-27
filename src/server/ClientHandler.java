@@ -146,6 +146,7 @@ public class ClientHandler extends Thread {
 			String line = "";
 			String input = "";
 			try {
+				//Read till we have a command and there is a double newLine.
 				//@ loop_invariant line != null;
 				while (!input.equals("") || line.equals("")) {
 					input = in.readLine();
@@ -925,22 +926,23 @@ public class ClientHandler extends Thread {
 	private void shutdown() {
 		if (loop) {
 			this.loop = false;
-			server.removeInvite(clientName);
+			if (inGame()) {
+				server.sendMessage(opponentName, Server.GAME_END + " "
+						+ DISCONNECT);
+				server.print("ClientHandler: " + clientName
+						+ " has left while in a game.");
+			} else if (connected()) {
+				server.removeInvite(clientName);
+				server.print("ClientHandler: " + clientName + " has left.");
+				server.broadcastLobby();
+			} else {
+				server.print("ClientHandler: unconnected client has left.");
+			}
 			server.removeHandler(this);
 			try {
 				sock.close();
 			} catch (IOException e) {
 				server.print("Couldn't close sock.");
-				System.exit(1);
-			}
-			if (inGame()) {
-				server.sendMessage(opponentName, Server.GAME_END + " "
-						+ DISCONNECT);
-			} else if (connected()) {
-				server.print("ClientHandler: " + clientName + " has left.");
-				server.broadcastLobby();
-			} else {
-				server.print("ClientHandler: unconnected client has left.");
 			}
 		}
 	}
