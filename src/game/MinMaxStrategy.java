@@ -27,7 +27,7 @@ public class MinMaxStrategy implements Strategy {
 	/*@	private invariant disc == Disc.YELLOW || disc == Disc.RED;
 	 	private invariant maxDepth > 0;
 	 */
-	
+
 	/**
 	 * Creates a new MinMaxStrategy with a depth of 4.
 	 */
@@ -73,6 +73,7 @@ public class MinMaxStrategy implements Strategy {
 	 *            The depth to set for this MinMaxStrategy.
 	 */
 	//@ requires maxDepth > 0;
+	//@ ensures getDepth() == maxDepth;
 	public void setDepth(int maxDepth) {
 		this.maxDepth = maxDepth;
 	}
@@ -92,6 +93,9 @@ public class MinMaxStrategy implements Strategy {
 		this.disc = d;
 		int c = -1;
 		int score = Integer.MIN_VALUE;
+		/*@ loop_invariant 0 <= col && col <= b.getColumns();
+			loop_invariant b.isField(col);
+		 */
 		for (int col = 0; col < b.getColumns(); col++) {
 			if (b.isEmptyField(col)) {
 				int row = b.emptyRow(col);
@@ -139,6 +143,9 @@ public class MinMaxStrategy implements Strategy {
 			return 0;
 		}
 		int score = 0;
+		/*@ loop_invariant 0 <= col && col <= b.getColumns();
+			loop_invariant b.isField(col);
+		*/
 		for (int col = 0; col < b.getColumns(); col++) {
 			if (b.isEmptyField(col)) {
 				int row = b.emptyRow(col);
@@ -157,8 +164,12 @@ public class MinMaxStrategy implements Strategy {
 	 *            The exponent.
 	 * @return 2^exp.
 	 */
+	/*@ requires exp >= 0;
+		ensures \result == Math.pow(2, exp);
+	 */
 	private int twoPow(int exp) {
 		int result = 1;
+		//@ loop_invariant 0 <= i && i <= exp;
 		for (int i = 0; i < exp; i++) {
 			result *= 2;
 		}
