@@ -130,6 +130,7 @@ public class Server extends Thread {
 	public void broadcast(String msg) {
 		synchronized (threads) {
 			mui.addMessage("Broadcast: " + msg);
+			//@ loop_invariant threads.contains(ch);
 			for (ClientHandler ch : threads) {
 				if (ch.connected()) {
 					ch.sendMessage(msg);
@@ -146,6 +147,7 @@ public class Server extends Thread {
 		synchronized (threads) {
 			String lobby = lobbyToString();
 			mui.addMessage("Lobby:" + lobby);
+			//@ loop_invariant threads.contains(ch);
 			for (ClientHandler ch : threads) {
 				if (ch.connected() && !ch.inGame()) {
 					ch.sendMessage(LOBBY + lobby);
@@ -167,6 +169,7 @@ public class Server extends Thread {
 	public void broadcastChat(String msg) {
 		synchronized (threads) {
 			mui.addMessage("Chat: " + msg);
+			//@ loop_invariant threads.contains(ch);
 			for (ClientHandler ch : threads) {
 				if (ch.connected() && ch.hasChat()) {
 					ch.sendMessage(msg);
@@ -196,6 +199,7 @@ public class Server extends Thread {
 	/*@ pure */public boolean nameExists(String name) {
 		synchronized (threads) {
 			boolean exists = false;
+			//@ loop_invariant threads.contains(ch);
 			for (ClientHandler ch : threads) {
 				if (name.equals(ch.getClientName())) {
 					exists = true;
@@ -219,6 +223,7 @@ public class Server extends Thread {
 	/*@ pure */public ClientHandler getClient(String name) {
 		synchronized (threads) {
 			ClientHandler client = null;
+			//@ loop_invariant threads.contains(ch);
 			for (ClientHandler ch : threads) {
 				if (ch.getClientName().equals(name)) {
 					client = ch;
@@ -328,6 +333,7 @@ public class Server extends Thread {
 	/*@ pure */public String lobbyToString() {
 		synchronized (threads) {
 			String clients = "";
+			//@ loop_invariant threads.contains(ch);
 			for (ClientHandler ch : threads) {
 				if (ch.connected() && !ch.inGame()) {
 					clients += " " + ch.getClientName();
@@ -421,6 +427,7 @@ public class Server extends Thread {
 	/*@ pure */public boolean isInvited(String name) {
 		synchronized (invites) {
 			boolean retBool = false;
+			//@ loop_invariant invites.containsKey(invite);
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) || invite[1].equals(name)) {
 					retBool = true;
@@ -449,6 +456,7 @@ public class Server extends Thread {
 	/*@ pure */public boolean isInvited(String name, String invited) {
 		synchronized (invites) {
 			boolean retBool = false;
+			//@ loop_invariant invites.containsKey(invite);
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
 					retBool = true;
@@ -487,6 +495,7 @@ public class Server extends Thread {
 	/*@ pure */public String[] getInvite(String name, String invited) {
 		synchronized (invites) {
 			String[] retInvite = null;
+			//@ loop_invariant invites.containsKey(invite);
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
 					retInvite = invite;
@@ -510,6 +519,7 @@ public class Server extends Thread {
 	public void removeInvite(String name) {
 		synchronized (invites) {
 			mui.addMessage("removing all invites with " + name + ".");
+			//@ loop_invariant invites.containsKey(invite);
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name)) {
 					sendMessage(invite[1], Server.DECLINE_INVITE + " " + name);
@@ -542,6 +552,7 @@ public class Server extends Thread {
 	*/
 	public void removeInvite(String name, String invited) {
 		synchronized (invites) {
+			//@ loop_invariant invites.containsKey(invite);
 			for (String[] invite : invites.keySet()) {
 				if (invite[0].equals(name) && invite[1].equals(invited)) {
 					invites.remove(invite);
@@ -562,6 +573,11 @@ public class Server extends Thread {
 			int rank = 0;
 			int entry = 0;
 			LeaderboardPair oldPair = null;
+			/*@ loop_invariant leaderboard.contains(pair);
+				loop_invariant 0 <= entry && entry <= 51;
+				loop_invariant entry <= leaderboard.size();
+				loop_invariant 0 <= rank && rank <= entry;
+			*/
 			for (LeaderboardPair pair : leaderboard) {
 				if (++entry <= 50) {
 					if (!pair.equalScore(oldPair)) {
@@ -592,6 +608,7 @@ public class Server extends Thread {
 	public void updateLeaderboard(String name, Boolean win) {
 		synchronized (leaderboard) {
 			boolean found = false;
+			//@ loop_invariant leaderboard.contains(pair);
 			for (LeaderboardPair pair : leaderboard) {
 				if (pair.getName().equals(name)) {
 					if (win == null) {
@@ -653,6 +670,7 @@ public class Server extends Thread {
 			throws IOException {
 		TreeSet<LeaderboardPair> leaderboard = new TreeSet<LeaderboardPair>();
 		BufferedReader in = new BufferedReader(new FileReader(FILENAME));
+		//@ loop_invariant in != null;
 		while (in.ready()) {
 			String[] pair = in.readLine().split("\\s+");
 			try {
@@ -684,6 +702,9 @@ public class Server extends Thread {
 		} catch (FileNotFoundException e) {
 			mui.addMessage("Error couldn't save leaderboard.");
 		}
+		/*@ loop_invariant out != null;
+			loop_invariant leaderboard.contains(pair);
+		*/
 		for (LeaderboardPair pair : leaderboard) {
 			out.println(pair);
 		}
