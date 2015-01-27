@@ -163,6 +163,11 @@ public class ClientHandler extends Thread {
 				shutdown();
 				break;
 			}
+			if (connected()) {
+				server.print(clientName + " to ClientHandler: " + line);
+			} else {
+				server.print("unconnected client to ClientHandler: " + line);
+			}
 			String[] command = line.split("\\s+");
 			switch (command[0]) {
 			case Client.CONNECT:
