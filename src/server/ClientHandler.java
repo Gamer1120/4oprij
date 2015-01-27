@@ -362,7 +362,7 @@ public class ClientHandler extends Thread {
 	 *            The command sent by the client.
 	 */
 	/*@ requires command != null & !command.equals("");
-		requires command[0].equals(client.CONNECT);
+		requires command[0].equals(Client.CONNECT);
 	 */
 	private void connectChecks(String[] command) {
 		if (command.length < 2) {
@@ -386,7 +386,7 @@ public class ClientHandler extends Thread {
 	 */
 	/*@ requires command != null;
 		requires command.length >= 2;
-		requires command[0].equals(client.CONNECT);
+		requires command[0].equals(Client.CONNECT);
 		requires command[1].length() <= 15;
 		requires server.nameExists(command[1]);
 		ensures connected();
@@ -402,7 +402,7 @@ public class ClientHandler extends Thread {
 			 */
 			features: for (int i = 2; i < command.length; i++) {
 				/*@ loop_invariant 0 <= j && j <= command.length;
-					loop_invariant (\forall int l; 0 <= l & l < j; Features.FEATURES[l] != null);
+					loop_invariant (\forall int l; 0 <= l & l < j; FEATURES[l] != null);
 				 */
 				for (int j = 0; j < FEATURES.length; j++) {
 					if (FEATURES[j].equals(command[i])) {
@@ -432,7 +432,7 @@ public class ClientHandler extends Thread {
 	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(client.INVITE);
+		requires command[0].equals(Client.INVITE);
 	 */
 	private void inviteChecks(String[] command) {
 		if (command.length < 2) {
@@ -477,7 +477,7 @@ public class ClientHandler extends Thread {
 	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(client.INVITE);
+		requires command[0].equals(Client.INVITE);
 		requires connected();
 		requires server.nameExists(command[1]);
 		requires !inGame();
@@ -574,7 +574,7 @@ public class ClientHandler extends Thread {
 	 *            The command sent by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(client.ACCEPT_INVITE);
+		requires command[0].equals(Client.ACCEPT_INVITE);
 	*/
 	private void acceptChecks(String[] command) {
 		if (!connected()) {
@@ -622,7 +622,7 @@ public class ClientHandler extends Thread {
 	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(client.DECLINE_INVITE);
+		requires command[0].equals(Client.DECLINE_INVITE);
 	*/
 	private void declineChecks(String[] command) {
 		if (!connected()) {
@@ -667,7 +667,7 @@ public class ClientHandler extends Thread {
 	 *            The command sent by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(client.MOVE);
+		requires command[0].equals(Client.MOVE);
 	*/
 	private void moveChecks(String[] command) {
 		synchronized (board) {
@@ -693,7 +693,7 @@ public class ClientHandler extends Thread {
 	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(client.MOVE);
+		requires command[0].equals(Client.MOVE);
 		requires connected();
 		requires opponentName != null;
 		requires playerNumber == 0 || playerNumber == 1;
