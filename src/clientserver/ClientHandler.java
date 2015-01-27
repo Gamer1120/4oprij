@@ -790,7 +790,7 @@ public class ClientHandler extends Thread {
 	 */
 	private void chat(String line) {
 		server.broadcastChat(Server.CHAT + " " + clientName + " "
-				+ line.split(" ", 2)[1]);
+				+ line.split("\\s+", 2)[1]);
 	}
 
 	/**
