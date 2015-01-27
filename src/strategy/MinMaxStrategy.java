@@ -1,7 +1,10 @@
-package game;
+package strategy;
+
+import game.Board;
+import game.Disc;
 
 /**
- * Client program for the Connect4 according to the protocol of the TI-2 group.<br>
+ * client program for the Connect4 according to the protocol of the TI-2 group.<br>
  * <br>
  * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 

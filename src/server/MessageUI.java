@@ -1,4 +1,4 @@
-package clientserver;
+package server;
 
 /**
  * MessageUI interface for the Connect4 according to the protocol of the TI-2

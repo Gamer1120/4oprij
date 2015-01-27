@@ -1,11 +1,7 @@
-package clientserver;
+package client;
 
 import game.Board;
-import game.ComputerPlayer;
 import game.Disc;
-import game.MinMaxStrategy;
-import game.NaiveStrategy;
-import game.SmartStrategy;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -17,8 +13,15 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
+import server.ClientHandler;
+import server.Server;
+import strategy.ComputerPlayer;
+import strategy.MinMaxStrategy;
+import strategy.NaiveStrategy;
+import strategy.SmartStrategy;
+
 /**
- * Client program for the Connect4 according to the protocol of the TI-2 group.<br>
+ * client program for the Connect4 according to the protocol of the TI-2 group.<br>
  * <br>
  * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 
@@ -49,16 +52,16 @@ public class Client extends Thread {
 	/**
 	 * The features this client has.
 	 */
-	private static final String CLIENT_FEATURES = Features.CHAT + " "
-			+ Features.CUSTOM_BOARD_SIZE + " " + Features.LEADERBOARD;
+	private static final String CLIENT_FEATURES = ClientHandler.CHAT + " "
+			+ ClientHandler.CUSTOM_BOARD_SIZE + " " + ClientHandler.LEADERBOARD;
 
 	/**
-	 * The name of this Client.
+	 * The name of this client.
 	 */
 	private String clientName;
 
 	/**
-	 * The User Interface of this Client.
+	 * The User Interface of this client.
 	 */
 	private ClientTUI mui;
 
@@ -81,16 +84,16 @@ public class Client extends Thread {
 	private boolean loop;
 
 	/**
-	 * The Board this Client uses for determining their move.
+	 * The Board this client uses for determining their move.
 	 */
 	private Board board;
 
 	/**
-	 * A boolean to determine whether this Client is connected.
+	 * A boolean to determine whether this client is connected.
 	 */
 	private Boolean isConnected;
 	/**
-	 * The Player this Client is.
+	 * The Player this client is.
 	 */
 	private ComputerPlayer computerPlayer;
 
@@ -99,18 +102,18 @@ public class Client extends Thread {
 	 */
 	private boolean moveRequested;
 	/**
-	 * A Map of invites this Client is invited by. This map gets emptied every
+	 * A Map of invites this client is invited by. This map gets emptied every
 	 * time a Game starts.
 	 */
 	private Map<String, Integer[]> invitedBy;
 	/**
-	 * A Map of invited this Client sent. This map gets emptied every time a
+	 * A Map of invited this client sent. This map gets emptied every time a
 	 * Game starts.
 	 */
 	private Map<String, Integer[]> invited;
 
 	/**
-	 * The number of this Client in a game, as stored on the Server.
+	 * The number of this client in a game, as stored on the Server.
 	 */
 	private int myNumber;
 
@@ -129,14 +132,14 @@ public class Client extends Thread {
 	 */
 
 	/**
-	 * Constructs a Client object and tries to make a Socket connection
+	 * Constructs a client object and tries to make a Socket connection
 	 * 
 	 * @param host
-	 *            The IP-adress of this Client
+	 *            The IP-adress of this client
 	 * @param port
-	 *            The port of this Client
+	 *            The port of this client
 	 * @param muiArg
-	 *            The ClientTUI for this Client
+	 *            The ClientTUI for this client
 	 * @throws IOException
 	 *             When it can't get the socket's in or outputstream, or the
 	 *             socket can't connect to the server.
@@ -337,7 +340,7 @@ public class Client extends Thread {
 
 	/**
 	 * This method accepts the Server.LOBBY packet sent by the Server. When this
-	 * method is called, it shows the Client the other Clients that are
+	 * method is called, it shows the client the other Clients that are
 	 * currently in the lobby.
 	 * 
 	 * @param serverMessage
@@ -353,7 +356,7 @@ public class Client extends Thread {
 	 * This method accepts the Server.INVITE packet sent by the Server. When
 	 * this method is called, it adds the inviter (and to an inviterlist, and
 	 * potentially, the custom board size. If the player isn't ingame, it will
-	 * also show the Client that they have been invited by that Client.
+	 * also show the client that they have been invited by that client.
 	 * 
 	 * @param serverMessage
 	 *            The full message the server sent.
@@ -392,7 +395,7 @@ public class Client extends Thread {
 	/**
 	 * This method accepts the Server.DECLINE_INVITE packet. If the Server
 	 * specified a person, the person will be removed from the list of people
-	 * this Client has invited.
+	 * this client has invited.
 	 * 
 	 * @param serverMessage
 	 *            The full messsage the server sent.
@@ -412,8 +415,8 @@ public class Client extends Thread {
 
 	/**
 	 * This method accepts the Server.GAME_START packet sent by the Server. When
-	 * this method is called, it will show the Client that a the game is
-	 * started. The Client is set to being in-game, and a new Board is created.
+	 * this method is called, it will show the client that a the game is
+	 * started. The client is set to being in-game, and a new Board is created.
 	 * The size of the Board is dependant on the size sent in the invite (the
 	 * Boardsizes of the invites are saved in a HashMap).
 	 * 
@@ -445,7 +448,7 @@ public class Client extends Thread {
 
 	/**
 	 * This method accepts the Server.GAME_END packet sent by the Server. When
-	 * this method is called, it will set the Client to no longer being in-game.
+	 * this method is called, it will set the client to no longer being in-game.
 	 * It will also show the client who won the game, or if the game was a draw.
 	 * 
 	 * @param serverMessage
@@ -459,7 +462,7 @@ public class Client extends Thread {
 		if (serverMessage.length > 2) {
 			mui.addGameMessage("The winner is: " + serverMessage[2]);
 		} else if (serverMessage.length == 2) {
-			if (serverMessage[1].equals(Game.DRAW)) {
+			if (serverMessage[1].equals(ClientHandler.DRAW)) {
 				mui.addGameMessage("The game was a draw!");
 			} else {
 				mui.addGameMessage("The game has ended. Reason:"
@@ -680,7 +683,7 @@ public class Client extends Thread {
 	}
 
 	/**
-	 * Gives the Client a suggested move (does not actually do the move) using
+	 * Gives the client a suggested move (does not actually do the move) using
 	 * it's view.
 	 */
 	/*@ pure */public void clientHint() {
@@ -745,18 +748,18 @@ public class Client extends Thread {
 	}
 
 	/**
-	 * This method returns the name of this Client.
+	 * This method returns the name of this client.
 	 * 
-	 * @return The name of this Client.
+	 * @return The name of this client.
 	 */
 	/*@ pure */public String getClientName() {
 		return clientName;
 	}
 
 	/**
-	 * This method returns the Board object stored for this Client.
+	 * This method returns the Board object stored for this client.
 	 * 
-	 * @return The Board object stored for this Client.
+	 * @return The Board object stored for this client.
 	 */
 	/*@ pure */public Board getBoard() {
 		return board;
@@ -899,10 +902,10 @@ public class Client extends Thread {
 
 	//HANDLE INVITES
 	/**
-	 * Method to add an invite to the list of people this Client has invited.
+	 * Method to add an invite to the list of people this client has invited.
 	 * 
 	 * @param name
-	 *            The name this Client just invited.
+	 *            The name this client just invited.
 	 */
 	/*@ requires !name.equals("");
 		requires name != null;
@@ -912,11 +915,11 @@ public class Client extends Thread {
 	}
 
 	/**
-	 * Method to add an invite to the list of people this Client has invited
+	 * Method to add an invite to the list of people this client has invited
 	 * with a custom Board size.
 	 * 
 	 * @param name
-	 *            The name this Client just invited.
+	 *            The name this client just invited.
 	 * @param BoardX
 	 *            The custom Board size's X value.
 	 * @param BoardY
@@ -932,22 +935,22 @@ public class Client extends Thread {
 	}
 
 	/**
-	 * Method to add an invite to the list of people this Client has been
+	 * Method to add an invite to the list of people this client has been
 	 * invited by.
 	 * 
 	 * @param name
-	 *            The name this Client just got invited by.
+	 *            The name this client just got invited by.
 	 */
 	public void addServerInvite(String name) {
 		addServerInvite(name, 7, 6);
 	}
 
 	/**
-	 * Method to add an invite to the list of people this Client has been
+	 * Method to add an invite to the list of people this client has been
 	 * invited by with a custom Board size.
 	 * 
 	 * @param name
-	 *            The name this Client just got invited by.
+	 *            The name this client just got invited by.
 	 * @param BoardX
 	 *            The custom Board size's X value.
 	 * @param BoardY
@@ -973,7 +976,7 @@ public class Client extends Thread {
 
 	/**
 	 * This method closes the Socket connection and exits the program. On a side
-	 * note, before it does this, it also sets the loop variable for this Client
+	 * note, before it does this, it also sets the loop variable for this client
 	 * to false.
 	 */
 	public void shutdown() {

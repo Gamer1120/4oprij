@@ -1,4 +1,4 @@
-package clientserver;
+package client;
 
 /**
  * ClientView for the Connect4 according to the protocol of the TI-2 group.<br>
@@ -7,7 +7,16 @@ package clientserver;
  * 
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
-public interface ClientView extends MessageUI {
+public interface ClientView {
+
+	/**
+	 * Adds a message to the view.
+	 * 
+	 * @param msg
+	 *            The message to add.
+	 */
+	//@ requires msg != null & !msg.equals("");
+	public void addMessage(String msg);
 
 	/**
 	 * Asks for the name of the player.

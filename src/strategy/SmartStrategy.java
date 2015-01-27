@@ -1,4 +1,7 @@
-package game;
+package strategy;
+
+import game.Board;
+import game.Disc;
 
 import java.util.Random;
 import java.util.ArrayList;

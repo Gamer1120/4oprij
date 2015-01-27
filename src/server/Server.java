@@ -1,4 +1,4 @@
-package clientserver;
+package server;
 
 import game.Board;
 
@@ -15,7 +15,7 @@ import java.util.TreeSet;
 
 /**
  * Server. A Thread class that listens to a socket connection on a specified
- * port. For every socket connection with a Client, a new ClientHandler thread
+ * port. For every socket connection with a client, a new ClientHandler thread
  * is started.<br>
  * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
  * 
@@ -38,8 +38,8 @@ public class Server extends Thread {
 	public static final String PONG = "PONG";
 	// END OF PROTOCOL
 
-	public static final String FEATURES = Features.CHAT + " "
-			+ Features.LEADERBOARD + " " + Features.CUSTOM_BOARD_SIZE;
+	public static final String FEATURES = ClientHandler.CHAT + " "
+			+ ClientHandler.LEADERBOARD + " " + ClientHandler.CUSTOM_BOARD_SIZE;
 	public static final String FILENAME = "leaderboard.txt";
 
 	/** The socket of the server. */
@@ -102,7 +102,7 @@ public class Server extends Thread {
 	/**
 	 * Listens to a port of this Server if there are any Clients that would like
 	 * to connect. For every new socket connection a new ClientHandler thread is
-	 * started that takes care of the further communication with the Client.
+	 * started that takes care of the further communication with the client.
 	 */
 	@Override
 	public void run() {
@@ -235,7 +235,7 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Sends a message to the Client with the specified name.
+	 * Sends a message to the client with the specified name.
 	 *
 	 * @param name
 	 *            name of the client
@@ -359,7 +359,7 @@ public class Server extends Thread {
 	}
 
 	/**
-	 * Gets the set of connected Client Handlers.
+	 * Gets the set of connected client Handlers.
 	 * 
 	 * @return threads, the set of connected clientHandlers
 	 */

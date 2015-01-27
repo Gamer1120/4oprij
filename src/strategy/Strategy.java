@@ -1,4 +1,7 @@
-package game;
+package strategy;
+
+import game.Board;
+import game.Disc;
 
 /**
  * Strategy interface for the Connect4 according to the protocol of the TI-2

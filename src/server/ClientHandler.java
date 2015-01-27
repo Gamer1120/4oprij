@@ -1,4 +1,4 @@
-package clientserver;
+package server;
 
 import game.Board;
 import game.Disc;
@@ -12,6 +12,8 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
+import client.Client;
+
 // TODO: Observable
 /**
  * The ClientHandler that reads all the input from the Clients and send messages
@@ -23,33 +25,46 @@ import java.util.Set;
  */
 public class ClientHandler extends Thread {
 
+	//PROTOCOL
+	public static final String CHAT = "CHAT";
+	public static final String LEADERBOARD = "LEADERBOARD";
+	public static final String CUSTOM_BOARD_SIZE = "CUSTOM_BOARD_SIZE";
+	public static final String SECURITY = "SECURITY";
+	public static final String MULTIPLAYER = "MULTIPLAYER";
+	public static final String[] FEATURES = new String[] { CHAT, LEADERBOARD,
+			CUSTOM_BOARD_SIZE, SECURITY, MULTIPLAYER };
+	public static final String WIN = "WIN";
+	public static final String DRAW = "DRAW";
+	public static final String DISCONNECT = "DISCONNECT";
+	//END PROTOCOL
+
 	/**
 	 * The Server for this ClientHandler.
 	 */
 	private Server server;
 
 	/**
-	 * The Socket this ClientHandler will use to connect to the Client.
+	 * The Socket this ClientHandler will use to connect to the client.
 	 */
 	private Socket sock;
 
 	/**
-	 * The BufferedReader used to receive packets from the Client.
+	 * The BufferedReader used to receive packets from the client.
 	 */
 	private BufferedReader in;
 
 	/**
-	 * The BufferedWriter used to send packets to the Client.
+	 * The BufferedWriter used to send packets to the client.
 	 */
 	private BufferedWriter out;
 
 	/**
-	 * The name of the Client this ClientHandler is associated with.
+	 * The name of the client this ClientHandler is associated with.
 	 */
 	private String clientName;
 
 	/**
-	 * The list of the clientFeatures of the Client this ClientHandler is
+	 * The list of the clientFeatures of the client this ClientHandler is
 	 * associated with.
 	 */
 	private HashSet<String> clientFeatures;
@@ -118,8 +133,8 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * This method takes care of sending messages from the Client. Every message
-	 * that is received, is preprended with the name of the Client, and the new
+	 * This method takes care of sending messages from the client. Every message
+	 * that is received, is preprended with the name of the client, and the new
 	 * message is offered to the Server for broadcasting. If an IOException is
 	 * thrown while reading the message or the message is null and a
 	 * NullPointerException is thrown, the method concludes that the socket
@@ -231,7 +246,7 @@ public class ClientHandler extends Thread {
 
 	/**
 	 * This method can be used to send a message over the socket connection to
-	 * the Client. If the writing of a message fails, the method concludes that
+	 * the client. If the writing of a message fails, the method concludes that
 	 * the socket connection has been lost and shutdown() is called.
 	 *
 	 * @param msg
@@ -251,34 +266,34 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Returns the name of the Client.
+	 * Returns the name of the client.
 	 *
-	 * @return the name of the Client.
+	 * @return the name of the client.
 	 */
 	/*@ pure */public String getClientName() {
 		return clientName;
 	}
 
 	/**
-	 * Returns the clientFeatures of the Client.
+	 * Returns the clientFeatures of the client.
 	 *
-	 * @return the clientFeatures of the Client.
+	 * @return the clientFeatures of the client.
 	 */
 	/*@ pure */public Set<String> getClientFeatures() {
 		return clientFeatures;
 	}
 
 	/**
-	 * Returns whether this Client has connected.
+	 * Returns whether this client has connected.
 	 *
-	 * @return true if the Client has a name.
+	 * @return true if the client has a name.
 	 */
 	/*@ pure */public boolean connected() {
 		return clientName != null;
 	}
 
 	/**
-	 * Returns whether the Client is playing a game.
+	 * Returns whether the client is playing a game.
 	 *
 	 * @return true if there is a Board.
 	 */
@@ -287,49 +302,49 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Returns whether this Client has the chat feature.
+	 * Returns whether this client has the chat feature.
 	 *
-	 * @return true if the Client has the chat feature.
+	 * @return true if the client has the chat feature.
 	 */
 	//@ requires connected();
 	/*@ pure */public boolean hasChat() {
-		return clientFeatures.contains(Features.CHAT);
+		return clientFeatures.contains(CHAT);
 	}
 
 	/**
-	 * Returns whether this Client has the custom board size feature.
+	 * Returns whether this client has the custom board size feature.
 	 *
-	 * @return true if the Client has the custom board size feature.
+	 * @return true if the client has the custom board size feature.
 	 */
 	//@ requires connected();
 	/*@ pure */public boolean hasCustomBoardSize() {
-		return clientFeatures.contains(Features.CUSTOM_BOARD_SIZE);
+		return clientFeatures.contains(CUSTOM_BOARD_SIZE);
 	}
 
 	/**
-	 * Returns whether this Client has the Leaderboard feature.
+	 * Returns whether this client has the Leaderboard feature.
 	 *
-	 * @return true if the Client has the Leaderboard feature.
+	 * @return true if the client has the Leaderboard feature.
 	 */
 	//@ requires connected();
 	/*@ pure */public boolean hasLeaderboard() {
-		return clientFeatures.contains(Features.LEADERBOARD);
+		return clientFeatures.contains(LEADERBOARD);
 	}
 
 	/**
-	 * Gets the Board of this Client.
+	 * Gets the Board of this client.
 	 *
-	 * @return the Board of this Client.
+	 * @return the Board of this client.
 	 */
 	/*@ pure */public Board getBoard() {
 		return board;
 	}
 
 	/**
-	 * Sets the Board of this Client.
+	 * Sets the Board of this client.
 	 *
 	 * @param b
-	 *            The Board to set for this Client.
+	 *            The Board to set for this client.
 	 */
 	/*@ requires connected();
 		requires b != null;
@@ -339,15 +354,15 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the Client has sent a command with valid arguments and with a
+	 * Checks if the client has sent a command with valid arguments and with a
 	 * valid name. If this is the case, connect will be called to connect the
 	 * client
 	 *
 	 * @param command
-	 *            The command sent by the Client.
+	 *            The command sent by the client.
 	 */
 	/*@ requires command != null & !command.equals("");
-		requires command[0].equals(Client.CONNECT);
+		requires command[0].equals(client.CONNECT);
 	 */
 	private void connectChecks(String[] command) {
 		if (command.length < 2) {
@@ -364,14 +379,14 @@ public class ClientHandler extends Thread {
 	/**
 	 * Connects the Clients by assigning the name specified in the command and
 	 * storing the clientFeatures. Then it send an ACCEPT_CONNECT with the
-	 * clientFeatures of the Client
+	 * clientFeatures of the client
 	 *
 	 * @param command
-	 *            The command sent by the Client.
+	 *            The command sent by the client.
 	 */
 	/*@ requires command != null;
 		requires command.length >= 2;
-		requires command[0].equals(Client.CONNECT);
+		requires command[0].equals(client.CONNECT);
 		requires command[1].length() <= 15;
 		requires server.nameExists(command[1]);
 		ensures connected();
@@ -389,9 +404,9 @@ public class ClientHandler extends Thread {
 				/*@ loop_invariant 0 <= j && j <= command.length;
 					loop_invariant (\forall int l; 0 <= l & l < j; Features.FEATURES[l] != null);
 				 */
-				for (int j = 0; j < Features.FEATURES.length; j++) {
-					if (Features.FEATURES[j].equals(command[i])) {
-						clientFeatures.add(Features.FEATURES[j]);
+				for (int j = 0; j < FEATURES.length; j++) {
+					if (FEATURES[j].equals(command[i])) {
+						clientFeatures.add(FEATURES[j]);
 						continue features;
 					}
 				}
@@ -405,7 +420,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the Client is connected, if the Client sent a command with
+	 * Checks if the client is connected, if the client sent a command with
 	 * valid arguments, if the opponent exists, if neither player is in a game
 	 * and checks whether there is no invite between both player. If this is the
 	 * case, invite will be called and an invite will be sent to the opponent
@@ -414,10 +429,10 @@ public class ClientHandler extends Thread {
 	 * been cancelled.
 	 *
 	 * @param command
-	 *            The command send by the Client.
+	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(Client.INVITE);
+		requires command[0].equals(client.INVITE);
 	 */
 	private void inviteChecks(String[] command) {
 		if (command.length < 2) {
@@ -455,14 +470,14 @@ public class ClientHandler extends Thread {
 	 * board size. The amount of rows and columns can't be smaller than 4 or
 	 * larger than 100. Then it calls invite to invite the opponent with a
 	 * custom board size. If one of the checks fail an error will be sent and
-	 * the invite will be automatically declined, to let the Client know the
+	 * the invite will be automatically declined, to let the client know the
 	 * invite has been cancelled.
 	 *
 	 * @param command
 	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(Client.INVITE);
+		requires command[0].equals(client.INVITE);
 		requires connected();
 		requires server.nameExists(command[1]);
 		requires !inGame();
@@ -475,7 +490,7 @@ public class ClientHandler extends Thread {
 			sendError(
 					Client.INVITE,
 					"Your client doesn't support the "
-							+ Features.CUSTOM_BOARD_SIZE
+							+ CUSTOM_BOARD_SIZE
 							+ " feature. Please add this feature if you want to use extras.");
 			sendMessage(Server.DECLINE_INVITE + " " + command[1]);
 		} else if (!server.hasCustomBoardSize(command[1])) {
@@ -509,7 +524,7 @@ public class ClientHandler extends Thread {
 	 * size if specified. the invite will be saved on the server.
 	 *
 	 * @param command
-	 *            The command send by the Client.
+	 *            The command send by the client.
 	 */
 	/*@ requires name != null;
 		requires connected();
@@ -530,7 +545,7 @@ public class ClientHandler extends Thread {
 	 * size if specified. The invite will be saved on the Server.
 	 *
 	 * @param command
-	 *            The command send by the Client.
+	 *            The command send by the client.
 	 */
 	/*@ requires name != null;
 		requires boardX >= 4;
@@ -550,16 +565,16 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the Client is connected, if the Client send a command with
+	 * Checks if the client is connected, if the client send a command with
 	 * valid arguments, if the opponent exists and if the opponent specified in
 	 * the command sent an invite to this player. If this is the case accept
 	 * will be called to accept the invite.
 	 *
 	 * @param command
-	 *            The command sent by the Client.
+	 *            The command sent by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(Client.ACCEPT_INVITE);
+		requires command[0].equals(client.ACCEPT_INVITE);
 	*/
 	private void acceptChecks(String[] command) {
 		if (!connected()) {
@@ -577,11 +592,11 @@ public class ClientHandler extends Thread {
 
 	/**
 	 * Accepts the invite, creates a Board with the size specified in the invite
-	 * and announces the start of the game to this Client and the specified
+	 * and announces the start of the game to this client and the specified
 	 * opponent.
 	 *
 	 * @param command
-	 *            The command sent by the Client.
+	 *            The command sent by the client.
 	 */
 	/*@ requires name != null;
 		requires connected();
@@ -607,7 +622,7 @@ public class ClientHandler extends Thread {
 	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(Client.DECLINE_INVITE);
+		requires command[0].equals(client.DECLINE_INVITE);
 	*/
 	private void declineChecks(String[] command) {
 		if (!connected()) {
@@ -629,7 +644,7 @@ public class ClientHandler extends Thread {
 	 * the Server. You can decline invites sent by you.
 	 *
 	 * @param command
-	 *            The command sent by the Client.
+	 *            The command sent by the client.
 	 */
 	/*@ requires name != null;
 		requires connected();
@@ -644,15 +659,15 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the Client is connected, if the Client is in game and if it's
-	 * the Client's turn to move, if this is the case it calls validMove to
+	 * Checks if the client is connected, if the client is in game and if it's
+	 * the client's turn to move, if this is the case it calls validMove to
 	 * check if the move is valid.
 	 *
 	 * @param command
-	 *            The command sent by the Client.
+	 *            The command sent by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(Client.MOVE);
+		requires command[0].equals(client.MOVE);
 	*/
 	private void moveChecks(String[] command) {
 		synchronized (board) {
@@ -669,16 +684,16 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the Client sent a command with valid arguments, tries to parse
+	 * Checks if the client sent a command with valid arguments, tries to parse
 	 * the column specified in the command, checks if the column is a valid
 	 * column and if it isn't full. If one of these things fail it sends an
 	 * error and a new move request, otherwise it will call move to do the move.
 	 *
 	 * @param command
-	 *            The command send by the Client.
+	 *            The command send by the client.
 	 */
 	/*@ requires command != null;
-		requires command[0].equals(Client.MOVE);
+		requires command[0].equals(client.MOVE);
 		requires connected();
 		requires opponentName != null;
 		requires playerNumber == 0 || playerNumber == 1;
@@ -739,23 +754,23 @@ public class ClientHandler extends Thread {
 		} else if (board.hasWinner()) {
 			server.updateLeaderboard(clientName, true);
 			server.updateLeaderboard(opponentName, false);
-			server.sendMessage(opponentName, Server.GAME_END + " " + Game.WIN
-					+ " " + clientName);
-			sendMessage(Server.GAME_END + " " + Game.WIN + " " + clientName);
+			server.sendMessage(opponentName, Server.GAME_END + " " + WIN + " "
+					+ clientName);
+			sendMessage(Server.GAME_END + " " + WIN + " " + clientName);
 		} else {
 			server.updateLeaderboard(clientName, null);
 			server.updateLeaderboard(opponentName, null);
-			server.sendMessage(opponentName, Server.GAME_END + " " + Game.DRAW);
-			sendMessage(Server.GAME_END + " " + Game.DRAW);
+			server.sendMessage(opponentName, Server.GAME_END + " " + DRAW);
+			sendMessage(Server.GAME_END + " " + DRAW);
 		}
 	}
 
 	/**
-	 * Checks if the Client is connected and if the command contains a message,
+	 * Checks if the client is connected and if the command contains a message,
 	 * if this is the case it calls chat to broadcast the message.
 	 *
 	 * @param command
-	 *            The command sent by the Client.
+	 *            The command sent by the client.
 	 */
 	/*@ requires line != null;
 	*/
@@ -769,7 +784,7 @@ public class ClientHandler extends Thread {
 			sendError(
 					Server.CHAT,
 					"Your client doesn't support the "
-							+ Features.CHAT
+							+ CHAT
 							+ " feature. Please add this feature if you want to use it.");
 		} else if (line.length() > 517) {
 			sendError(Server.CHAT, "Message longer than 512 characters.");
@@ -782,7 +797,7 @@ public class ClientHandler extends Thread {
 	 * Broadcasts the message to all connected clients.
 	 *
 	 * @param command
-	 *            The command sent by the Client.
+	 *            The command sent by the client.
 	 */
 	/*@ requires line != null;
 		requires connected();
@@ -794,7 +809,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the Client is connected and if the client is in game. If this
+	 * Checks if the client is connected and if the client is in game. If this
 	 * is the case it calls requestBoard to send the board.
 	 */
 	private void requestBoardChecks() {
@@ -808,7 +823,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Sends the board to the Client.
+	 * Sends the board to the client.
 	 */
 	//@ requires connected();
 	//@ requires inGame();
@@ -817,7 +832,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the Client is connected. If this is the case it calls
+	 * Checks if the client is connected. If this is the case it calls
 	 * requestLobby to send the lobby.
 	 */
 	private void requestLobbyChecks() {
@@ -829,7 +844,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Sends the lobby to the Client.
+	 * Sends the lobby to the client.
 	 */
 	//@ requires connected();
 	private void requestLobby() {
@@ -837,7 +852,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Checks if the Client is connected. If this is the case it calls
+	 * Checks if the client is connected. If this is the case it calls
 	 * requestLobby to send the lobby.
 	 */
 	private void requestLeaderboardChecks() {
@@ -847,7 +862,7 @@ public class ClientHandler extends Thread {
 			sendError(
 					Client.REQUEST_LEADERBOARD,
 					"Your client doesn't support the "
-							+ Features.LEADERBOARD
+							+ LEADERBOARD
 							+ " feature. Please add this feature if you want to use it.");
 		} else {
 			requestLeaderboard();
@@ -855,7 +870,7 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Sends the leaderboard to the Client.
+	 * Sends the leaderboard to the client.
 	 */
 	//@ requires connected();
 	//@ requires hasLeaderboard();
@@ -886,8 +901,8 @@ public class ClientHandler extends Thread {
 	}
 
 	/**
-	 * Ends the game, resets the values belonging to the game and broadcasts
-	 * the lobby because this client just joined the lobby again.
+	 * Ends the game, resets the values belonging to the game and broadcasts the
+	 * lobby because this client just joined the lobby again.
 	 */
 	//@ ensures playerNumber == -1;
 	//@ ensures opponentName == null;
@@ -903,7 +918,7 @@ public class ClientHandler extends Thread {
 
 	/**
 	 * This ClientHandler signs off from the Server and subsequently sends a
-	 * last broadcast to the Server to inform that the Client is no longer
+	 * last broadcast to the Server to inform that the client is no longer
 	 * participating in the lobby.
 	 */
 	//@ ensures !loop;
@@ -920,7 +935,7 @@ public class ClientHandler extends Thread {
 			}
 			if (inGame()) {
 				server.sendMessage(opponentName, Server.GAME_END + " "
-						+ Game.DISCONNECT);
+						+ DISCONNECT);
 			} else if (connected()) {
 				server.print("ClientHandler: " + clientName + " has left.");
 				server.broadcastLobby();

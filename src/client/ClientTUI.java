@@ -1,4 +1,4 @@
-package clientserver;
+package client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.net.UnknownHostException;
  */
 public class ClientTUI implements ClientView {
 	/**
-	 * The Client this ClientTUI is made for.
+	 * The client this ClientTUI is made for.
 	 */
 	private Client client;
 	/**
@@ -61,7 +61,7 @@ public class ClientTUI implements ClientView {
 	/**
 	 * This method reads the messages in the InputStream. Then, it decides which
 	 * command was sent, and executes this command by forwarding it to the
-	 * Client.
+	 * client.
 	 */
 	public void readInput() {
 		while (client.isAlive()) {

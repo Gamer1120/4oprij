@@ -1,4 +1,4 @@
-package clientserver;
+package temp;
 
 
 
@@ -213,7 +213,7 @@ package clientserver;
 public class Protocol {
 	public static class Client {
 		/**
-		 * <h3 id="client">Client</h3>
+		 * <h3 id="client">client</h3>
 		 */
 
 		/**
