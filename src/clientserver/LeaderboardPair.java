@@ -26,6 +26,8 @@ public class LeaderboardPair implements Comparable<LeaderboardPair>,
 	 */
 	private int[] score;
 
+	//@	private_invariant name != null & !name.equals("");
+	
 	/**
 	 * Creates a new LeaderboardPair object without any games played given a
 	 * name.

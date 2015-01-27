@@ -533,6 +533,7 @@ public class Client extends Thread {
 	public void serverShowLeaderboard(String[] serverMessage) {
 		if ((serverMessage.length - 1) % 5 == 0) {
 			int amountOfPlayers = (serverMessage.length - 1) / 5;
+			//@ loop_invariant 0 <= i & i <= amountOfPlayers;
 			for (int i = 0; i < amountOfPlayers; i++) {
 				mui.addLeaderBoardLine(serverMessage[((i * 5) + 5)],
 						serverMessage[((i * 5) + 1)],
@@ -856,7 +857,9 @@ public class Client extends Thread {
 			Disc secondDisc, String[] serverMessage) {
 		Board serverBoard = new Board(rows, columns);
 		int i = 3;
+		//@ loop_invariant row >= -1 & row < serverBoard.getRows();
 		for (int row = rows - 1; row >= 0; row--) {
+			//@ loop_invariant col >= 0 & col <= serverBoard.getColumns();
 			for (int col = 0; col < columns; col++) {
 				if (Integer.parseInt(serverMessage[i]) == 0) {
 					//Disc.EMPTY
@@ -884,6 +887,7 @@ public class Client extends Thread {
 	//@ requires array != null;
 	public String arrayToLine(String[] array) {
 		String retLine = "";
+		//@ loop_invariant i >= 1 & i <= array.length;
 		for (int i = 1; i < array.length; i++) {
 			retLine += " " + array[i];
 		}

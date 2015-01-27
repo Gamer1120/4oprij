@@ -34,6 +34,8 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	private JTextArea taMessages;
 	private Server server;
 
+	//@ private invariant server != null;
+	
 	/** Constructs a ServerGUI object. */
 	public ServerGUI() {
 		super("ServerGUI");
@@ -113,6 +115,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	/**
 	 * listener for the "Start Listening" button
 	 */
+	//@ requires ev != null;
 	@Override
 	public void actionPerformed(ActionEvent ev) {
 		Object src = ev.getSource();
@@ -148,6 +151,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	}
 
 	/** add a message to the textarea */
+	//@ requires msg != null & !msg.equals("");
 	@Override
 	public void addMessage(String msg) {
 		taMessages.append(msg + "\n");

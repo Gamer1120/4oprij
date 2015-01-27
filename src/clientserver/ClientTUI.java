@@ -32,6 +32,11 @@ public class ClientTUI implements ClientView {
 	 * The port the ClientTUI will be connecting to.
 	 */
 	private int port;
+	
+	/*@	private invariant this.reader != null;
+	  	private invariant client != null;
+	  	private invariant host != null;
+	 */
 
 	/**
 	 * Creates a ClientTUI object.

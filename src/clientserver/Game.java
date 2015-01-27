@@ -27,7 +27,8 @@ public class Game {
 	private int[] boardSize;
 	private Board board;
 
-	//TODO: discuss teams or more discs
+	
+	
 	public Game(ClientHandler[] players, int boardX, int boardY) {
 		this.clients = new HashSet<ClientHandler>();
 		clients.addAll(Arrays.asList(players));
