@@ -131,6 +131,7 @@ public class ClientHandler extends Thread {
 			String line = "";
 			String input = "";
 			try {
+				//@ loop_invariant line != null;
 				while (!input.equals("") || line.equals("")) {
 					input = in.readLine();
 					line += input;
@@ -379,7 +380,15 @@ public class ClientHandler extends Thread {
 	private void connect(String[] command) {
 		clientName = command[1];
 		if (command.length > 2) {
+			/*  JML doesn't recognize this loop since features: is in front of the loop.
+				If you put JML after the features:, the continue doesn't recognize it.
+				loop_invariant 2 <= i && i <= command.length;
+				loop_invariant (\forall int k; 2 <= k & k < i; command[k] != null);
+			 */
 			features: for (int i = 2; i < command.length; i++) {
+				/*@ loop_invariant 0 <= j && j <= command.length;
+					loop_invariant (\forall int l; 0 <= l & l < j; Features.FEATURES[l] != null);
+				 */
 				for (int j = 0; j < Features.FEATURES.length; j++) {
 					if (Features.FEATURES[j].equals(command[i])) {
 						clientFeatures.add(Features.FEATURES[j]);
