@@ -1,5 +1,7 @@
 package server;
 
+import java.util.Observer;
+
 /**
  * MessageUI interface for the Connect4 according to the protocol of the TI-2
  * group.<br>
@@ -8,7 +10,7 @@ package server;
  * 
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
-interface MessageUI {
+interface MessageUI extends Observer{
 	/**
 	 * Adds a message to the MessageUI.
 	 * 

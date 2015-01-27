@@ -497,7 +497,7 @@ public class Board extends Observable {
 	public void setField(int row, int col, Disc d) {
 		fields[row][col] = d;
 		super.setChanged();
-		super.notifyObservers(new int[] { col, row });
+		super.notifyObservers(new Object[] { d, col, row });
 	}
 
 	/**

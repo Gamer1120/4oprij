@@ -300,6 +300,7 @@ public class Server extends Thread {
 			Integer[] boardSize = invites.get(invite);
 			invites.remove(invite);
 			board = new Board(boardSize[1].intValue(), boardSize[0].intValue());
+			board.addObserver(mui);
 			setBoard(name, board);
 			setBoard(invited, board);
 		}

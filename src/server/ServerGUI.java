@@ -1,5 +1,7 @@
 package server;
 
+import game.Board;
+
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.FlowLayout;
@@ -11,6 +13,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Observable;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -24,7 +27,8 @@ import javax.swing.JTextField;
  * A GUI for the server, as provided in the files in week 7 for the Multiclient
  * chat. Limited Javadoc/OpenJML is provided in this class.
  * 
- * @author Theo Ruys, modified by Michael Koopman s1401335 and Sven Konings s1534130
+ * @author Theo Ruys, modified by Michael Koopman s1401335 and Sven Konings
+ *         s1534130
  */
 public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 
@@ -35,7 +39,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	private Server server;
 
 	//@ private invariant server != null;
-	
+
 	/** Constructs a ServerGUI object. */
 	public ServerGUI() {
 		super("ServerGUI");
@@ -145,7 +149,8 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		} catch (IOException e) {
 			tfPort.setEditable(true);
 			bConnect.setEnabled(true);
-			addMessage("Error listening on port " + port + ", please select a different one");
+			addMessage("Error listening on port " + port
+					+ ", please select a different one");
 		}
 
 	}
@@ -160,6 +165,19 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 	/** Start a ServerGUI application */
 	public static void main(String[] args) {
 		new ServerGUI();
+	}
+
+	/** Notify's the server user when an observable object has changed */
+	@Override
+	public void update(Observable object, Object arg) {
+		if (object instanceof Board && arg instanceof Object[]) {
+			// Board notify sends an Object array with the disc, the col and the row.
+			Object[] move = (Object[]) arg;
+			addMessage("Board with code " + object.hashCode() + ": " + move[0]
+					+ " disc placed in column " + move[1] + " and row "
+					+ move[2]);
+		}
+
 	}
 
 }
