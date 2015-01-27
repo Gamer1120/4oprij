@@ -96,11 +96,15 @@ public class ClientTUITest {
 		ct.addConnectMessage("addConnectMessage()");
 		ct.addInviteMessage("addInviteMessage()");
 		ct.addMoveMessage("addMoveMessage()");
-		ct.addChatMessage("TestChatter addChatMessage()");
 		ct.addLobbyMessage("addLobbyMessage()");
 		ct.addErrorMessage("addErrorMessage()");
 		ct.addPingMessage("addPingMessage()");
 		ct.addHelpMessage("addHelpMessage()");
+		ct.addHintMessage(12345);
+		ct.addFeaturesMessage("addFeaturesMessage()");
+		ct.addGameMessage("addGameMessage()");
+		ct.addDifficultyMessage(false);
+		ct.addDifficultyMessage(true);
 		ct.setUpClient();
 	}
 
