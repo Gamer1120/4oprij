@@ -282,7 +282,7 @@ public class ClientTUI implements ClientView {
 	//@ requires message !=null & !message.equals("");
 	/*@ pure */@Override
 	public void addLobbyMessage(String message) {
-		addMessage("[LOBBY}" + message);
+		addMessage("[LOBBY]" + message);
 	}
 
 	/**
