@@ -1,32 +1,92 @@
 package game;
 
+/**
+ * Client program for the Connect4 according to the protocol of the TI-2 group.<br>
+ * <br>
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 <br>
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+
 public class MinMaxStrategy implements Strategy {
+	/**
+	 * The name of this Strategy.
+	 */
 	public static final String NAME = "MiniMax";
 
+	/**
+	 * The Disc this MinMaxStrategy uses.
+	 */
 	private Disc disc;
+
+	/**
+	 * The amount of turns this MinMaxStrategy thinks ahead.
+	 */
 	private int maxDepth;
 
+	/*@	private invariant disc == Disc.YELLOW || disc == Disc.RED;
+	 	private invariant maxDepth > 0;
+	 */
+	
+	/**
+	 * Creates a new MinMaxStrategy with a depth of 4.
+	 */
 	public MinMaxStrategy() {
 		this(4);
 	}
 
+	/**
+	 * Creates a new MinMaxStrategy with the specified depth.
+	 * 
+	 * @param maxDepth
+	 *            The depth this MinMaxStrategy will use.
+	 */
+	//@ requires maxDepth > 0;
+	//@ ensures getDepth() == maxDepth;
 	public MinMaxStrategy(int maxDepth) {
 		this.maxDepth = maxDepth;
 	}
 
+	/**
+	 * Returns the name of this MinMaxStrategy.
+	 * 
+	 * @return The name of this MinMaxStrategy.
+	 */
 	@Override
-	public String getName() {
+	/*@ pure */public String getName() {
 		return NAME;
 	}
 
-	public int getDepth() {
+	/**
+	 * Returns the depth of this MinMaxStrategy.
+	 * 
+	 * @return The depth of this MinMaxStrategy.
+	 */
+	/*@ pure */public int getDepth() {
 		return maxDepth;
 	}
 
+	/**
+	 * Sets the depth for this MinMaxStrategy.
+	 * 
+	 * @param maxDepth
+	 *            The depth to set for this MinMaxStrategy.
+	 */
+	//@ requires maxDepth > 0;
 	public void setDepth(int maxDepth) {
 		this.maxDepth = maxDepth;
 	}
 
+	/**
+	 * Determines a move according to the MinMax algorithm.
+	 * 
+	 * @param b
+	 *            The Board to determine a move for.
+	 * @param d
+	 *            The Disc to determine the move for.
+	 */
+	//@ requires b != null;
+	//@ requires d == Disc.YELLOW || d == Disc.RED;
 	@Override
 	public int determineMove(Board b, Disc d) {
 		this.disc = d;
@@ -57,6 +117,17 @@ public class MinMaxStrategy implements Strategy {
 		return c;
 	}
 
+	/**
+	 * Gives a score to a move. The higher the score, the better the move is.
+	 * 
+	 * @param b
+	 *            The board to determine a move for.
+	 * @param depth
+	 *            The maximum search depth.
+	 * @param d
+	 *            The Disc to determine a score for.
+	 * @return The score for this move.
+	 */
 	private int evaluateMove(Board b, int depth, Disc d) {
 		if (b.isWinner(d)) {
 			if (d == disc) {
@@ -79,6 +150,13 @@ public class MinMaxStrategy implements Strategy {
 		return score;
 	}
 
+	/**
+	 * This method calculates 2^exp. This is used to calculate the score.
+	 * 
+	 * @param exp
+	 *            The exponent.
+	 * @return 2^exp.
+	 */
 	private int twoPow(int exp) {
 		int result = 1;
 		for (int i = 0; i < exp; i++) {
@@ -86,51 +164,4 @@ public class MinMaxStrategy implements Strategy {
 		}
 		return result;
 	}
-
-	public static void main(String[] args) {
-		Board board = new Board();
-		board.insertDisc(0, Disc.RED);
-		board.insertDisc(0, Disc.RED);
-
-		board.insertDisc(1, Disc.YELLOW);
-		board.insertDisc(1, Disc.RED);
-		board.insertDisc(1, Disc.YELLOW);
-		board.insertDisc(1, Disc.YELLOW);
-		board.insertDisc(1, Disc.RED);
-		board.insertDisc(1, Disc.RED);
-
-		board.insertDisc(2, Disc.RED);
-		board.insertDisc(2, Disc.RED);
-		board.insertDisc(2, Disc.RED);
-		board.insertDisc(2, Disc.YELLOW);
-		board.insertDisc(2, Disc.RED);
-
-		board.insertDisc(3, Disc.RED);
-		board.insertDisc(3, Disc.YELLOW);
-		board.insertDisc(3, Disc.RED);
-		board.insertDisc(3, Disc.YELLOW);
-		board.insertDisc(3, Disc.YELLOW);
-		board.insertDisc(3, Disc.YELLOW);
-
-		board.insertDisc(4, Disc.YELLOW);
-		board.insertDisc(4, Disc.RED);
-		board.insertDisc(4, Disc.YELLOW);
-		board.insertDisc(4, Disc.RED);
-
-		board.insertDisc(6, Disc.YELLOW);
-		board.insertDisc(6, Disc.YELLOW);
-		board.insertDisc(6, Disc.YELLOW);
-		board.insertDisc(6, Disc.RED);
-		board.insertDisc(6, Disc.YELLOW);
-
-		System.out.println(board);
-		MinMaxStrategy minimax = new MinMaxStrategy(4);
-		Disc d = Disc.RED;
-		int col = minimax.determineMove(board, d);
-		System.out.println("Place in column: " + col);
-		board.insertDisc(col, d);
-		System.out.println(board);
-
-	}
-
 }

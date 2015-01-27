@@ -26,7 +26,7 @@ public interface Strategy {
 	 * @return The move determined by the strategy.
 	 */
 	/*@	requires b != null;
-	 	requires d == Disc.YELLOW || Disc.RED;
+	 	requires d == Disc.YELLOW || d == Disc.RED;
 	 */
 	public int determineMove(Board b, Disc d);
 }
