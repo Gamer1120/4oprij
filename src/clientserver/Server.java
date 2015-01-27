@@ -319,7 +319,6 @@ public class Server extends Thread {
 		ensures getClient(name).getBoard() == board;
 	*/
 	private void setBoard(String name, Board board) {
-		// TODO: Game maken inplaats van bord?
 		mui.addMessage("Set board for " + name + ".");
 		getClient(name).setBoard(board);
 	}

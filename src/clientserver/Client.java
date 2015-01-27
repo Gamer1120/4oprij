@@ -272,7 +272,6 @@ public class Client extends Thread {
 				serverMoveOK(serverMessage);
 				break;
 			case Server.ERROR:
-				//TODO: Zet dit netjes neer.
 				mui.addErrorMessage(line.split(" ", 2)[1]);
 				if (!isConnected) {
 					isConnected = null;

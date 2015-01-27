@@ -12,7 +12,7 @@ import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
 
-// TODO: LOOPINVARIANTEN
+// TODO: Observable
 /**
  * The ClientHandler that reads all the input from the Clients and send messages
  * from the Server to the Clients.<br>

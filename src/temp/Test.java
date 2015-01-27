@@ -1,4 +1,7 @@
-package game;
+package temp;
+
+import game.Board;
+import game.Disc;
 
 public class Test {
 	public final static int N = 0;

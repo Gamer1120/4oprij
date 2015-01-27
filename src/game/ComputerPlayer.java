@@ -20,7 +20,9 @@ public class ComputerPlayer extends Observable {
 	 */
 	private Disc d;
 
-	//@ private invariant s != null;
+	/*@ private invariant s != null;
+		private invariant d == Disc.YELLOW || d == Disc.RED;
+	 */
 
 	/**
 	 * Creates a new ComputerPlayer object with a given Disc and a
