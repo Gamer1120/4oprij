@@ -9,9 +9,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.TreeSet;
 
 /**
  * Server. A Thread class that listens to a socket connection on a specified
@@ -59,10 +60,10 @@ public class Server extends Thread {
 	private HashMap<String[], Integer[]> invites;
 
 	/**
-	 * The sorted leaderboard set, the order is based on the natural ordering of
-	 * LeaderboardPair.
+	 * The leaderboard list, sorted using Collections.sort. The order is based
+	 * on the natural ordering of LeaderboardPair.
 	 */
-	private TreeSet<LeaderboardPair> leaderboard;
+	private ArrayList<LeaderboardPair> leaderboard;
 
 	/*@ private invariant ss != null;
 		private invariant mui != null;
@@ -94,7 +95,7 @@ public class Server extends Thread {
 			this.leaderboard = readLeaderboard();
 			mui.addMessage("Read leaderboard.");
 		} catch (IOException e) {
-			this.leaderboard = new TreeSet<LeaderboardPair>();
+			this.leaderboard = new ArrayList<LeaderboardPair>();
 			mui.addMessage("Created new leaderboard.");
 		}
 	}
@@ -573,15 +574,14 @@ public class Server extends Thread {
 		synchronized (leaderboard) {
 			String scores = "";
 			int rank = 0;
-			int entry = 0;
 			LeaderboardPair oldPair = null;
-			/*@ loop_invariant leaderboard.contains(pair);
-				loop_invariant 0 <= entry && entry <= 51;
-				loop_invariant entry <= leaderboard.size();
-				loop_invariant 0 <= rank && rank <= entry;
+			/*@ loop_invariant 0 <= i && i <= 50;
+				loop_invariant i <= leaderboard.size();
+				loop_invariant 0 <= rank && rank <= i;
 			*/
-			for (LeaderboardPair pair : leaderboard) {
-				if (++entry <= 50) {
+			for (int i = 0; i < leaderboard.size(); i++) {
+				if (i < 50) {
+					LeaderboardPair pair = leaderboard.get(i);
 					if (!pair.equalScore(oldPair)) {
 						rank++;
 						oldPair = pair;
@@ -599,7 +599,8 @@ public class Server extends Thread {
 	 * Updates the score of the LeaderboardPair with the givin name. If the name
 	 * doesn't exists it creates a new LeaderboardPair. If win is null 1 is
 	 * added to games played and if it's true or false 1 is added to gamse
-	 * playad and to games won or games lost repectively.
+	 * playad and to games won or games lost repectively. Then sorts the
+	 * leaderboardbased on the natural ordering of leaderboardpair.
 	 * 
 	 * @param name
 	 *            Name of he LeaderboardPair
@@ -647,6 +648,7 @@ public class Server extends Thread {
 				}
 				leaderboard.add(pair);
 			}
+			Collections.sort(leaderboard);
 			writeLeaderboard();
 		}
 	}
@@ -654,24 +656,24 @@ public class Server extends Thread {
 	/**
 	 * Gets the leaderboard.
 	 * 
-	 * @return the leaderboard, a TreeSet of LeaderboardPairs
+	 * @return the leaderboard, a ArrayList of LeaderboardPairs
 	 */
-	/*@ pure */public TreeSet<LeaderboardPair> getLeaderboard() {
+	/*@ pure */public ArrayList<LeaderboardPair> getLeaderboard() {
 		return leaderboard;
 	}
 
 	/**
 	 * Tries to read the leaderboard from the file specified in the FILENAME
-	 * final and creates a TreeSet with the read values.
+	 * final and creates and sorts an ArrayList with the read values.
 	 * 
-	 * @return the created TreeSet
+	 * @return the created ArrayList
 	 * @throws IOException
 	 *             if the file can't be found
 	 */
-	/*@ pure */public TreeSet<LeaderboardPair> readLeaderboard()
+	/*@ pure */public ArrayList<LeaderboardPair> readLeaderboard()
 			throws IOException {
-		TreeSet<LeaderboardPair> leaderboard = new TreeSet<LeaderboardPair>();
 		BufferedReader in = new BufferedReader(new FileReader(FILENAME));
+		ArrayList<LeaderboardPair> leaderboard = new ArrayList<LeaderboardPair>();
 		//@ loop_invariant in != null;
 		while (in.ready()) {
 			String[] pair = in.readLine().split("\\s+");
@@ -689,6 +691,7 @@ public class Server extends Thread {
 			}
 		}
 		in.close();
+		Collections.sort(leaderboard);
 		return leaderboard;
 	}
 
