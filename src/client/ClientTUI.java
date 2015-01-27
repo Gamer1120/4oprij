@@ -408,7 +408,7 @@ public class ClientTUI implements ClientView {
 		}
 	}
 	
-	public Client getClient(){
+	/*@ pure */public Client getClient(){
 		return client;
 	}
 }

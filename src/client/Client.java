@@ -601,7 +601,6 @@ public class Client extends Thread {
 			}
 		} else {
 			mui.addErrorMessage("There was no move requested.");
-
 		}
 	}
 
@@ -719,7 +718,6 @@ public class Client extends Thread {
 				mui.addErrorMessage("Can't parse difficulty");
 				mui.addDifficultyMessage(false);
 			}
-
 		} else {
 			mui.addErrorMessage("Only the difficulty of the MinMaxPlayer can be changed");
 			mui.addDifficultyMessage(false);
@@ -819,7 +817,6 @@ public class Client extends Thread {
 						+ " Couldn't parse Board. TERMINATING.");
 				shutdown();
 			}
-
 		} else if (myNumber == 2) {
 			try {
 				serverBoard = makeBoard(Integer.parseInt(protocol[2]),
@@ -834,7 +831,6 @@ public class Client extends Thread {
 		} else {
 			mui.addErrorMessage("Couldn't determine player.");
 		}
-
 		board = serverBoard;
 		makeMove(savedMove[0], savedMove[1]);
 		mui.addGameMessage("Succesfully received the board from the server");
