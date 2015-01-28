@@ -205,11 +205,11 @@ public class Client extends Thread {
 			if (splitName.length == 1) {
 				this.clientName = "MiniMaxPlayer";
 				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new MinMaxStrategy(4));
+						new MinMaxStrategy());
 			} else {
 				this.clientName = splitName[1];
 				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new MinMaxStrategy(4));
+						new MinMaxStrategy());
 			}
 		} else {
 			this.clientName = splitName[0];
@@ -687,7 +687,7 @@ public class Client extends Thread {
 	 */
 	/*@ pure */public void clientHint() {
 		if (isIngame()) {
-			mui.addHintMessage(new MinMaxStrategy(4).determineMove(
+			mui.addHintMessage(new MinMaxStrategy().determineMove(
 					board.deepCopy(), Disc.YELLOW));
 		} else {
 			mui.addErrorMessage("You're not in-game.");

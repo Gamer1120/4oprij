@@ -40,7 +40,7 @@ public class MinMaxStrategy implements Strategy {
 	 * Creates a new MinMaxStrategy with a depth of 4.
 	 */
 	public MinMaxStrategy() {
-		this(4);
+		this(8);
 	}
 
 	/**
