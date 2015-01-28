@@ -140,6 +140,9 @@ public class ClientTUI implements ClientView {
 	public void askName() {
 		while (client.isConnected() == Client.Connection.FALSE
 				|| client.isConnected() == Client.Connection.CONNECTING) {
+			if (client.isConnected() == Client.Connection.TRUE) {
+				break;
+			}
 			if (client.isConnected() == Client.Connection.FALSE) {
 				addMessage("Please enter your name.");
 				addMessage("If you want to use a game.strategy, and make the computer play for you, use -<LETTER> <NAME>.");
@@ -153,9 +156,15 @@ public class ClientTUI implements ClientView {
 					addMessage("[ERROR]Input disconnected. Shutting down.");
 					System.exit(0);
 				}
+				if (!client.isAlive()) {
+					client.start();
+				}
 				if (client.isConnected() == Client.Connection.TRUE) {
 					break;
 				}
+			}
+			if (client.isConnected() == Client.Connection.TRUE) {
+				break;
 			}
 		}
 		client.clientHelp();
@@ -222,7 +231,6 @@ public class ClientTUI implements ClientView {
 			setUpClient();
 			return;
 		}
-		client.start();
 		askName();
 	}
 
