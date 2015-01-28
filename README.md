@@ -1,4 +1,4 @@
-Connect4 Programming Project Michael Koopman s1401335 Sven Konings s1534130
+Connect4 Programming Project Michael Koopman s1401335 Sven Konings s1534130 P06
 ======
 
 How do I run your solution?
