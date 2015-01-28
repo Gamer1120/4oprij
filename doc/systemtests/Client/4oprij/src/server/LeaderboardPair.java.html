@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>LeaderboardPair.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ClientTUI (28-jan-2015 18:46:14)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">server</a> &gt; <span class="el_source">LeaderboardPair.java</span></div><h1>LeaderboardPair.java</h1><pre class="source lang-java linenums">package server;
+
+import java.io.Serializable;
+
+/**
+ * Leaderboard class for the Connect4 according to the protocol of the TI-2
+ * group.&lt;br&gt;
+ * &lt;br&gt;
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 &lt;br&gt;
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+public class LeaderboardPair implements Comparable&lt;LeaderboardPair&gt;,
+		Serializable {
+
+	/**
+	 * Auto generated serial UID for Serializable.
+	 */
+	private static final long serialVersionUID = 4797121270035180883L;
+	/**
+	 * The name belonging to this LeaderboardPair
+	 */
+	private String name;
+	/**
+	 * The score for this LeaderboardPair
+	 */
+	private int[] score;
+
+	//@	private invariant name != null &amp; !name.equals(&quot;&quot;);
+	
+	/**
+	 * Creates a new LeaderboardPair object without any games played given a
+	 * name.
+	 * 
+	 * @param name
+	 *            The name for this Leaderboardpair.
+	 */
+	/*@ ensures this.getName() == name;
+	 	ensures this.getWins() == 0;
+	  	ensures this.getLosses() == 0;
+	  	ensures this.getGames() == 0;
+	 */
+	public LeaderboardPair(String name) {
+<span class="nc" id="L44">		this(name, 0, 0, 0);</span>
+<span class="nc" id="L45">	}</span>
+
+	/**
+	 * Creates a new LeaderboardPair given a name, the wins, losses and games
+	 * played this person has.
+	 * 
+	 * @param name
+	 *            The name for this LeaderboardPair.
+	 * @param wins
+	 *            The amount of wins this LeaderboardPair has.
+	 * @param losses
+	 *            The amount of losses this LeaderboardPair has.
+	 * @param games
+	 *            The amount of games this LeaderboardPair has played.
+	 */
+	/*@ ensures this.getName() == name;
+	ensures this.getWins() == wins;
+	ensures this.getLosses() == losses;
+	ensures this.getGames() == games;
+	*/
+<span class="nc" id="L65">	public LeaderboardPair(String name, int wins, int losses, int games) {</span>
+<span class="nc" id="L66">		this.name = name;</span>
+<span class="nc" id="L67">		this.score = new int[] { wins, losses, games };</span>
+<span class="nc" id="L68">	}</span>
+
+	/**
+	 * Returns the name for this LeaderboardPair.
+	 * 
+	 * @return The name for this LeaderboardPair.
+	 */
+	/*@ pure */public String getName() {
+<span class="nc" id="L76">		return name;</span>
+	}
+
+	/**
+	 * Returns the score this LeaderboardPair has.
+	 * 
+	 * @return The score this LeaderboardPair has.
+	 */
+	/*@ pure */public int[] getScore() {
+<span class="nc" id="L85">		return score;</span>
+	}
+
+	/**
+	 * Returns the amount of wins this LeaderboardPair has.
+	 * 
+	 * @return The amount of wins this LeaderboardPair has.
+	 */
+	/*@ pure */public int getWins() {
+<span class="nc" id="L94">		return score[0];</span>
+	}
+
+	/**
+	 * Returns the amount of losses this LeaderboardPair has.
+	 * 
+	 * @return The amount of losses this LeaderboardPair has.
+	 */
+	/*@ pure */public int getLosses() {
+<span class="nc" id="L103">		return score[1];</span>
+	}
+
+	/**
+	 * Returns the amount of games this LeaderboardPair has played.
+	 * 
+	 * @return The amount of games this LeaderboardPair has played.
+	 */
+	/*@ pure */public int getGames() {
+<span class="nc" id="L112">		return score[2];</span>
+	}
+
+	/**
+	 * Returns the amount of games this LeaderboardPair has played.
+	 * 
+	 * @return The amount of games this LeaderboardPair has played.
+	 */
+	/*@ pure */public int getPoints() {
+<span class="nc" id="L121">		return score[0] - score[1];</span>
+	}
+
+	/**
+	 * Updates this LeaderboardPair, adding a win and a game played.
+	 */
+	/*@ pure */public void updateWin() {
+<span class="nc" id="L128">		score[0]++;</span>
+<span class="nc" id="L129">		score[2]++;</span>
+<span class="nc" id="L130">	}</span>
+
+	/**
+	 * Updates this LeaderboardPair, adding a loss and a game played.
+	 */
+	/*@ pure */public void updateLoss() {
+<span class="nc" id="L136">		score[1]++;</span>
+<span class="nc" id="L137">		score[2]++;</span>
+<span class="nc" id="L138">	}</span>
+
+	/**
+	 * Updates this LeaderboardPair, adding a game played.
+	 */
+	/*@ pure */public void updateDraw() {
+<span class="nc" id="L144">		score[2]++;</span>
+<span class="nc" id="L145">	}</span>
+
+	/**
+	 * Compares a LeaderboardPair to another one. This method is used to
+	 * determine the order in which the Leaderboard needs to be given. The
+	 * leaderboard has an ascending order, so when this pair has a larger score
+	 * this method will return a negative value (smaller). First, the highest
+	 * combined score is checked. If those are the same, the most wins are
+	 * checked. If those are also the same, the least losses is checked. If that
+	 * fails, the highest total games is checked. If that fails, it's sorted in
+	 * alphabetical order (using it's name).
+	 * 
+	 * @param pair
+	 *            The LeaderboardPair to compare this LeaderboardPair to.
+	 * @return -1 if the this LeaderboardPair is smaller (higher score, more
+	 *         wins, less losses, more games or alphabetical order), 1 if this
+	 *         LeaderboardPair is bigger, or 0 if they are the same.
+	 */
+	//@ requires pair != null;
+	@Override
+	public int compareTo(LeaderboardPair pair) {
+		// Highest combined score
+<span class="nc bnc" id="L167" title="All 2 branches missed.">		if (this.getPoints() &gt; pair.getPoints()) {</span>
+<span class="nc" id="L168">			return -1;</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">		} else if (this.getPoints() &lt; pair.getPoints()) {</span>
+<span class="nc" id="L170">			return 1;</span>
+			// Most wins
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		} else if (this.getWins() &gt; pair.getWins()) {</span>
+<span class="nc" id="L173">			return -1;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">		} else if (this.getWins() &lt; pair.getWins()) {</span>
+<span class="nc" id="L175">			return 1;</span>
+			// Least losses
+<span class="nc bnc" id="L177" title="All 2 branches missed.">		} else if (this.getLosses() &lt; pair.getLosses()) {</span>
+<span class="nc" id="L178">			return -1;</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">		} else if (this.getLosses() &gt; pair.getLosses()) {</span>
+<span class="nc" id="L180">			return 1;</span>
+			// Highest total games
+<span class="nc bnc" id="L182" title="All 2 branches missed.">		} else if (this.getGames() &gt; pair.getGames()) {</span>
+<span class="nc" id="L183">			return -1;</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">		} else if (this.getGames() &lt; pair.getGames()) {</span>
+<span class="nc" id="L185">			return 1;</span>
+			// Alphabetical order (captital letters first)
+		} else {
+<span class="nc" id="L188">			return this.getName().compareTo(pair.getName());</span>
+		}
+	}
+
+	/**
+	 * Checks if this Leaderboardpair is the same as the specified Object, if
+	 * the Object isn't a Leaderboardpair false will be returned.
+	 * 
+	 * @param o
+	 *            The object to compare to this LeaderboardPair.
+	 * @return Whether these two Objects are the same.
+	 */
+	//@ requires o != null;
+	@Override
+	public boolean equals(Object o) {
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		if (o instanceof LeaderboardPair) {</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">			return name.equals(((LeaderboardPair) o).getName())</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">					&amp;&amp; equalScore(o);</span>
+		} else {
+<span class="nc" id="L207">			return false;</span>
+		}
+	}
+
+	/**
+	 * Checks if 2 LeaderboardPairs have the same score.
+	 * 
+	 * @param o
+	 *            The object to compare to this LeaderboardPair.
+	 * @return Whether these two LeaderboardPairs have the same score.
+	 */
+	//@ requires o != null;
+	public boolean equalScore(Object o) {
+<span class="nc bnc" id="L220" title="All 2 branches missed.">		if (o instanceof LeaderboardPair) {</span>
+<span class="nc" id="L221">			LeaderboardPair pair = (LeaderboardPair) o;</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">			return this.getWins() == pair.getWins()</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">					&amp;&amp; this.getLosses() == pair.getLosses()</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">					&amp;&amp; this.getGames() == pair.getGames();</span>
+		} else {
+<span class="nc" id="L226">			return false;</span>
+		}
+	}
+
+	/**
+	 * Returns a String representation of this LeaderboardPair.
+	 */
+	@Override
+	/*@ pure */public String toString() {
+<span class="nc" id="L235">		return getName() + &quot; &quot; + getWins() + &quot; &quot; + getLosses() + &quot; &quot;</span>
+<span class="nc" id="L236">				+ getGames();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ClientTUI (28-jan-2015 18:46:14)</div></body></html>

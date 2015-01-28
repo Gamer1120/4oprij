@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ClientTUITest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ClientTUI (28-jan-2015 18:46:14)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">ClientTUITest.java</span></div><h1>ClientTUITest.java</h1><pre class="source lang-java linenums">package test;
+
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import client.ClientTUI;
+
+public class ClientTUITest {
+	private String commands1;
+
+	// HOW TO SETUP THIS TEST
+	// 1. Launch ServerGUI on port 2727.
+	// 2. Run a ClientTUI. Enter localhost for the IP, 2727 for the port and -N TestOpponent as name.
+	// 3. Run this test.
+	// 4. Compare the output of the console to this: http://pastebin.com/0KDitV3h
+<span class="nc" id="L16">	public ClientTUITest() {</span>
+<span class="nc" id="L17">		this.commands1 = &quot;&quot;;</span>
+		// Try to enter a wrong IP.
+<span class="nc" id="L19">		addCommand(&quot;localsdfnjk&quot;);</span>
+<span class="nc" id="L20">		addCommand(&quot;234.234.11111.324&quot;);</span>
+		// Try to enter a correct IP.
+<span class="nc" id="L22">		addCommand(&quot;localhost&quot;);</span>
+		// Try to enter a wrong port.
+<span class="nc" id="L24">		addCommand(&quot;234234&quot;);</span>
+<span class="nc" id="L25">		addCommand(&quot;sdnfjksdbfjk&quot;);</span>
+		// Try to enter a correct port.
+<span class="nc" id="L27">		addCommand(&quot;2727&quot;);</span>
+		// Try to connect with a valid name.
+<span class="nc" id="L29">		addCommand(&quot;ClientTUITest&quot;);</span>
+		// Try to send some wrong invites.
+<span class="nc" id="L31">		addCommand(&quot;PING&quot;);</span>
+		// Sends a help command.
+<span class="nc" id="L33">		addCommand(&quot;HELP&quot;);</span>
+		// Ask for the leaderboard.
+<span class="nc" id="L35">		addCommand(&quot;LEADERBOARD&quot;);</span>
+		// If the in stream is empty, the Client will terminate,
+		// so just send some pings to make sure we receive other messages.
+<span class="nc" id="L38">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L39">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L40">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L41">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L42">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L43">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L44">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L45">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L46">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L47">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L48">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L49">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L50">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L51">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L52">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L53">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L54">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L55">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L56">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L57">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L58">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L59">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L60">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L61">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L62">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L63">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L64">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L65">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L66">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L67">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L68">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L69">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L70">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L71">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L72">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L73">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L74">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L75">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L76">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L77">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L78">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L79">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L80">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L81">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L82">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L83">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L84">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L85">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L86">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L87">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L88">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L89">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L90">		addCommand(&quot;PING&quot;);</span>
+<span class="nc" id="L91">		addCommand(&quot;PING&quot;);</span>
+		// Try to send some correct.
+<span class="nc" id="L93">		InputStream in1 = new ByteArrayInputStream(commands1.getBytes());</span>
+<span class="nc" id="L94">		System.setIn(in1);</span>
+<span class="nc" id="L95">		ClientTUI ct = new ClientTUI();</span>
+<span class="nc" id="L96">		ct.addConnectMessage(&quot;addConnectMessage()&quot;);</span>
+<span class="nc" id="L97">		ct.addInviteMessage(&quot;addInviteMessage()&quot;);</span>
+<span class="nc" id="L98">		ct.addMoveMessage(&quot;addMoveMessage()&quot;);</span>
+<span class="nc" id="L99">		ct.addLobbyMessage(&quot;addLobbyMessage()&quot;);</span>
+<span class="nc" id="L100">		ct.addErrorMessage(&quot;addErrorMessage()&quot;);</span>
+<span class="nc" id="L101">		ct.addPingMessage(&quot;addPingMessage()&quot;);</span>
+<span class="nc" id="L102">		ct.addHelpMessage(&quot;addHelpMessage()&quot;);</span>
+<span class="nc" id="L103">		ct.addHintMessage(12345);</span>
+<span class="nc" id="L104">		ct.addFeaturesMessage(&quot;addFeaturesMessage()&quot;);</span>
+<span class="nc" id="L105">		ct.addGameMessage(&quot;addGameMessage()&quot;);</span>
+<span class="nc" id="L106">		ct.addDifficultyMessage(false);</span>
+<span class="nc" id="L107">		ct.addDifficultyMessage(true);</span>
+<span class="nc" id="L108">		ct.setUpClient();</span>
+<span class="nc" id="L109">	}</span>
+
+	public static void main(String[] args) {
+<span class="nc" id="L112">		new ClientTUITest();</span>
+<span class="nc" id="L113">	}</span>
+
+	public void addCommand(String command) {
+<span class="nc" id="L116">		commands1 += command + &quot;\n&quot;;</span>
+<span class="nc" id="L117">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ClientTUI (28-jan-2015 18:46:14)</div></body></html>

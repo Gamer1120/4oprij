@@ -1,0 +1,1015 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>Client.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ClientTUI (28-jan-2015 18:46:14)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">client</a> &gt; <span class="el_source">Client.java</span></div><h1>Client.java</h1><pre class="source lang-java linenums"><span class="nc" id="L1">package client;</span>
+
+import game.Board;
+import game.Disc;
+import game.strategy.ComputerPlayer;
+import game.strategy.MinMaxStrategy;
+import game.strategy.NaiveStrategy;
+import game.strategy.SmartStrategy;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
+
+import server.ClientHandler;
+import server.Server;
+
+/**
+ * client program for the Connect4 according to the protocol of the TI-2 group.&lt;br&gt;
+ * &lt;br&gt;
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 &lt;br&gt;
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+public class Client extends Thread {
+	// The protocol, as discussed in our TI-2 group. For further explanation,
+	// you can look at the protocol documentation.
+	public static final String CONNECT = &quot;CONNECT&quot;;
+	public static final String QUIT = &quot;QUIT&quot;;
+	public static final String INVITE = &quot;INVITE&quot;;
+	public static final String ACCEPT_INVITE = &quot;ACCEPT&quot;;
+	public static final String DECLINE_INVITE = &quot;DECLINE&quot;;
+	public static final String MOVE = &quot;MOVE&quot;;
+	public static final String CHAT = &quot;CHAT&quot;;
+	public static final String REQUEST_BOARD = &quot;REQUEST&quot;;
+	public static final String REQUEST_LOBBY = &quot;LOBBY&quot;;
+	public static final String REQUEST_LEADERBOARD = &quot;LEADERBOARD&quot;;
+	public static final String ERROR = &quot;ERROR&quot;;
+	public static final String PING = &quot;PING&quot;;
+	// END OF PROTOCOL
+	// CUSTOM COMMANDS
+	public static final String HELP = &quot;HELP&quot;;
+	public static final String HINT = &quot;HINT&quot;;
+	public static final String DIFFICULTY = &quot;DIFFICULTY&quot;;
+	// END OF CUSTOM COMMANDS
+
+	/**
+	 * The features this client has.
+	 */
+	private static final String CLIENT_FEATURES = ClientHandler.CHAT + &quot; &quot;
+			+ ClientHandler.CUSTOM_BOARD_SIZE + &quot; &quot; + ClientHandler.LEADERBOARD;
+
+	/**
+	 * The name of this client.
+	 */
+	private String clientName;
+
+	/**
+	 * The User Interface of this client.
+	 */
+	private ClientTUI mui;
+
+	/**
+	 * The Socket
+	 */
+	private Socket sock;
+	/**
+	 * The BufferedReader that will be used to communicate over the Socket.
+	 */
+	private BufferedReader in;
+	/**
+	 * The BufferedWriter that will be used to communicate over the Socket.
+	 */
+	private BufferedWriter out;
+	/**
+	 * While this boolean is true, it makes sure that commands are continuously
+	 * read from the BufferedReader.
+	 */
+	private boolean loop;
+
+	/**
+	 * The Board this client uses for determining their move.
+	 */
+	private Board board;
+
+	/**
+	 * The enum to keep track of whether this client is connected or trying to
+	 * connect.
+	 */
+<span class="fc" id="L95">	public enum Connection {</span>
+<span class="fc" id="L96">		FALSE, CONNECTING, TRUE</span>
+	}
+
+	/**
+	 * An enum to determine whether this client is connected.
+	 */
+	private Connection isConnected;
+	/**
+	 * The Player this client is.
+	 */
+	private ComputerPlayer computerPlayer;
+
+	/**
+	 * A boolean to determine whether the server has requested a move.
+	 */
+	private boolean moveRequested;
+	/**
+	 * A Map of invites this client is invited by. This map gets emptied every
+	 * time a Game starts.
+	 */
+	private Map&lt;String, Integer[]&gt; invitedBy;
+	/**
+	 * A Map of invited this client sent. This map gets emptied every time a
+	 * Game starts.
+	 */
+	private Map&lt;String, Integer[]&gt; invited;
+
+	/**
+	 * The number of this client in a game, as stored on the Server.
+	 */
+	private int myNumber;
+
+	/**
+	 * An array with a move. This is used if the move can't be made on the
+	 * Board, and the Board needs to be requested from the Server.
+	 */
+	private int[] savedMove;
+
+	/*@	private invariant sock != null;
+	 	private invariant mui != null;
+	 	private invariant in != null;
+	 	private invariant out != null;
+	  	private invariant invited != null;
+	  	private invariant invitedBy != null;
+	 */
+
+	/**
+	 * Constructs a client object and tries to make a Socket connection
+	 * 
+	 * @param host
+	 *            The IP-adress of this client
+	 * @param port
+	 *            The port of this client
+	 * @param muiArg
+	 *            The ClientTUI for this client
+	 * @throws IOException
+	 *             When it can't get the socket's in or outputstream, or the
+	 *             socket can't connect to the server.
+	 */
+	/*@ requires host != null;
+	 	requires port &gt;= 1 &amp; port &lt;= 65535;
+	 	requires muiArg != null;
+	 	ensures isConnected() == Connection.FALSE;
+	 	ensures getBoard() == null;
+	 */
+<span class="fc" id="L161">	public Client(InetAddress host, int port, ClientTUI muiArg)</span>
+			throws IOException {
+<span class="fc" id="L163">		this.mui = muiArg;</span>
+<span class="fc" id="L164">		this.sock = new Socket(host, port);</span>
+<span class="fc" id="L165">		this.in = new BufferedReader(new InputStreamReader(</span>
+<span class="fc" id="L166">				sock.getInputStream()));</span>
+<span class="fc" id="L167">		this.out = new BufferedWriter(new OutputStreamWriter(</span>
+<span class="fc" id="L168">				sock.getOutputStream()));</span>
+<span class="fc" id="L169">		this.isConnected = Connection.FALSE;</span>
+<span class="fc" id="L170">		this.invited = new HashMap&lt;String, Integer[]&gt;();</span>
+<span class="fc" id="L171">		this.invitedBy = new HashMap&lt;String, Integer[]&gt;();</span>
+<span class="fc" id="L172">		this.loop = true;</span>
+<span class="fc" id="L173">		this.board = null;</span>
+<span class="fc" id="L174">		this.moveRequested = false;</span>
+<span class="fc" id="L175">		this.computerPlayer = null;</span>
+<span class="fc" id="L176">		this.savedMove = null;</span>
+<span class="fc" id="L177">	}</span>
+
+	/**
+	 * Sets up a player with the given name. If the name starts with &quot;-N &quot;, a
+	 * ComputerPlayer with a NaiveStrategy is created instead, and if the name
+	 * starts with &quot;-S &quot;, a ComputerPlayer with a SmartStrategy is created.
+	 * 
+	 * @param name
+	 *            The String returned by askName.
+	 */
+	/*@ requires !name.equals(&quot;&quot;);
+	 	requires name != null;
+	 */
+	public void setUpPlayer(String name) {
+<span class="fc" id="L191">		String[] splitName = name.split(&quot;\\s+&quot;);</span>
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">		if (splitName[0].equals(&quot;&quot;)) {</span>
+<span class="nc" id="L193">			isConnected = Connection.FALSE;</span>
+<span class="nc" id="L194">		} else {</span>
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">			if (splitName[0].equals(&quot;-N&quot;)) {</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">				if (splitName.length == 1) {</span>
+<span class="nc" id="L197">					this.clientName = &quot;NaivePlayer&quot;;</span>
+<span class="nc" id="L198">					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,</span>
+<span class="nc" id="L199">							new NaiveStrategy());</span>
+<span class="nc" id="L200">				} else {</span>
+<span class="nc" id="L201">					this.clientName = splitName[1];</span>
+<span class="nc" id="L202">					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,</span>
+<span class="nc" id="L203">							new NaiveStrategy());</span>
+				}
+<span class="pc bpc" id="L205" title="1 of 2 branches missed.">			} else if (splitName[0].equals(&quot;-S&quot;)) {</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">				if (splitName.length == 1) {</span>
+<span class="nc" id="L207">					this.clientName = &quot;SmartPlayer&quot;;</span>
+<span class="nc" id="L208">					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,</span>
+<span class="nc" id="L209">							new SmartStrategy());</span>
+<span class="nc" id="L210">				} else {</span>
+<span class="nc" id="L211">					this.clientName = splitName[1];</span>
+<span class="nc" id="L212">					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,</span>
+<span class="nc" id="L213">							new SmartStrategy());</span>
+				}
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">			} else if (splitName[0].equals(&quot;-M&quot;)) {</span>
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">				if (splitName.length == 1) {</span>
+<span class="nc" id="L217">					this.clientName = &quot;MiniMaxPlayer&quot;;</span>
+<span class="nc" id="L218">					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,</span>
+<span class="nc" id="L219">							new MinMaxStrategy());</span>
+<span class="nc" id="L220">				} else {</span>
+<span class="fc" id="L221">					this.clientName = splitName[1];</span>
+<span class="fc" id="L222">					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,</span>
+<span class="fc" id="L223">							new MinMaxStrategy());</span>
+				}
+<span class="fc" id="L225">			} else {</span>
+<span class="nc" id="L226">				this.clientName = splitName[0];</span>
+<span class="nc" id="L227">				this.computerPlayer = null;</span>
+			}
+<span class="fc" id="L229">			isConnected = Connection.CONNECTING;</span>
+<span class="fc" id="L230">			sendMessage(CONNECT + &quot; &quot; + getClientName() + &quot; &quot; + CLIENT_FEATURES);</span>
+		}
+<span class="fc" id="L232">	}</span>
+
+	/**
+	 * This method reads the messages in the InputStream. Then, it decides which
+	 * command was sent, and executes this command by calling the method created
+	 * for it.
+	 */
+	@Override
+	public void run() {
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">		while (loop) {</span>
+<span class="fc" id="L242">			String line = &quot;&quot;;</span>
+			try {
+<span class="fc bfc" id="L244" title="All 2 branches covered.">				while (line.equals(&quot;&quot;)) {</span>
+<span class="fc" id="L245">					line = in.readLine();</span>
+				}
+				/*
+				 * Calling in.readLine() when the connection is lost gives an
+				 * IOException, but when in.readLine() has already been called
+				 * and the connection is lost in.readLine will result in null and
+				 * input.equals() will result in an NullPointerException. If the
+				 * connection is lost the clienthandler shuts down
+				 */
+<span class="fc" id="L254">			} catch (IOException | NullPointerException e) {</span>
+<span class="fc" id="L255">				shutdown();</span>
+<span class="fc" id="L256">				break;</span>
+			}
+<span class="fc" id="L258">			String[] serverMessage = line.split(&quot;\\s+&quot;);</span>
+			//TODO: later weghalen
+<span class="fc" id="L260">			mui.addMessage(&quot;[SERVER]&quot; + line);</span>
+<span class="pc bpc" id="L261" title="20 of 40 branches missed.">			switch (serverMessage[0]) {</span>
+			case Server.ACCEPT_CONNECT:
+<span class="fc" id="L263">				isConnected = Connection.TRUE;</span>
+<span class="fc" id="L264">				serverConnect(serverMessage);</span>
+<span class="fc" id="L265">				break;</span>
+			case Server.LOBBY:
+<span class="fc" id="L267">				serverLobby(serverMessage);</span>
+<span class="fc" id="L268">				break;</span>
+			case Server.INVITE:
+<span class="fc" id="L270">				serverInvite(serverMessage);</span>
+<span class="fc" id="L271">				break;</span>
+			case Server.DECLINE_INVITE:
+<span class="fc" id="L273">				serverDecline(serverMessage);</span>
+<span class="fc" id="L274">				break;</span>
+			case Server.GAME_START:
+<span class="fc" id="L276">				serverGameStart(serverMessage);</span>
+<span class="fc" id="L277">				break;</span>
+			case Server.GAME_END:
+<span class="fc" id="L279">				serverGameEnd(serverMessage);</span>
+<span class="fc" id="L280">				break;</span>
+			case Server.REQUEST_MOVE:
+<span class="fc" id="L282">				serverRequestMove(serverMessage);</span>
+<span class="fc" id="L283">				break;</span>
+			case Server.MOVE_OK:
+<span class="fc" id="L285">				serverMoveOK(serverMessage);</span>
+<span class="fc" id="L286">				break;</span>
+			case Server.ERROR:
+<span class="fc" id="L288">				mui.addErrorMessage(line.split(&quot; &quot;, 2)[1]);</span>
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">				if (isConnected == Connection.CONNECTING) {</span>
+<span class="nc" id="L290">					isConnected = Connection.FALSE;</span>
+				}
+<span class="nc" id="L292">				break;</span>
+			case Server.BOARD:
+<span class="nc" id="L294">				board = toBoard(line);</span>
+<span class="nc" id="L295">				break;</span>
+			case Server.CHAT:
+<span class="nc" id="L297">				mui.addChatMessage(line.split(&quot; &quot;, 2)[1]);</span>
+<span class="nc" id="L298">				break;</span>
+			case Server.LEADERBOARD:
+<span class="nc" id="L300">				serverShowLeaderboard(serverMessage);</span>
+<span class="nc" id="L301">				break;</span>
+			case Server.PONG:
+<span class="fc" id="L303">				mui.addPingMessage(&quot;Pong!&quot;);</span>
+<span class="fc" id="L304">				break;</span>
+			default:
+<span class="nc" id="L306">				sendMessage(ERROR + &quot; &quot; + serverMessage[0]</span>
+<span class="nc" id="L307">						+ &quot; Unknown command.&quot;);</span>
+				break;
+			}
+		}
+<span class="fc" id="L311">	}</span>
+
+	/**
+	 * This method sends a message to the ClientHandler using the OutputStream
+	 * out.
+	 * 
+	 * @param msg
+	 *            The message to be sent.
+	 */
+	//@ requires msg != null;
+	public void sendMessage(String msg) {
+		try {
+<span class="fc" id="L323">			out.write(msg);</span>
+<span class="fc" id="L324">			out.newLine();</span>
+<span class="fc" id="L325">			out.flush();</span>
+<span class="pc" id="L326">		} catch (IOException e) {</span>
+<span class="nc" id="L327">			shutdown();</span>
+		}
+<span class="fc" id="L329">	}</span>
+
+	//ACCEPTING FROM SERVER
+	/**
+	 * This method accepts the Server.CONNECT packet sent by the Server. When
+	 * this method is called, it prints that a connection has been established
+	 * with the Server, as well as the IP address and port of the Server. After
+	 * this, it lists the features the Server has.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	//@	requires serverMessage != null &amp; serverMessage[0].equals(Server.ACCEPT_CONNECT);
+	private void serverConnect(String[] serverMessage) {
+<span class="fc" id="L343">		mui.addConnectMessage(&quot;Successfully established connection to server: &quot;</span>
+		// IP of the server
+<span class="fc" id="L345">				+ sock.getRemoteSocketAddress().toString());</span>
+<span class="fc" id="L346">		mui.addFeaturesMessage(&quot;The features of this server are:&quot;</span>
+<span class="fc" id="L347">				+ arrayToLine(serverMessage));</span>
+<span class="fc" id="L348">	}</span>
+
+	/**
+	 * This method accepts the Server.LOBBY packet sent by the Server. When this
+	 * method is called, it shows the client the other Clients that are
+	 * currently in the lobby.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	//@ requires serverMessage != null &amp; serverMessage[0].equals(Server.LOBBY);
+	private void serverLobby(String[] serverMessage) {
+<span class="fc" id="L360">		mui.addLobbyMessage(&quot;The people that are currently in the lobby are:&quot;</span>
+<span class="fc" id="L361">				+ arrayToLine(serverMessage));</span>
+<span class="fc" id="L362">	}</span>
+
+	/**
+	 * This method accepts the Server.INVITE packet sent by the Server. When
+	 * this method is called, it adds the inviter (and to an inviterlist, and
+	 * potentially, the custom board size. If the player isn't ingame, it will
+	 * also show the client that they have been invited by that client.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	//@ requires serverMessage != null &amp; serverMessage[0].equals(Server.INVITE);
+	private void serverInvite(String[] serverMessage) {
+<span class="fc" id="L375">		String opponentName = serverMessage[1];</span>
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">		if (serverMessage.length == 2) {</span>
+<span class="fc" id="L377">			addServerInvite(opponentName);</span>
+<span class="fc" id="L378">			mui.addInviteMessage(opponentName</span>
+<span class="fc" id="L379">					+ &quot; has invited you to a game of Connect4 (default boardsize)!&quot;);</span>
+<span class="fc" id="L380">			mui.addInviteMessage(&quot;Use \&quot;ACCEPT &quot; + opponentName</span>
+<span class="fc" id="L381">					+ &quot;\&quot; to accept this invite or \&quot;DECLINE &quot; + opponentName</span>
+<span class="fc" id="L382">					+ &quot;\&quot; to decline it.&quot;);</span>
+<span class="pc bnc" id="L383" title="All 2 branches missed.">		} else if (serverMessage.length &gt;= 4) {</span>
+			try {
+<span class="nc" id="L385">				int boardX = Integer.parseInt(serverMessage[2]);</span>
+<span class="nc" id="L386">				int boardY = Integer.parseInt(serverMessage[3]);</span>
+<span class="nc" id="L387">				addServerInvite(opponentName, boardX, boardY);</span>
+<span class="nc" id="L388">				mui.addInviteMessage(opponentName</span>
+<span class="nc" id="L389">						+ &quot; has invited you to a game of Connect4 with a custom Board size of &quot;</span>
+<span class="nc" id="L390">						+ boardX + &quot; x &quot; + boardY + &quot;!&quot;);</span>
+<span class="nc" id="L391">				mui.addInviteMessage(&quot;Use \&quot;ACCEPT &quot; + opponentName</span>
+<span class="nc" id="L392">						+ &quot;\&quot; to accept this invite or \&quot;DECLINE &quot;</span>
+<span class="nc" id="L393">						+ opponentName + &quot;\&quot; to decline it.&quot;);</span>
+<span class="nc" id="L394">			} catch (NumberFormatException e) {</span>
+<span class="nc" id="L395">				mui.addErrorMessage(&quot;The server just sent an invite with an invalid custom board size.&quot;);</span>
+<span class="nc" id="L396">				sendMessage(ERROR</span>
+						+ &quot; &quot;
+						+ INVITE
+						+ &quot; Your server just sent me an invite with an invalid custom board size :(&quot;);
+			}
+		}
+<span class="fc" id="L402">	}</span>
+
+	/**
+	 * This method accepts the Server.DECLINE_INVITE packet. If the Server
+	 * specified a person, the person will be removed from the list of people
+	 * this client has invited.
+	 * 
+	 * @param serverMessage
+	 *            The full messsage the server sent.
+	 */
+	//@ requires serverMessage != null &amp; serverMessage[0].equals(Server.DECLINE_INVITE);
+	private void serverDecline(String[] serverMessage) {
+<span class="pc bpc" id="L414" title="1 of 2 branches missed.">		if (serverMessage.length &gt; 1) {</span>
+<span class="fc" id="L415">			invited.remove(serverMessage[1]);</span>
+<span class="fc" id="L416">			mui.addInviteMessage(&quot;The invite you sent to &quot; + serverMessage[1]</span>
+<span class="fc" id="L417">					+ &quot; got declined.&quot;);</span>
+<span class="fc" id="L418">		} else {</span>
+<span class="nc" id="L419">			mui.addInviteMessage(&quot;The server just tried to decline one of your invites, but it didn't send who declined yours.&quot;);</span>
+<span class="nc" id="L420">			sendMessage(ERROR + &quot; &quot; + serverMessage[0]</span>
+<span class="nc" id="L421">					+ &quot; Your server didn't send me who declined the invite.&quot;);</span>
+		}
+<span class="fc" id="L423">	}</span>
+
+	/**
+	 * This method accepts the Server.GAME_START packet sent by the Server. When
+	 * this method is called, it will show the client that a the game is
+	 * started. The client is set to being in-game, and a new Board is created.
+	 * The size of the Board is dependant on the size sent in the invite (the
+	 * Boardsizes of the invites are saved in a HashMap).
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	/*@ requires serverMessage != null &amp; serverMessage[0].equals(Server.GAME_START);
+	 	ensures board != null;
+	 	ensures myNumber != -1;
+	 */
+	private void serverGameStart(String[] serverMessage) {
+<span class="pc bpc" id="L440" title="1 of 2 branches missed.">		if (serverMessage[1].equals(getClientName())) {</span>
+<span class="nc" id="L441">			myNumber = 1;</span>
+<span class="nc" id="L442">			mui.addGameMessage(&quot;A game between you and &quot; + serverMessage[2]</span>
+<span class="nc" id="L443">					+ &quot; has started!&quot;);</span>
+<span class="nc" id="L444">			Integer[] boardSize = invitedBy.get(serverMessage[2]);</span>
+
+<span class="nc" id="L446">			board = new Board(boardSize[1], boardSize[0]);</span>
+<span class="nc" id="L447">		} else {</span>
+<span class="fc" id="L448">			myNumber = 2;</span>
+<span class="fc" id="L449">			mui.addGameMessage(&quot;A game between you and &quot; + serverMessage[1]</span>
+<span class="fc" id="L450">					+ &quot; has started!&quot;);</span>
+<span class="fc" id="L451">			Integer[] boardSize = invited.get(serverMessage[1]);</span>
+<span class="fc" id="L452">			board = new Board(boardSize[1], boardSize[0]);</span>
+		}
+<span class="fc" id="L454">		mui.addBoard();</span>
+<span class="fc" id="L455">		mui.addGameMessage(&quot;You are YELLOW&quot;);</span>
+<span class="fc" id="L456">	}</span>
+
+	/**
+	 * This method accepts the Server.GAME_END packet sent by the Server. When
+	 * this method is called, it will set the client to no longer being in-game.
+	 * It will also show the client who won the game, or if the game was a draw.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	/*@	requires serverMessage != null &amp; serverMessage[0].equals(Server.GAME_END);
+		ensures this.board == null;
+	*/
+	private void serverGameEnd(String[] serverMessage) {
+<span class="fc" id="L470">		this.board = null;</span>
+<span class="fc bfc" id="L471" title="All 2 branches covered.">		if (serverMessage.length &gt; 2) {</span>
+<span class="fc" id="L472">			mui.addGameMessage(&quot;The winner is: &quot; + serverMessage[2]);</span>
+<span class="pc bpc" id="L473" title="1 of 2 branches missed.">		} else if (serverMessage.length == 2) {</span>
+<span class="pc bpc" id="L474" title="1 of 2 branches missed.">			if (serverMessage[1].equals(ClientHandler.DRAW)) {</span>
+<span class="nc" id="L475">				mui.addGameMessage(&quot;The game was a draw!&quot;);</span>
+<span class="nc" id="L476">			} else {</span>
+<span class="fc" id="L477">				mui.addGameMessage(&quot;The game has ended. Reason:&quot;</span>
+<span class="fc" id="L478">						+ arrayToLine(serverMessage));</span>
+			}
+		}
+<span class="fc" id="L481">	}</span>
+
+	/**
+	 * This method accepts the Server.MOVE packet sent by the Server. When this
+	 * method is called, it will request a move from the Player. If the Player
+	 * is a HumanPlayer, the GameView will be used to ask for a move. If the
+	 * Player is a ComputerPlayer, the determineMove() method from the
+	 * ComputerPlayer is used instead.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	/*@ requires serverMessage != null &amp; serverMessage[0].equals(Server.REQUEST_MOVE);
+	 	ensures moveRequested;
+	 */
+	private void serverRequestMove(String[] serverMessage) {
+<span class="pc bpc" id="L497" title="1 of 2 branches missed.">		if (computerPlayer == null) {</span>
+<span class="nc" id="L498">			moveRequested = true;</span>
+<span class="nc" id="L499">			mui.addMoveMessage(&quot;Please enter a move.&quot;);</span>
+			;
+<span class="nc" id="L501">		} else {</span>
+<span class="fc" id="L502">			int move = computerPlayer.determineMove(board.deepCopy());</span>
+<span class="fc" id="L503">			sendMessage(MOVE + &quot; &quot; + move);</span>
+		}
+<span class="fc" id="L505">	}</span>
+
+	/**
+	 * This method accepts the Server.MOVE_OK packet sent by the Server. When
+	 * this method is called, it will update the Board by inserting the Disc for
+	 * the Player that was given in the packet. If it can't insert the Disc, it
+	 * will request the Board and try to insert the Disc once again.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	//@ requires serverMessage != null &amp; serverMessage[0].equals(Server.MOVE_OK);
+	private void serverMoveOK(String[] serverMessage) {
+<span class="fc" id="L518">		int move = -1;</span>
+		try {
+<span class="fc" id="L520">			move = Integer.parseInt(serverMessage[2]);</span>
+<span class="pc" id="L521">		} catch (NumberFormatException e) {</span>
+<span class="nc" id="L522">			mui.addErrorMessage(&quot;Server did not send a valid move. TERMINATING.&quot;);</span>
+<span class="nc" id="L523">			sendMessage(ERROR + &quot; &quot; + Server.MOVE_OK + &quot; Couldn't parse move.&quot;);</span>
+<span class="nc" id="L524">			shutdown();</span>
+		}
+<span class="pc bpc" id="L526" title="1 of 2 branches missed.">		if (checkMove(move)) {</span>
+<span class="fc" id="L527">			makeMove(Integer.parseInt(serverMessage[1]), move);</span>
+<span class="fc" id="L528">			mui.addBoard();</span>
+<span class="fc" id="L529">		} else {</span>
+<span class="nc" id="L530">			mui.addErrorMessage(&quot;Couldn't do the move, requesting board from server&quot;);</span>
+<span class="nc" id="L531">			savedMove = new int[] { Integer.parseInt(serverMessage[1]), move };</span>
+<span class="nc" id="L532">			clientRequestBoard();</span>
+		}
+<span class="fc" id="L534">	}</span>
+
+	/**
+	 * If the server sent a valid Leaderboard, this method adds the formatted
+	 * leaderboard to the View.
+	 * 
+	 * @param serverMessage
+	 *            The full message the server sent.
+	 */
+	//@ requires serverMessage != null &amp; serverMessage[0].equals(Server.LEADERBOARD);
+	private void serverShowLeaderboard(String[] serverMessage) {
+<span class="nc bnc" id="L545" title="All 2 branches missed.">		if ((serverMessage.length - 1) % 5 == 0) {</span>
+<span class="nc" id="L546">			int amountOfPlayers = (serverMessage.length - 1) / 5;</span>
+			//@ loop_invariant 0 &lt;= i &amp; i &lt;= amountOfPlayers;
+<span class="nc bnc" id="L548" title="All 2 branches missed.">			for (int i = 0; i &lt; amountOfPlayers; i++) {</span>
+<span class="nc" id="L549">				mui.addLeaderBoardLine(serverMessage[((i * 5) + 5)],</span>
+<span class="nc" id="L550">						serverMessage[((i * 5) + 1)],</span>
+<span class="nc" id="L551">						serverMessage[((i * 5) + 2)],</span>
+<span class="nc" id="L552">						serverMessage[((i * 5) + 3)],</span>
+<span class="nc" id="L553">						serverMessage[((i * 5) + 4)]);</span>
+			}
+<span class="nc" id="L555">		} else {</span>
+<span class="nc" id="L556">			mui.addErrorMessage(&quot;Didn't get a valid Leaderboard from the Server.&quot;);</span>
+<span class="nc" id="L557">			sendMessage(ERROR + &quot; &quot; + Server.LEADERBOARD</span>
+					+ &quot; Didn't get a valid Leaderboard from your Server :(&quot;);
+		}
+<span class="nc" id="L560">	}</span>
+
+	//END ACCEPTING FROM SERVER
+
+	//ACCEPTING FROM VIEW
+	/**
+	 * Shows the commands that are available. In case the client is in-game,
+	 * different commands are shown than when he's not.
+	 */
+	public void clientHelp() {
+<span class="fc bfc" id="L570" title="All 2 branches covered.">		if (isIngame()) {</span>
+<span class="fc" id="L571">			mui.addHelpMessage(&quot;Available commands are: &quot; + Client.MOVE</span>
+					+ &quot; &lt;column&gt;, &quot; + Client.HINT + &quot;, &quot; + Client.PING + &quot;, &quot;
+					+ Client.HELP + &quot;, &quot; + Client.DIFFICULTY + &quot; &lt;number&gt;&quot;
+					+ &quot; and &quot; + Client.QUIT + &quot;.&quot;);
+<span class="fc" id="L575">		} else {</span>
+<span class="fc" id="L576">			mui.addHelpMessage(&quot;Available commands are: &quot; + Client.INVITE</span>
+					+ &quot; &lt;player&gt;, &quot; + Client.ACCEPT_INVITE + &quot; &lt;player&gt;, &quot;
+					+ Client.DECLINE_INVITE + &quot; &lt;player&gt;, &quot; + Client.CHAT
+					+ &quot; &lt;message&gt;, &quot; + Client.REQUEST_LOBBY + &quot;, &quot;
+					+ Client.REQUEST_LEADERBOARD + &quot;, &quot; + Client.PING + &quot;, &quot;
+					+ Client.HELP + &quot;, &quot; + Client.DIFFICULTY + &quot; &lt;number&gt;&quot;
+					+ &quot; and &quot; + Client.QUIT + &quot;.&quot;);
+		}
+<span class="fc" id="L584">	}</span>
+
+	/**
+	 * Forwards the move the player just made to the server, if the move was
+	 * valid, and there was a move requested.
+	 * 
+	 * @param input
+	 *            The raw message the view sent.
+	 * @param splitInput
+	 *            The message the view sent, split up in an array.
+	 */
+	/*@	requires input != null &amp; !input.equals(&quot;&quot;);
+	 	requires splitInput != null &amp; !splitInput.equals(&quot;&quot;);
+	 */
+	public void clientMove(String input, String[] splitInput) {
+<span class="pc bpc" id="L599" title="1 of 2 branches missed.">		if (moveRequested) {</span>
+<span class="nc" id="L600">			moveRequested = false;</span>
+<span class="nc bnc" id="L601" title="All 2 branches missed.">			if (splitInput.length == 2) {</span>
+				try {
+<span class="nc" id="L603">					Integer.parseInt(splitInput[1]);</span>
+<span class="nc" id="L604">				} catch (NumberFormatException e) {</span>
+<span class="nc" id="L605">					mui.addErrorMessage(&quot;Please enter a valid move after MOVE.&quot;);</span>
+				}
+<span class="nc" id="L607">				sendMessage(input);</span>
+<span class="nc" id="L608">			} else {</span>
+<span class="nc" id="L609">				mui.addErrorMessage(&quot;Please enter exactly one argument after MOVE.&quot;);</span>
+			}
+<span class="nc" id="L611">		} else {</span>
+<span class="fc" id="L612">			mui.addErrorMessage(&quot;There was no move requested.&quot;);</span>
+		}
+<span class="fc" id="L614">	}</span>
+
+	/**
+	 * Forwards the invite the player just made to the server, if the player
+	 * added a name to invite. It saves the invite in the HashMap made for this.
+	 * This method also supports custom board sizes.
+	 * 
+	 * @param input
+	 *            The raw message the view sent.
+	 * @param splitInput
+	 *            The message the view sent, split up in an array.
+	 */
+	/*@	requires input != null &amp; !input.equals(&quot;&quot;);
+		requires splitInput != null &amp; !splitInput.equals(&quot;&quot;);
+	 */
+	public void clientInvite(String input, String[] splitInput) {
+<span class="fc bfc" id="L630" title="All 2 branches covered.">		if (splitInput.length &gt;= 4) {</span>
+			try {
+<span class="fc" id="L632">				addClientInvite(splitInput[1], Integer.parseInt(splitInput[2]),</span>
+<span class="fc" id="L633">						Integer.parseInt(splitInput[3]));</span>
+<span class="fc" id="L634">				sendMessage(input);</span>
+<span class="fc" id="L635">				mui.addInviteMessage(&quot;Tried to invite: &quot; + splitInput[1]</span>
+<span class="fc" id="L636">						+ &quot; with the specified custom board size.&quot;);</span>
+<span class="fc" id="L637">			} catch (NumberFormatException e) {</span>
+<span class="fc" id="L638">				mui.addErrorMessage(&quot;Please specify the BoardX and BoardY as integers. Invite failed.&quot;);</span>
+			}
+<span class="fc bfc" id="L640" title="All 2 branches covered.">		} else if (splitInput.length &gt;= 2) {</span>
+<span class="fc" id="L641">			addClientInvite(splitInput[1]);</span>
+<span class="fc" id="L642">			sendMessage(input);</span>
+<span class="fc" id="L643">			mui.addInviteMessage(&quot;Tried to invite: &quot; + splitInput[1]</span>
+<span class="fc" id="L644">					+ &quot; with default board size.&quot;);</span>
+<span class="fc" id="L645">		} else {</span>
+<span class="fc" id="L646">			mui.addErrorMessage(&quot;Invalid arguments, couldn't send invite&quot;);</span>
+		}
+<span class="fc" id="L648">	}</span>
+
+	/**
+	 * Forwards that an invite has been accepted to the server, as well as whose
+	 * invite got accepted, provided that the player entered a name.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the view sent, split up in an array.
+	 */
+	/*@	requires input != null &amp; !input.equals(&quot;&quot;);
+		requires splitInput != null &amp; !splitInput.equals(&quot;&quot;);
+	 */
+	public void clientAccept(String input, String[] splitInput) {
+<span class="pc bpc" id="L663" title="1 of 2 branches missed.">		if (splitInput.length == 2) {</span>
+<span class="nc" id="L664">			sendMessage(Client.ACCEPT_INVITE + &quot; &quot; + splitInput[1]);</span>
+<span class="nc" id="L665">		} else {</span>
+<span class="fc" id="L666">			mui.addErrorMessage(&quot;Please use ACCEPT &lt;name&gt; to accept an invite.&quot;);</span>
+		}
+<span class="fc" id="L668">	}</span>
+
+	/**
+	 * Forwards the rejected invite to the Server, if the player specified whose
+	 * invite to decline.
+	 * 
+	 * @param input
+	 *            The raw message the server sent.
+	 * @param splitInput
+	 *            The message the view sent, split up in an array.
+	 */
+	/*@	requires input != null &amp; !input.equals(&quot;&quot;);
+		requires splitInput != null &amp; !splitInput.equals(&quot;&quot;);
+	 */
+	public void clientDecline(String input, String[] splitInput) {
+<span class="fc bfc" id="L683" title="All 2 branches covered.">		if (splitInput.length == 2) {</span>
+<span class="fc" id="L684">			removeServerInvite(splitInput[1]);</span>
+<span class="fc" id="L685">			sendMessage(input);</span>
+<span class="fc" id="L686">			mui.addInviteMessage(&quot;Tried to decline &quot; + splitInput[1]</span>
+<span class="fc" id="L687">					+ &quot;'s invite.&quot;);</span>
+<span class="fc" id="L688">		} else {</span>
+<span class="fc" id="L689">			mui.addErrorMessage(&quot;Please use DECLINE &lt;name&gt; to decline an invite.&quot;);</span>
+		}
+<span class="fc" id="L691">	}</span>
+
+	/**
+	 * Gives the client a suggested move (does not actually do the move) using
+	 * it's view.
+	 */
+	/*@ pure */public void clientHint() {
+<span class="fc bfc" id="L698" title="All 2 branches covered.">		if (isIngame()) {</span>
+<span class="fc" id="L699">			mui.addHintMessage(new MinMaxStrategy().determineMove(</span>
+<span class="fc" id="L700">					board.deepCopy(), Disc.YELLOW));</span>
+<span class="fc" id="L701">		} else {</span>
+<span class="fc" id="L702">			mui.addErrorMessage(&quot;You're not in-game.&quot;);</span>
+		}
+<span class="fc" id="L704">	}</span>
+
+	/**
+	 * Method to request the board from the server.
+	 */
+	public void clientRequestBoard() {
+<span class="nc" id="L710">		sendMessage(REQUEST_BOARD);</span>
+<span class="nc" id="L711">	}</span>
+
+	/**
+	 * Method to set the difficulty of a MinMaxStrategy. The difficulty is the
+	 * amount of turns the game.strategy will think ahead.
+	 * 
+	 * @param input
+	 *            The raw message the view sent.
+	 */
+	public void clientDifficulty(String input) {
+<span class="pc bpc" id="L721" title="1 of 2 branches missed.">		if (computerPlayer.getStrategy() instanceof MinMaxStrategy) {</span>
+			try {
+<span class="fc" id="L723">				int depth = Integer.parseInt(input);</span>
+<span class="fc" id="L724">				((MinMaxStrategy) computerPlayer.getStrategy()).setDepth(depth);</span>
+<span class="fc" id="L725">				mui.addDifficultyMessage(true);</span>
+<span class="fc" id="L726">			} catch (NumberFormatException e) {</span>
+<span class="fc" id="L727">				mui.addErrorMessage(&quot;Can't parse difficulty&quot;);</span>
+<span class="fc" id="L728">				mui.addDifficultyMessage(false);</span>
+			}
+<span class="fc" id="L730">		} else {</span>
+<span class="nc" id="L731">			mui.addErrorMessage(&quot;Only the difficulty of the MinMaxPlayer can be changed&quot;);</span>
+<span class="nc" id="L732">			mui.addDifficultyMessage(false);</span>
+		}
+<span class="fc" id="L734">	}</span>
+
+	//END ACCEPTING FROM VIEW
+
+	//CLIENT GETTERS
+	/**
+	 * This method returns whether the client is connected to a server.
+	 * 
+	 * @return true if the client is connected to a server.
+	 */
+	/*@ pure */public Connection isConnected() {
+<span class="fc" id="L745">		return isConnected;</span>
+	}
+
+	/**
+	 * This method returns whether the client is ingame.
+	 * 
+	 * @return true if the client is ingame.
+	 */
+	/*@ pure */public boolean isIngame() {
+<span class="fc bfc" id="L754" title="All 2 branches covered.">		return board != null;</span>
+	}
+
+	/**
+	 * This method returns the name of this client.
+	 * 
+	 * @return The name of this client.
+	 */
+	/*@ pure */public String getClientName() {
+<span class="fc" id="L763">		return clientName;</span>
+	}
+
+	/**
+	 * This method returns the Board object stored for this client.
+	 * 
+	 * @return The Board object stored for this client.
+	 */
+	//@ requires isIngame();
+	/*@ pure */public Board getBoard() {
+<span class="fc" id="L773">		return board;</span>
+	}
+
+	//END CLIENT GETTERS
+
+	//USEFUL METHODS
+	/**
+	 * Checks if a move is valid on the stored Board.
+	 * 
+	 * @param move
+	 *            The move to be made.
+	 * @return If that move is valid.
+	 */
+	//@ requires isIngame();
+	/*@ pure */private boolean checkMove(int move) {
+<span class="pc bpc" id="L788" title="2 of 4 branches missed.">		return board.isField(move) &amp;&amp; board.isEmptyField(move);</span>
+	}
+
+	/**
+	 * Makes a move on the Board.
+	 * 
+	 * @param player
+	 *            The number of the player.
+	 * @param col
+	 *            The column to throw the Disc in.
+	 */
+	//@ requires isIngame();
+	private void makeMove(int player, int col) {
+		// TODO: Kijken wat protocol is.
+<span class="fc bfc" id="L802" title="All 2 branches covered.">		if (player == myNumber) {</span>
+<span class="fc" id="L803">			board.insertDisc(col, Disc.YELLOW);</span>
+<span class="fc" id="L804">		} else {</span>
+<span class="fc" id="L805">			board.insertDisc(col, Disc.RED);</span>
+		}
+<span class="fc" id="L807">		savedMove = null;</span>
+<span class="fc" id="L808">	}</span>
+
+	/**
+	 * This method makes a Board out of the packet the server sends when the
+	 * Board is requested.
+	 * 
+	 * @param line
+	 *            The Boardpacket the Server sent.
+	 * @return A new Board object with the Board as sent by the Server.
+	 */
+	//@ requires line != null;
+	//@ requires isIngame();
+	public Board toBoard(String line) {
+<span class="nc" id="L821">		String[] protocol = line.split(&quot; &quot;);</span>
+<span class="nc" id="L822">		Board serverBoard = null;</span>
+<span class="nc bnc" id="L823" title="All 2 branches missed.">		if (myNumber == 1) {</span>
+			try {
+<span class="nc" id="L825">				serverBoard = makeBoard(Integer.parseInt(protocol[2]),</span>
+<span class="nc" id="L826">						Integer.parseInt(protocol[1]), Disc.YELLOW, Disc.RED,</span>
+<span class="nc" id="L827">						line.split(&quot; &quot;));</span>
+<span class="nc" id="L828">			} catch (NumberFormatException e) {</span>
+<span class="nc" id="L829">				mui.addErrorMessage(&quot;Server sent a wrong board. TERMINATING.&quot;);</span>
+<span class="nc" id="L830">				sendMessage(ERROR + &quot; &quot; + Server.BOARD</span>
+						+ &quot; Couldn't parse Board. TERMINATING.&quot;);
+<span class="nc" id="L832">				shutdown();</span>
+			}
+<span class="nc" id="L834">			board = serverBoard;</span>
+<span class="nc" id="L835">			makeMove(savedMove[0], savedMove[1]);</span>
+<span class="nc" id="L836">			mui.addGameMessage(&quot;Succesfully received the board from the server&quot;);</span>
+<span class="nc" id="L837">			mui.addBoard();</span>
+<span class="nc bnc" id="L838" title="All 2 branches missed.">		} else if (myNumber == 2) {</span>
+			try {
+<span class="nc" id="L840">				serverBoard = makeBoard(Integer.parseInt(protocol[2]),</span>
+<span class="nc" id="L841">						Integer.parseInt(protocol[1]), Disc.RED, Disc.YELLOW,</span>
+<span class="nc" id="L842">						line.split(&quot; &quot;));</span>
+<span class="nc" id="L843">			} catch (NumberFormatException e) {</span>
+<span class="nc" id="L844">				mui.addErrorMessage(&quot;Server sent a wrong board. TERMINATING.&quot;);</span>
+<span class="nc" id="L845">				sendMessage(ERROR + &quot; &quot; + Server.BOARD</span>
+						+ &quot; Couldn't parse Board. TERMINATING.&quot;);
+<span class="nc" id="L847">				shutdown();</span>
+			}
+<span class="nc" id="L849">			board = serverBoard;</span>
+<span class="nc" id="L850">			makeMove(savedMove[0], savedMove[1]);</span>
+<span class="nc" id="L851">			mui.addGameMessage(&quot;Succesfully received the board from the server&quot;);</span>
+<span class="nc" id="L852">			mui.addBoard();</span>
+<span class="nc" id="L853">		} else {</span>
+<span class="nc" id="L854">			mui.addErrorMessage(&quot;Couldn't determine player.&quot;);</span>
+		}
+<span class="nc" id="L856">		board = serverBoard;</span>
+<span class="nc" id="L857">		makeMove(savedMove[0], savedMove[1]);</span>
+<span class="nc" id="L858">		mui.addGameMessage(&quot;Succesfully received the board from the server&quot;);</span>
+<span class="nc" id="L859">		mui.addBoard();</span>
+<span class="nc" id="L860">		return serverBoard;</span>
+	}
+
+	/**
+	 * This method is used by toBoard to create a Board.
+	 * 
+	 * @param rows
+	 *            The amount of rows the Board has.
+	 * @param columns
+	 *            The amount of columns the Board has.
+	 * @param firstDisc
+	 *            The Disc the first player uses.
+	 * @param secondDisc
+	 *            The Disc the second player uses.
+	 * @param serverMessage
+	 *            The board as sent by the server.
+	 * @return A valid Board constructed from these parameters.
+	 */
+	//@ requires isIngame();
+	public Board makeBoard(int rows, int columns, Disc firstDisc,
+			Disc secondDisc, String[] serverMessage) {
+<span class="nc" id="L881">		Board serverBoard = new Board(rows, columns);</span>
+<span class="nc" id="L882">		int i = 3;</span>
+		//@ loop_invariant row &gt;= -1 &amp; row &lt; serverBoard.getRows();
+<span class="nc bnc" id="L884" title="All 2 branches missed.">		for (int row = rows - 1; row &gt;= 0; row--) {</span>
+			//@ loop_invariant col &gt;= 0 &amp; col &lt;= serverBoard.getColumns();
+<span class="nc bnc" id="L886" title="All 2 branches missed.">			for (int col = 0; col &lt; columns; col++) {</span>
+<span class="nc bnc" id="L887" title="All 2 branches missed.">				if (Integer.parseInt(serverMessage[i]) == 0) {</span>
+					//Disc.EMPTY
+<span class="nc" id="L889">					serverBoard.setField(row, col, Disc.EMPTY);</span>
+<span class="nc bnc" id="L890" title="All 2 branches missed.">				} else if (Integer.parseInt(serverMessage[i]) == 1) {</span>
+					//Disc.YELLOW
+<span class="nc" id="L892">					serverBoard.setField(row, col, firstDisc);</span>
+<span class="nc bnc" id="L893" title="All 2 branches missed.">				} else if (Integer.parseInt(serverMessage[i]) == 2) {</span>
+					//Disc.RED
+<span class="nc" id="L895">					serverBoard.setField(row, col, secondDisc);</span>
+				}
+<span class="nc" id="L897">				i++;</span>
+			}
+		}
+<span class="nc" id="L900">		return serverBoard;</span>
+	}
+
+	/**
+	 * This method is used to convert an Stringarray to a single String.
+	 * 
+	 * @param array
+	 *            The array to convert.
+	 * @return The array converted to one line.
+	 */
+	//@ requires array != null;
+	public String arrayToLine(String[] array) {
+<span class="fc" id="L912">		String retLine = &quot;&quot;;</span>
+		//@ loop_invariant i &gt;= 1 &amp; i &lt;= array.length;
+<span class="fc bfc" id="L914" title="All 2 branches covered.">		for (int i = 1; i &lt; array.length; i++) {</span>
+<span class="fc" id="L915">			retLine += &quot; &quot; + array[i];</span>
+		}
+<span class="fc" id="L917">		return retLine;</span>
+	}
+
+	//END USEFUL METHODS
+
+	//HANDLE INVITES
+	/**
+	 * Method to add an invite to the list of people this client has invited.
+	 * 
+	 * @param name
+	 *            The name this client just invited.
+	 */
+	/*@ requires !name.equals(&quot;&quot;);
+		requires name != null;
+	*/
+	public void addClientInvite(String name) {
+<span class="fc" id="L933">		addClientInvite(name, 7, 6);</span>
+<span class="fc" id="L934">	}</span>
+
+	/**
+	 * Method to add an invite to the list of people this client has invited
+	 * with a custom Board size.
+	 * 
+	 * @param name
+	 *            The name this client just invited.
+	 * @param BoardX
+	 *            The custom Board size's X value.
+	 * @param BoardY
+	 *            The custom Board size's Y value.
+	 */
+	/*@ requires !name.equals(&quot;&quot;);
+	 	requires name != null;
+	 	requires BoardX &gt; 0;
+	 	requires BoardY &gt; 0;
+	 */
+	public void addClientInvite(String name, int BoardX, int BoardY) {
+<span class="fc" id="L953">		invited.put(name, new Integer[] { BoardX, BoardY });</span>
+<span class="fc" id="L954">	}</span>
+
+	/**
+	 * Method to add an invite to the list of people this client has been
+	 * invited by.
+	 * 
+	 * @param name
+	 *            The name this client just got invited by.
+	 */
+	public void addServerInvite(String name) {
+<span class="fc" id="L964">		addServerInvite(name, 7, 6);</span>
+<span class="fc" id="L965">	}</span>
+
+	/**
+	 * Method to add an invite to the list of people this client has been
+	 * invited by with a custom Board size.
+	 * 
+	 * @param name
+	 *            The name this client just got invited by.
+	 * @param BoardX
+	 *            The custom Board size's X value.
+	 * @param BoardY
+	 *            The custom Board size's Y value.
+	 */
+	public void addServerInvite(String name, int BoardX, int BoardY) {
+<span class="fc" id="L979">		invitedBy.put(name, new Integer[] { BoardX, BoardY });</span>
+<span class="fc" id="L980">	}</span>
+
+	/**
+	 * Method to remove an invite from the list of people this client has
+	 * invited. It's called when the server sends a Server.DECLINE_INVITE
+	 * packet.
+	 * 
+	 * @param name
+	 *            The name of the person who declined the invite.
+	 */
+	public void removeServerInvite(String name) {
+<span class="fc" id="L991">		invited.remove(name);</span>
+<span class="fc" id="L992">	}</span>
+
+	//END HANDLING INVITES
+
+	/**
+	 * This method closes the Socket connection and exits the program. On a side
+	 * note, before it does this, it also sets the loop variable for this client
+	 * to false.
+	 */
+	public void shutdown() {
+<span class="fc bfc" id="L1002" title="All 2 branches covered.">		if (loop) {</span>
+<span class="fc" id="L1003">			loop = false;</span>
+<span class="fc" id="L1004">			mui.addMessage(&quot;Shutting down...&quot;);</span>
+<span class="fc" id="L1005">			sendMessage(Client.QUIT + &quot; Shutdown&quot;);</span>
+			try {
+<span class="fc" id="L1007">				sock.close();</span>
+<span class="pc" id="L1008">			} catch (IOException e) {</span>
+<span class="nc" id="L1009">				e.printStackTrace();</span>
+			}
+<span class="nc" id="L1011">			System.exit(0);</span>
+		}
+<span class="fc" id="L1013">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ClientTUI (28-jan-2015 18:46:14)</div></body></html>

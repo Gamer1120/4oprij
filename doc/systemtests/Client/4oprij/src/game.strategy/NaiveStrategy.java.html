@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>NaiveStrategy.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ClientTUI (28-jan-2015 18:46:14)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">game.strategy</a> &gt; <span class="el_source">NaiveStrategy.java</span></div><h1>NaiveStrategy.java</h1><pre class="source lang-java linenums">package game.strategy;
+
+import game.Board;
+import game.Disc;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+/**
+ * NaiveStrategy for the Connect4 according to the protocol of the TI-2 group.&lt;br&gt;
+ * &lt;br&gt;
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 &lt;br&gt;
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+<span class="nc" id="L16">public class NaiveStrategy implements Strategy {</span>
+	/**
+	 * The name this game.strategy has.
+	 */
+	public final static String NAME = &quot;Naive&quot;;
+
+	/**
+	 * Returns the name this Strategy has.
+	 */
+	/*@ pure */@Override
+	public String getName() {
+<span class="nc" id="L27">		return NAME;</span>
+	}
+
+	/**
+	 * Determines a random move on a given Board with a given Disc.
+	 * 
+	 * @param b
+	 *            The Board to make the move on.
+	 * @param d
+	 *            The Disc to make the move for.
+	 */
+	//@ requires b != null;
+	@Override
+	public int determineMove(Board b, Disc d) {
+<span class="nc" id="L41">		ArrayList&lt;Integer&gt; empty = new ArrayList&lt;Integer&gt;();</span>
+		//@ loop_invariant 0 &lt;= col &amp; col &lt;= b.getColumns();
+<span class="nc bnc" id="L43" title="All 2 branches missed.">		for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">			if (b.isEmptyField(col)) {</span>
+<span class="nc" id="L45">				empty.add(col);</span>
+			}
+		}
+<span class="nc" id="L48">		Random rng = new Random();</span>
+<span class="nc" id="L49">		return empty.get(rng.nextInt(empty.size()));</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ClientTUI (28-jan-2015 18:46:14)</div></body></html>

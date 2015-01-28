@@ -1,0 +1,889 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>BoardTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ClientTUI (28-jan-2015 18:46:14)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">BoardTest.java</span></div><h1>BoardTest.java</h1><pre class="source lang-java linenums">package test;
+
+import static org.junit.Assert.*;
+import game.Board;
+import game.Disc;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * Test program for Board.java. &lt;br&gt;
+ * &lt;br&gt;
+ * WARNING: THIS TEST CANNOT BE RELIABLY USED FOR BOARDS WITH OTHER SIZES THAN
+ * THE DEFAULT 7 COLUMNS BY 6 ROWS &lt;br&gt;
+ * &lt;br&gt;
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 &lt;br&gt;
+ * &lt;br&gt;
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+<span class="nc" id="L21">public class BoardTest {</span>
+	/**
+	 * Test variable for a Board object.
+	 */
+	private Board b;
+
+	/**
+	 * This method creates a new Board before each test.
+	 * 
+	 * @throws Exception
+	 *             Any general exception.
+	 */
+	@Before
+	public void setUp() throws Exception {
+<span class="nc" id="L35">		b = new Board();</span>
+<span class="nc" id="L36">	}</span>
+
+	/**
+	 * Tests if a new Board is actually empty, by calling b.getField(row, col)
+	 * for every valid field in the Board, and checking if that returns
+	 * Disc.EMPTY.
+	 */
+	@Test
+	public void testEmptyBoard() {
+<span class="nc bnc" id="L45" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">			for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L47">				assertEquals(&quot;b.getField(&quot; + row + &quot;,&quot; + col + &quot;)&quot;,</span>
+<span class="nc" id="L48">						b.getField(row, col), Disc.EMPTY);</span>
+			}
+		}
+<span class="nc" id="L51">	}</span>
+
+	/**
+	 * Tests the method deepCopy(). It inserts some Discs in the original Board,
+	 * then creates a copy of it (using b.deepCopy()). After that it makes sure
+	 * that every Disc is the same in both Boards.
+	 */
+	@Test
+	public void testDeepCopy() {
+<span class="nc" id="L60">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L61">		b.insertDisc(3, Disc.RED);</span>
+<span class="nc" id="L62">		Board copy = b.deepCopy();</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">			for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L65">				assertEquals(</span>
+<span class="nc" id="L66">						&quot;For all fields: b.getField(row, col) == copy.getField(row, col)&quot;,</span>
+<span class="nc" id="L67">						b.getField(row, col), copy.getField(row, col));</span>
+			}
+		}
+<span class="nc" id="L70">	}</span>
+
+	/**
+	 * Tests the method emptyRow(col). First it assures that emptyRow returns 5
+	 * for all columns on an empty Board, since 5 is the lowest row on the
+	 * Board. It then inserts a Disc into column 2, and assures that for all
+	 * columns, except for 2, the emptyRow still returns 5. For column 2, this
+	 * should now return 4 instead. After this, some more Discs are inserted,
+	 * and a similar test is executed. The final test tests whether emptyRow
+	 * returns -1 when the specified column is full, as it's supposed to do.
+	 */
+	@Test
+	public void testEmptyRow() {
+<span class="nc bnc" id="L83" title="All 2 branches missed.">		for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L84">			assertEquals(&quot;For all empty columns: b.emptyRow(col) == 5&quot;, 5,</span>
+<span class="nc" id="L85">					b.emptyRow(col));</span>
+		}
+<span class="nc" id="L87">		b.insertDisc(2, Disc.YELLOW);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">			if (col != 2) {</span>
+<span class="nc" id="L90">				assertEquals(&quot;For all empty columns: b.emptyRow(col) == 5&quot;, 5,</span>
+<span class="nc" id="L91">						b.emptyRow(col));</span>
+<span class="nc" id="L92">			} else {</span>
+<span class="nc" id="L93">				assertEquals(&quot;For col = 2: b.emptyRow(col) == 4 now&quot;, 4,</span>
+<span class="nc" id="L94">						b.emptyRow(col));</span>
+			}
+		}
+<span class="nc" id="L97">		b.insertDisc(2, Disc.RED);</span>
+<span class="nc" id="L98">		b.insertDisc(2, Disc.YELLOW);</span>
+<span class="nc" id="L99">		b.insertDisc(5, Disc.RED);</span>
+<span class="nc" id="L100">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L101">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L102">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L103">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L104">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc bnc" id="L106" title="All 6 branches missed.">			if (col != 2 &amp;&amp; col != 5 &amp;&amp; col != 1) {</span>
+<span class="nc" id="L107">				assertEquals(&quot;For all empty columns: b.emptyRow(col) == 5&quot;, 5,</span>
+<span class="nc" id="L108">						b.emptyRow(col));</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">			} else if (col == 2) {</span>
+<span class="nc" id="L110">				assertEquals(&quot;For col = 2: b.emptyRow(col) == 2 now&quot;, 2,</span>
+<span class="nc" id="L111">						b.emptyRow(col));</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">			} else if (col == 5) {</span>
+<span class="nc" id="L113">				assertEquals(&quot;For col = 5: b.emptyRow(col) == 4 now&quot;, 4,</span>
+<span class="nc" id="L114">						b.emptyRow(col));</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">			} else if (col == 1) {</span>
+<span class="nc" id="L116">				assertEquals(&quot;For col = 1: b.emptyRow(col) == 0 now&quot;, 0,</span>
+<span class="nc" id="L117">						b.emptyRow(col));</span>
+			}
+		}
+<span class="nc" id="L120">		b.reset();</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc" id="L122">			b.insertDisc(0, Disc.RED);</span>
+		}
+<span class="nc" id="L124">		assertEquals(&quot;b.emptyRow(0)&quot;, -1, b.emptyRow(0));</span>
+<span class="nc" id="L125">	}</span>
+
+	/**
+	 * Tests the method fullRow(col). First, it assures that the method returns
+	 * -1 for every column on an empty Board, since there's no Discs in any
+	 * column. After that, some Discs are inserted, and it's assured that for
+	 * the columns those were inserted into, b.fullRow(col) returns the values
+	 * it's supposed to.
+	 */
+	@Test
+	public void testFullRow() {
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L137">			assertEquals(&quot;b.fullRow(col) should be -1 when there are no discs&quot;,</span>
+<span class="nc" id="L138">					-1, b.fullRow(col));</span>
+		}
+<span class="nc" id="L140">		b.insertDisc(2, Disc.RED);</span>
+<span class="nc" id="L141">		b.insertDisc(2, Disc.YELLOW);</span>
+<span class="nc" id="L142">		b.insertDisc(5, Disc.RED);</span>
+<span class="nc" id="L143">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L144">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L145">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L146">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L147">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L148">		assertEquals(&quot;b.fullRow(1) == 1&quot;, 1, b.fullRow(1));</span>
+<span class="nc" id="L149">		assertEquals(&quot;b.fullRow(2) == 4&quot;, 4, b.fullRow(2));</span>
+<span class="nc" id="L150">		assertEquals(&quot;b.fullRow(5) == 5&quot;, 5, b.fullRow(5));</span>
+<span class="nc" id="L151">	}</span>
+
+	/**
+	 * Firstly tests the method isField(col). First, it tests for every valid
+	 * column, that it's a valid column. Afterwards, it tests the same for some
+	 * invalid columns.
+	 * 
+	 * Secondly tests the method isField(row, col). First, it tests for every
+	 * valid column and row, that they're valid. Afterwards, it tests the same
+	 * for some invalid ones.
+	 */
+	@Test
+	public void testIsField() {
+		// Calling isField(col) with a valid index
+<span class="nc bnc" id="L165" title="All 2 branches missed.">		for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L166">			assertEquals(&quot;b.isField(col)&quot;, true, b.isField(col));</span>
+		}
+		// Calling isField(col) with an invalid index
+
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		for (int col = b.getColumns(); col &lt; b.getColumns() * 2; col++) {</span>
+<span class="nc" id="L171">			assertEquals(&quot;For these invalid fields: b.isField(col) == false&quot;,</span>
+<span class="nc" id="L172">					false, b.isField(col));</span>
+		}
+
+		// Calling isField(row, col) with a valid index
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">			for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L178">				assertEquals(</span>
+<span class="nc" id="L179">						&quot;For all valid fields: b.isField(row, col) == true&quot;,</span>
+<span class="nc" id="L180">						true, b.isField(row, col));</span>
+			}
+		}
+		// Calling isField(row, col) with some invalid indexes
+<span class="nc bnc" id="L184" title="All 2 branches missed.">		for (int row = b.getRows(); row &lt; b.getRows() * 2; row++) {</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			for (int col = b.getColumns(); col &lt; b.getColumns() * 2; col++) {</span>
+<span class="nc" id="L186">				assertEquals(</span>
+<span class="nc" id="L187">						&quot;For these invalid fields: b.isField(row, col) == false&quot;,</span>
+<span class="nc" id="L188">						false, b.isField(row, col));</span>
+			}
+		}
+<span class="nc" id="L191">	}</span>
+
+	/**
+	 * Tests the method getField(row, col). First, it assures that on an empty
+	 * Board, b.getField(row, col) returns Disc.EMPTY for every row and column.
+	 * After that, the Board is filled with some Discs. Then, it's tested that
+	 * b.getField(row, col) returns the Discs it's intended to return.
+	 */
+	@Test
+	public void testGetField() {
+		// Calls all fields, and checks if they're Disc.EMPTY
+<span class="nc bnc" id="L202" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">			for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L204">				assertEquals(</span>
+<span class="nc" id="L205">						&quot;For all fields on an empty board: b.getField(row, col) == Disc.EMPTY&quot;,</span>
+<span class="nc" id="L206">						Disc.EMPTY, b.getField(row, col));</span>
+			}
+		}
+		// Fills the board with some Discs
+<span class="nc" id="L210">		b.insertDisc(2, Disc.RED);</span>
+<span class="nc" id="L211">		b.insertDisc(2, Disc.YELLOW);</span>
+<span class="nc" id="L212">		b.insertDisc(5, Disc.RED);</span>
+<span class="nc" id="L213">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L214">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L215">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L216">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L217">		b.insertDisc(1, Disc.YELLOW);</span>
+		// Tests if the getField returns the proper Discs
+<span class="nc" id="L219">		assertEquals(&quot;In (4,2) there's now a YELLOW Disc&quot;, Disc.YELLOW,</span>
+<span class="nc" id="L220">				b.getField(4, 2));</span>
+<span class="nc" id="L221">		assertEquals(&quot;In (5,2) there's now a RED Disc&quot;, Disc.RED,</span>
+<span class="nc" id="L222">				b.getField(5, 2));</span>
+<span class="nc" id="L223">		assertEquals(&quot;In (5,5) there's now a RED Disc&quot;, Disc.RED,</span>
+<span class="nc" id="L224">				b.getField(5, 5));</span>
+<span class="nc" id="L225">		assertEquals(&quot;In (1,1) there's now a YELLOW Disc&quot;, Disc.YELLOW,</span>
+<span class="nc" id="L226">				b.getField(1, 1));</span>
+<span class="nc" id="L227">		assertEquals(&quot;In (2,1) there's now a YELLOW Disc&quot;, Disc.YELLOW,</span>
+<span class="nc" id="L228">				b.getField(2, 1));</span>
+<span class="nc" id="L229">		assertEquals(&quot;In (3,1) there's now a RED Disc&quot;, Disc.RED,</span>
+<span class="nc" id="L230">				b.getField(3, 1));</span>
+<span class="nc" id="L231">		assertEquals(&quot;In (4,1) there's now a YELLOW Disc&quot;, Disc.YELLOW,</span>
+<span class="nc" id="L232">				b.getField(4, 1));</span>
+<span class="nc" id="L233">		assertEquals(&quot;In (5,1) there's now a RED Disc&quot;, Disc.RED,</span>
+<span class="nc" id="L234">				b.getField(5, 1));</span>
+<span class="nc" id="L235">	}</span>
+
+	/**
+	 * Firstly, it tests the method isEmptyField(col). It tests that for every
+	 * column on an empty Board there's at least 1 empty field in each of those
+	 * columns. Then, a column is filled, and after each Disc, it's checked
+	 * whether the column still has empty fields. Once the column is full, it
+	 * should no longer have empty fields.
+	 * 
+	 * Secondly, it tests the method isEmptyField(row, col). First, it assures
+	 * that every field on an empty Board is empty. After that it inserts some
+	 * Discs, and assures that the fields those Discs got inserted into are no
+	 * longer empty.
+	 */
+	@Test
+	public void testIsEmptyField() {
+<span class="nc bnc" id="L251" title="All 2 branches missed.">		for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L252">			assertEquals(true, b.isEmptyField(col));</span>
+		}
+<span class="nc bnc" id="L254" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc" id="L255">			assertEquals(true, b.isEmptyField(0));</span>
+<span class="nc" id="L256">			b.insertDisc(0, Disc.RED);</span>
+		}
+<span class="nc" id="L258">		assertEquals(false, b.isEmptyField(0));</span>
+		// From here on testing isEmptyField(row, col)
+<span class="nc" id="L260">		b.reset();</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">			for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L263">				assertEquals(true, b.isEmptyField(row, col));</span>
+			}
+		}
+		// Inserts some discs
+<span class="nc" id="L267">		b.insertDisc(2, Disc.RED);</span>
+<span class="nc" id="L268">		b.insertDisc(2, Disc.YELLOW);</span>
+<span class="nc" id="L269">		b.insertDisc(5, Disc.RED);</span>
+<span class="nc" id="L270">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L271">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L272">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L273">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L274">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L275">		assertEquals(&quot;(4,2) is no longer an empty field.&quot;, false,</span>
+<span class="nc" id="L276">				b.isEmptyField(4, 2));</span>
+<span class="nc" id="L277">		assertEquals(&quot;(5,2) is no longer an empty field.&quot;, false,</span>
+<span class="nc" id="L278">				b.isEmptyField(5, 2));</span>
+<span class="nc" id="L279">		assertEquals(&quot;(5,5) is no longer an empty field.&quot;, false,</span>
+<span class="nc" id="L280">				b.isEmptyField(5, 5));</span>
+<span class="nc" id="L281">		assertEquals(&quot;(1,1) is no longer an empty field.&quot;, false,</span>
+<span class="nc" id="L282">				b.isEmptyField(1, 1));</span>
+<span class="nc" id="L283">		assertEquals(&quot;(2,1) is no longer an empty field.&quot;, false,</span>
+<span class="nc" id="L284">				b.isEmptyField(2, 1));</span>
+<span class="nc" id="L285">		assertEquals(&quot;(3,1) is no longer an empty field.&quot;, false,</span>
+<span class="nc" id="L286">				b.isEmptyField(3, 1));</span>
+<span class="nc" id="L287">		assertEquals(&quot;(4,1) is no longer an empty field.&quot;, false,</span>
+<span class="nc" id="L288">				b.isEmptyField(4, 1));</span>
+<span class="nc" id="L289">		assertEquals(&quot;(5,1) is no longer an empty field.&quot;, false,</span>
+<span class="nc" id="L290">				b.isEmptyField(5, 1));</span>
+<span class="nc" id="L291">	}</span>
+
+	/**
+	 * Tests the method isFull(). It puts a random Disc on every position of the
+	 * Board. After each placement, a check is made to see that the Board is not
+	 * full yet. After every Disc has been placed, the Board should be full.
+	 */
+
+	@Test
+	public void testIsFull() {
+<span class="nc bnc" id="L301" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">			for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">				if (Math.random() &gt; 0.5) {</span>
+<span class="nc" id="L304">					b.setField(row, col, Disc.RED);</span>
+<span class="nc" id="L305">				} else {</span>
+<span class="nc" id="L306">					b.setField(row, col, Disc.YELLOW);</span>
+				}
+<span class="nc bnc" id="L308" title="All 4 branches missed.">				if (!(row == b.getRows() - 1 &amp;&amp; col == b.getColumns() - 1)) {</span>
+<span class="nc" id="L309">					assertEquals(&quot;For a non-full board: b.isFull() == false&quot;,</span>
+<span class="nc" id="L310">							false, b.isFull());</span>
+<span class="nc" id="L311">				} else {</span>
+<span class="nc" id="L312">					assertEquals(&quot;For a full board: b.isFull() == true&quot;, true,</span>
+<span class="nc" id="L313">							b.isFull());</span>
+				}
+			}
+		}
+<span class="nc" id="L317">	}</span>
+
+	/**
+	 * Tests the method gameOver(). It wasn't necessary to implement a test for
+	 * this method, since it only returns whether the Board isFull() or
+	 * hasWinner(). These methods have been tested already.
+	 */
+	@Test
+	public void testIsGameOver() {
+<span class="nc" id="L326">	}</span>
+
+	/**
+	 * Tests the method hasRow(Disc). It basically creates every possible
+	 * situation, in which there's a row on the Board. At every boardrow, there
+	 * are 4 potential rows, namely on the positions 0-3, 1-4, 2-5 and 3-6. To
+	 * make every possible combination, the algorithm works as follows: Reset
+	 * the Board before every test, then for every single boardrow, put 4 discs
+	 * in that boardrow, such that there's 4 Discs connected. Then, check
+	 * whether b.hasRow(Disc) is true for the Disc you inserted, and make sure
+	 * (because why not) that for the Disc you didn't insert,
+	 * b.hasRow(otherDisc) is false. After this, the same test is done, but with
+	 * 3 Discs connected at a time. None of these should make b.hasRow(Disc) or
+	 * b.hasRow(otherDisc) return true. After this, a pre-defined realistic
+	 * situation is created, in which there's no 4 connected Discs for either of
+	 * the players in a row, and it's made sure, that b.hasRow(Disc) and
+	 * b.hasRow(otherDisc) are false.
+	 */
+	@Test
+	public void testHasRow() {
+<span class="nc bnc" id="L346" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">			for (int col = 0; col &lt;= 3; col++) {</span>
+<span class="nc" id="L348">				b.reset();</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">				for (int i = col; i &lt;= (col + 3); i++) {</span>
+<span class="nc" id="L350">					b.setField(row, i, Disc.RED);</span>
+				}
+				// Red should now have a row, although yellow obviously
+				// shouldn't.
+<span class="nc" id="L354">				assertEquals(&quot;b.hasRow(Disc.RED) == true&quot;, true,</span>
+<span class="nc" id="L355">						b.hasRow(Disc.RED));</span>
+<span class="nc" id="L356">				assertEquals(&quot;b.hasRow(Disc.YELLOW) == false&quot;, false,</span>
+<span class="nc" id="L357">						b.hasRow(Disc.YELLOW));</span>
+			}
+		}
+		// Now tests with rows of 3.
+<span class="nc bnc" id="L361" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">			for (int col = 0; col &lt;= 3; col++) {</span>
+<span class="nc" id="L363">				b.reset();</span>
+				// Fill the boardrow with a row of 3 discs
+<span class="nc bnc" id="L365" title="All 2 branches missed.">				for (int i = col; i &lt;= (col + 2); i++) {</span>
+<span class="nc" id="L366">					b.setField(row, i, Disc.RED);</span>
+				}
+<span class="nc" id="L368">				assertEquals(&quot;b.hasRow(Disc.RED) == false&quot;, false,</span>
+<span class="nc" id="L369">						b.hasRow(Disc.RED));</span>
+<span class="nc" id="L370">				assertEquals(&quot;b.hasRow(Disc.YELLOW) == false&quot;, false,</span>
+<span class="nc" id="L371">						b.hasRow(Disc.YELLOW));</span>
+
+			}
+			// Fills a clean board with some Discs which don't give a situation
+			// where there's a row.
+<span class="nc" id="L376">			b.reset();</span>
+<span class="nc" id="L377">			b.insertDisc(2, Disc.RED);</span>
+<span class="nc" id="L378">			b.insertDisc(2, Disc.YELLOW);</span>
+<span class="nc" id="L379">			b.insertDisc(5, Disc.RED);</span>
+<span class="nc" id="L380">			b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L381">			b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L382">			b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L383">			assertEquals(&quot;b.hasRow(Disc.RED) == false&quot;, false,</span>
+<span class="nc" id="L384">					b.hasRow(Disc.RED));</span>
+<span class="nc" id="L385">			assertEquals(&quot;b.hasRow(Disc.YELLOW) == false&quot;, false,</span>
+<span class="nc" id="L386">					b.hasRow(Disc.YELLOW));</span>
+		}
+<span class="nc" id="L388">	}</span>
+
+	/**
+	 * Tests the method hasColumn(Disc). It basically creates every possible
+	 * situation, in which there's a column on the Board. At every boardcolumn,
+	 * there are 3 potential columns, namely on the positions 0-3, 1-4 and 2-5.
+	 * To make every possible combination, the algorithm works as follows: Reset
+	 * the Board before every test, then for every single boardcolumn, put 4
+	 * discs in that boardcolumn, such that there's 4 Discs connected. Then,
+	 * check whether b.hasColumn(Disc) is true for the Disc you inserted, and
+	 * make sure (because why not) that for the Disc you didn't insert,
+	 * b.hasColumn(otherDisc) is false. After this, the same test is done, but
+	 * with 3 Discs connected at a time. None of these should make
+	 * b.hasColumn(Disc) or b.hasColumn(otherDisc) return true. After this, a
+	 * pre-defined realistic situation is created, in which there's no 4
+	 * connected Discs for either of the players in a column, and it's made
+	 * sure, that b.hasColumn(Disc) and b.hasColumn(otherDisc) are false.
+	 */
+	@Test
+	public void testHasColumn() {
+<span class="nc bnc" id="L408" title="All 2 branches missed.">		for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">			for (int row = 0; row &lt;= 2; row++) {</span>
+<span class="nc" id="L410">				b.reset();</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">				for (int i = row; i &lt;= (row + 3); i++) {</span>
+<span class="nc" id="L412">					b.setField(i, col, Disc.RED);</span>
+				}
+				// Red should now have a row, although yellow obviously
+				// shouldn't.
+<span class="nc" id="L416">				assertEquals(&quot;b.hasColumn(Disc.RED) == true&quot;, true,</span>
+<span class="nc" id="L417">						b.hasColumn(Disc.RED));</span>
+<span class="nc" id="L418">				assertEquals(&quot;b.hasColumn(Disc.YELLOW) == false&quot;, false,</span>
+<span class="nc" id="L419">						b.hasColumn(Disc.YELLOW));</span>
+			}
+		}
+		// Now tests with columns of 3.
+<span class="nc bnc" id="L423" title="All 2 branches missed.">		for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">			for (int row = 0; row &lt;= 2; row++) {</span>
+<span class="nc" id="L425">				b.reset();</span>
+				// Fill the boardcolumn with a row of 3 discs
+<span class="nc bnc" id="L427" title="All 2 branches missed.">				for (int i = row; i &lt;= (row + 2); i++) {</span>
+<span class="nc" id="L428">					b.setField(i, col, Disc.RED);</span>
+				}
+<span class="nc" id="L430">				assertEquals(&quot;b.hasColumn(Disc.RED) == false&quot;, false,</span>
+<span class="nc" id="L431">						b.hasColumn(Disc.RED));</span>
+<span class="nc" id="L432">				assertEquals(&quot;b.hasColumn(Disc.YELLOW) == false&quot;, false,</span>
+<span class="nc" id="L433">						b.hasColumn(Disc.YELLOW));</span>
+			}
+		}
+		// Fills a clean board with some Discs which don't give a situation
+		// where there's a column.
+<span class="nc" id="L438">		b.reset();</span>
+<span class="nc" id="L439">		b.insertDisc(2, Disc.RED);</span>
+<span class="nc" id="L440">		b.insertDisc(2, Disc.YELLOW);</span>
+<span class="nc" id="L441">		b.insertDisc(5, Disc.RED);</span>
+<span class="nc" id="L442">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L443">		b.insertDisc(1, Disc.YELLOW);</span>
+<span class="nc" id="L444">		b.insertDisc(1, Disc.RED);</span>
+<span class="nc" id="L445">		assertEquals(&quot;b.hasColumn(Disc.RED) == false&quot;, false,</span>
+<span class="nc" id="L446">				b.hasColumn(Disc.RED));</span>
+<span class="nc" id="L447">		assertEquals(&quot;b.hasColumn(Disc.YELLOW) == false&quot;, false,</span>
+<span class="nc" id="L448">				b.hasColumn(Disc.YELLOW));</span>
+<span class="nc" id="L449">	}</span>
+
+	/**
+	 * Tests the method hasDiagonal(). It basically creates every possible
+	 * situation, in which there's a diagonal on the Board . The way it does the
+	 * test, is as follows: it inserts 4 Disc s into the Board, which make the
+	 * Board have a diagonal. After each Disc is inserted, a check is made, to
+	 * see whether the Board has a diagonal. After each of the first three
+	 * Discs, the Board should not have a diagonal, but after the fourth Disc,
+	 * the Board should have one. Since there were only 24 options, each option
+	 * was coded manually. This was humanly faster, than writing an algorithm
+	 * for it. All possible diagonals can be found in the Excel-speadsheet
+	 * located in /doc/PossibleDiagonals.xlsx. The numbers of the options in the
+	 * code represent the numbers of options in the spreadsheet.
+	 */
+	@Test
+	public void testHasDiagonal() {
+		// Option 1
+<span class="nc" id="L467">		b.setField(3, 0, Disc.RED);</span>
+<span class="nc" id="L468">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L469">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L470">		b.setField(2, 1, Disc.RED);</span>
+<span class="nc" id="L471">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L472">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L473">		b.setField(1, 2, Disc.RED);</span>
+<span class="nc" id="L474">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L475">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L476">		b.setField(0, 3, Disc.RED);</span>
+<span class="nc" id="L477">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L478">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L479">		b.reset();</span>
+		// Option 2
+<span class="nc" id="L481">		b.setField(4, 0, Disc.RED);</span>
+<span class="nc" id="L482">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L483">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L484">		b.setField(3, 1, Disc.RED);</span>
+<span class="nc" id="L485">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L486">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L487">		b.setField(2, 2, Disc.RED);</span>
+<span class="nc" id="L488">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L489">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L490">		b.setField(1, 3, Disc.RED);</span>
+<span class="nc" id="L491">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L492">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L493">		b.reset();</span>
+		// Option 3
+<span class="nc" id="L495">		b.setField(3, 1, Disc.RED);</span>
+<span class="nc" id="L496">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L497">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L498">		b.setField(2, 2, Disc.RED);</span>
+<span class="nc" id="L499">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L500">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L501">		b.setField(1, 3, Disc.RED);</span>
+<span class="nc" id="L502">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L503">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L504">		b.setField(0, 4, Disc.RED);</span>
+<span class="nc" id="L505">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L506">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L507">		b.reset();</span>
+		// Option 4
+<span class="nc" id="L509">		b.setField(5, 0, Disc.RED);</span>
+<span class="nc" id="L510">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L511">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L512">		b.setField(4, 1, Disc.RED);</span>
+<span class="nc" id="L513">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L514">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L515">		b.setField(3, 2, Disc.RED);</span>
+<span class="nc" id="L516">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L517">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L518">		b.setField(2, 3, Disc.RED);</span>
+<span class="nc" id="L519">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L520">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L521">		b.reset();</span>
+		// Option 5
+<span class="nc" id="L523">		b.setField(4, 1, Disc.RED);</span>
+<span class="nc" id="L524">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L525">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L526">		b.setField(3, 2, Disc.RED);</span>
+<span class="nc" id="L527">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L528">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L529">		b.setField(2, 3, Disc.RED);</span>
+<span class="nc" id="L530">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L531">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L532">		b.setField(1, 4, Disc.RED);</span>
+<span class="nc" id="L533">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L534">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L535">		b.reset();</span>
+		// Option 6
+<span class="nc" id="L537">		b.setField(3, 2, Disc.RED);</span>
+<span class="nc" id="L538">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L539">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L540">		b.setField(2, 3, Disc.RED);</span>
+<span class="nc" id="L541">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L542">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L543">		b.setField(1, 4, Disc.RED);</span>
+<span class="nc" id="L544">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L545">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L546">		b.setField(0, 5, Disc.RED);</span>
+<span class="nc" id="L547">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L548">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L549">		b.reset();</span>
+		// Option 7
+<span class="nc" id="L551">		b.setField(5, 1, Disc.RED);</span>
+<span class="nc" id="L552">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L553">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L554">		b.setField(4, 2, Disc.RED);</span>
+<span class="nc" id="L555">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L556">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L557">		b.setField(3, 3, Disc.RED);</span>
+<span class="nc" id="L558">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L559">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L560">		b.setField(2, 4, Disc.RED);</span>
+<span class="nc" id="L561">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L562">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L563">		b.reset();</span>
+		// Option 8
+<span class="nc" id="L565">		b.setField(4, 2, Disc.RED);</span>
+<span class="nc" id="L566">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L567">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L568">		b.setField(3, 3, Disc.RED);</span>
+<span class="nc" id="L569">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L570">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L571">		b.setField(2, 4, Disc.RED);</span>
+<span class="nc" id="L572">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L573">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L574">		b.setField(1, 5, Disc.RED);</span>
+<span class="nc" id="L575">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L576">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L577">		b.reset();</span>
+		// Option 9
+<span class="nc" id="L579">		b.setField(3, 3, Disc.RED);</span>
+<span class="nc" id="L580">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L581">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L582">		b.setField(2, 4, Disc.RED);</span>
+<span class="nc" id="L583">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L584">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L585">		b.setField(1, 5, Disc.RED);</span>
+<span class="nc" id="L586">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L587">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L588">		b.setField(0, 6, Disc.RED);</span>
+<span class="nc" id="L589">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L590">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L591">		b.reset();</span>
+		// Option 10
+<span class="nc" id="L593">		b.setField(5, 2, Disc.RED);</span>
+<span class="nc" id="L594">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L595">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L596">		b.setField(4, 3, Disc.RED);</span>
+<span class="nc" id="L597">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L598">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L599">		b.setField(3, 4, Disc.RED);</span>
+<span class="nc" id="L600">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L601">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L602">		b.setField(2, 5, Disc.RED);</span>
+<span class="nc" id="L603">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L604">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L605">		b.reset();</span>
+		// Option 11
+<span class="nc" id="L607">		b.setField(4, 3, Disc.RED);</span>
+<span class="nc" id="L608">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L609">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L610">		b.setField(3, 4, Disc.RED);</span>
+<span class="nc" id="L611">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L612">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L613">		b.setField(2, 5, Disc.RED);</span>
+<span class="nc" id="L614">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L615">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L616">		b.setField(1, 6, Disc.RED);</span>
+<span class="nc" id="L617">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L618">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L619">		b.reset();</span>
+		// Option 12
+<span class="nc" id="L621">		b.setField(5, 3, Disc.RED);</span>
+<span class="nc" id="L622">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L623">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L624">		b.setField(4, 4, Disc.RED);</span>
+<span class="nc" id="L625">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L626">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L627">		b.setField(3, 5, Disc.RED);</span>
+<span class="nc" id="L628">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L629">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L630">		b.setField(2, 6, Disc.RED);</span>
+<span class="nc" id="L631">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L632">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L633">		b.reset();</span>
+		// From now on testing the verticals the other way around.
+		// Option 13
+<span class="nc" id="L636">		b.setField(2, 0, Disc.RED);</span>
+<span class="nc" id="L637">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L638">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L639">		b.setField(3, 1, Disc.RED);</span>
+<span class="nc" id="L640">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L641">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L642">		b.setField(4, 2, Disc.RED);</span>
+<span class="nc" id="L643">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L644">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L645">		b.setField(5, 3, Disc.RED);</span>
+<span class="nc" id="L646">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L647">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L648">		b.reset();</span>
+		// Option 14
+<span class="nc" id="L650">		b.setField(1, 0, Disc.RED);</span>
+<span class="nc" id="L651">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L652">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L653">		b.setField(2, 1, Disc.RED);</span>
+<span class="nc" id="L654">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L655">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L656">		b.setField(3, 2, Disc.RED);</span>
+<span class="nc" id="L657">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L658">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L659">		b.setField(4, 3, Disc.RED);</span>
+<span class="nc" id="L660">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L661">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L662">		b.reset();</span>
+		// Option 15
+<span class="nc" id="L664">		b.setField(2, 1, Disc.RED);</span>
+<span class="nc" id="L665">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L666">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L667">		b.setField(3, 2, Disc.RED);</span>
+<span class="nc" id="L668">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L669">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L670">		b.setField(4, 3, Disc.RED);</span>
+<span class="nc" id="L671">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L672">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L673">		b.setField(5, 4, Disc.RED);</span>
+<span class="nc" id="L674">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L675">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L676">		b.reset();</span>
+		// Option 16
+<span class="nc" id="L678">		b.setField(0, 0, Disc.RED);</span>
+<span class="nc" id="L679">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L680">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L681">		b.setField(1, 1, Disc.RED);</span>
+<span class="nc" id="L682">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L683">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L684">		b.setField(2, 2, Disc.RED);</span>
+<span class="nc" id="L685">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L686">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L687">		b.setField(3, 3, Disc.RED);</span>
+<span class="nc" id="L688">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L689">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L690">		b.reset();</span>
+		// Option 17
+<span class="nc" id="L692">		b.setField(1, 1, Disc.RED);</span>
+<span class="nc" id="L693">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L694">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L695">		b.setField(2, 2, Disc.RED);</span>
+<span class="nc" id="L696">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L697">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L698">		b.setField(3, 3, Disc.RED);</span>
+<span class="nc" id="L699">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L700">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L701">		b.setField(4, 4, Disc.RED);</span>
+<span class="nc" id="L702">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L703">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L704">		b.reset();</span>
+		// Option 18
+<span class="nc" id="L706">		b.setField(2, 2, Disc.RED);</span>
+<span class="nc" id="L707">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L708">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L709">		b.setField(3, 3, Disc.RED);</span>
+<span class="nc" id="L710">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L711">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L712">		b.setField(4, 4, Disc.RED);</span>
+<span class="nc" id="L713">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L714">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L715">		b.setField(5, 5, Disc.RED);</span>
+<span class="nc" id="L716">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L717">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L718">		b.reset();</span>
+		// Option 19
+<span class="nc" id="L720">		b.setField(0, 1, Disc.RED);</span>
+<span class="nc" id="L721">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L722">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L723">		b.setField(1, 2, Disc.RED);</span>
+<span class="nc" id="L724">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L725">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L726">		b.setField(2, 3, Disc.RED);</span>
+<span class="nc" id="L727">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L728">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L729">		b.setField(3, 4, Disc.RED);</span>
+<span class="nc" id="L730">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L731">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L732">		b.reset();</span>
+		// Option 20
+<span class="nc" id="L734">		b.setField(1, 2, Disc.RED);</span>
+<span class="nc" id="L735">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L736">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L737">		b.setField(2, 3, Disc.RED);</span>
+<span class="nc" id="L738">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L739">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L740">		b.setField(3, 4, Disc.RED);</span>
+<span class="nc" id="L741">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L742">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L743">		b.setField(4, 5, Disc.RED);</span>
+<span class="nc" id="L744">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L745">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L746">		b.reset();</span>
+		// Option 21
+<span class="nc" id="L748">		b.setField(2, 3, Disc.RED);</span>
+<span class="nc" id="L749">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L750">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L751">		b.setField(3, 4, Disc.RED);</span>
+<span class="nc" id="L752">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L753">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L754">		b.setField(4, 5, Disc.RED);</span>
+<span class="nc" id="L755">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L756">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L757">		b.setField(5, 6, Disc.RED);</span>
+<span class="nc" id="L758">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L759">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L760">		b.reset();</span>
+		// Option 22
+<span class="nc" id="L762">		b.setField(0, 2, Disc.RED);</span>
+<span class="nc" id="L763">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L764">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L765">		b.setField(1, 3, Disc.RED);</span>
+<span class="nc" id="L766">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L767">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L768">		b.setField(2, 4, Disc.RED);</span>
+<span class="nc" id="L769">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L770">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L771">		b.setField(3, 5, Disc.RED);</span>
+<span class="nc" id="L772">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L773">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L774">		b.reset();</span>
+		// Option 23
+<span class="nc" id="L776">		b.setField(1, 3, Disc.RED);</span>
+<span class="nc" id="L777">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L778">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L779">		b.setField(2, 4, Disc.RED);</span>
+<span class="nc" id="L780">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L781">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L782">		b.setField(3, 5, Disc.RED);</span>
+<span class="nc" id="L783">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L784">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L785">		b.setField(4, 6, Disc.RED);</span>
+<span class="nc" id="L786">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L787">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L788">		b.reset();</span>
+		// Option 24
+<span class="nc" id="L790">		b.setField(0, 3, Disc.RED);</span>
+<span class="nc" id="L791">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L792">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L793">		b.setField(1, 4, Disc.RED);</span>
+<span class="nc" id="L794">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L795">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L796">		b.setField(2, 5, Disc.RED);</span>
+<span class="nc" id="L797">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==false&quot;, false,</span>
+<span class="nc" id="L798">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L799">		b.setField(3, 6, Disc.RED);</span>
+<span class="nc" id="L800">		assertEquals(&quot;b.hasDiagonal(Disc.RED)==true&quot;, true,</span>
+<span class="nc" id="L801">				b.hasDiagonal(Disc.RED));</span>
+<span class="nc" id="L802">		b.reset();</span>
+<span class="nc" id="L803">	}</span>
+
+	/**
+	 * Tests the method isWinner(Disc). It wasn't necessary to implement a test
+	 * for this method, since it only returns whether the Board hasRow(d) or
+	 * hasColumn(d) or hasDiagonal(d). These methods have been tested already.
+	 */
+	@Test
+	public void testIsWinner() {
+<span class="nc" id="L812">	}</span>
+
+	/**
+	 * Tests the method hasWinner(Disc). It wasn't necessary to implement a test
+	 * for this method, since it only returns whether isWinner(Disc.YELLOW) or
+	 * isWinner(Disc.RED). This method has been tested already.
+	 */
+	@Test
+	public void testHasWinner() {
+<span class="nc" id="L821">	}</span>
+
+	/**
+	 * Tests the method hasWinner(Disc). It wasn't necessary to implement a test
+	 * for this method, since it's implicitly tested.
+	 */
+	@Test
+	public void testToString() {
+<span class="nc" id="L829">	}</span>
+
+	/**
+	 * Tests the method reset(). It basically fills the board with random Discs,
+	 * it calls the method b.reset() and it tests if all the fields on the board
+	 * are Disc.EMPTY afterwards.
+	 */
+	@Test
+	public void testReset() {
+		// Fills the board with Discs
+<span class="nc bnc" id="L839" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L840" title="All 2 branches missed.">			for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc bnc" id="L841" title="All 2 branches missed.">				if (Math.random() &gt; 0.5) {</span>
+<span class="nc" id="L842">					b.setField(row, col, Disc.RED);</span>
+<span class="nc" id="L843">				} else {</span>
+<span class="nc" id="L844">					b.setField(row, col, Disc.YELLOW);</span>
+				}
+			}
+		}
+		// Resets the board
+<span class="nc" id="L849">		b.reset();</span>
+		// Tests if all fields are empty now.
+<span class="nc bnc" id="L851" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L852" title="All 2 branches missed.">			for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L853">				assertEquals(&quot;All discs on the board are Disc.EMPTY now.&quot;,</span>
+<span class="nc" id="L854">						Disc.EMPTY, b.getField(row, col));</span>
+			}
+		}
+<span class="nc" id="L857">	}</span>
+
+	/**
+	 * Tests the method insertDisc(col). It fills a column with a couple of
+	 * Discs, and then makes sure that the inserted Discs are now in the places
+	 * they should be.
+	 */
+	@Test
+	public void testInsertDisc() {
+<span class="nc bnc" id="L866" title="All 2 branches missed.">		for (int row = 5; row &gt;= 0; row--) {</span>
+<span class="nc" id="L867">			b.insertDisc(0, Disc.RED);</span>
+<span class="nc" id="L868">			assertEquals(&quot;b.getField(row, 0) == Disc.RED&quot;, Disc.RED,</span>
+<span class="nc" id="L869">					b.getField(row, 0));</span>
+		}
+<span class="nc" id="L871">	}</span>
+
+	/**
+	 * Tests the method setField(Disc). It basically places some Discs on the
+	 * Board, and then checks whether the field it just placed it on has the
+	 * proper Disc in it.
+	 */
+	@Test
+	public void testSetField() {
+<span class="nc bnc" id="L880" title="All 2 branches missed.">		for (int row = 0; row &lt; b.getRows(); row++) {</span>
+<span class="nc bnc" id="L881" title="All 2 branches missed.">			for (int col = 0; col &lt; b.getColumns(); col++) {</span>
+<span class="nc" id="L882">				b.setField(row, col, Disc.RED);</span>
+<span class="nc" id="L883">				assertEquals(&quot;b.getField(row, col) == Disc.RED&quot;, Disc.RED,</span>
+<span class="nc" id="L884">						b.getField(row, col));</span>
+			}
+		}
+<span class="nc" id="L887">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ClientTUI (28-jan-2015 18:46:14)</div></body></html>

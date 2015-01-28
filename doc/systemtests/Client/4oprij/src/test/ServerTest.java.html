@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ServerTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ClientTUI (28-jan-2015 18:46:14)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">ServerTest.java</span></div><h1>ServerTest.java</h1><pre class="source lang-java linenums">package test;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Arrays;
+
+import server.ClientHandler;
+import server.Server;
+import server.ServerGUI;
+
+<span class="nc" id="L12">public class ServerTest {</span>
+
+	// HOW TO SETUP THIS TEST
+	// 1. Delete leaderboard.txt
+	// 2. Run this test.
+	// 3. Compare the results in ServerGUI with this: http://pastebin.com/W2D7ixrY
+	// 4. Close ServerGUI.
+	// 5. Run this test again (because of the leaderboard)
+	// 6. Compare the results in ServerGUI with this: http://pastebin.com/H2Vzrptc
+	public static void main(String[] args) {
+<span class="nc" id="L22">		Server s = null;</span>
+<span class="nc" id="L23">		ServerGUI sgui = null;</span>
+		try {
+<span class="nc" id="L25">			sgui = new ServerGUI();</span>
+<span class="nc" id="L26">			s = new Server(2727, sgui);</span>
+<span class="nc" id="L27">		} catch (IOException e) {</span>
+<span class="nc" id="L28">			System.out</span>
+<span class="nc" id="L29">					.println(&quot;Couldn't create a Server on port 2727. Maybe you already have one running?&quot;);</span>
+		}
+<span class="nc" id="L31">		ClientHandler ch = null;</span>
+		try {
+<span class="nc" id="L33">			ch = new ClientHandler(s, new Socket(</span>
+<span class="nc" id="L34">					InetAddress.getByName(&quot;localhost&quot;), 2727));</span>
+<span class="nc" id="L35">		} catch (IOException e) {</span>
+<span class="nc" id="L36">			System.out.println(&quot;Couldn't create a new ClientHandler.&quot;);</span>
+		}
+<span class="nc" id="L38">		s.addHandler(ch);</span>
+<span class="nc" id="L39">		s.broadcast(&quot;s.broadcast()&quot;);</span>
+<span class="nc" id="L40">		s.broadcastLobby();</span>
+<span class="nc" id="L41">		s.broadcastChat(&quot;s.broadcastChat()&quot;);</span>
+<span class="nc" id="L42">		s.print(&quot;s.print()&quot;);</span>
+<span class="nc" id="L43">		sgui.addMessage(&quot;The name TestName exists on this server: &quot;</span>
+<span class="nc" id="L44">				+ s.nameExists(&quot;TestName&quot;));</span>
+<span class="nc" id="L45">		sgui.addMessage(&quot;s.lobbyToString() -&gt; &quot; + s.lobbyToString());</span>
+<span class="nc" id="L46">		sgui.addMessage(&quot;s.getHandlers() --&gt; &quot; + s.getHandlers());</span>
+<span class="nc" id="L47">		sgui.addMessage(&quot;Player 1 just invited Player2.&quot;);</span>
+<span class="nc" id="L48">		s.addInvite(&quot;Player1&quot;, &quot;Player2&quot;, 6, 7);</span>
+<span class="nc" id="L49">		sgui.addMessage(&quot;Player2 is now invited by Player1: &quot;</span>
+<span class="nc" id="L50">				+ s.isInvited(&quot;Player1&quot;, &quot;Player2&quot;));</span>
+<span class="nc" id="L51">		sgui.addMessage(&quot;Player2 is now invited: &quot; + s.isInvited(&quot;Player2&quot;));</span>
+<span class="nc" id="L52">		sgui.addMessage(&quot;s.getInvites() --&gt; &quot; + s.getInvites());</span>
+<span class="nc" id="L53">		sgui.addMessage(&quot;s.getInvite(Player1, Player2) --&gt; &quot;+Arrays.toString(s.getInvite(&quot;Player1&quot;, &quot;Player2&quot;)));</span>
+<span class="nc" id="L54">		sgui.addMessage(s.leaderboardToString().toString());</span>
+<span class="nc" id="L55">		s.updateLeaderboard(&quot;TestUser&quot;, true);</span>
+<span class="nc" id="L56">		sgui.addMessage(s.leaderboardToString().toString());</span>
+<span class="nc" id="L57">		sgui.addMessage(s.getLeaderboard().toString());</span>
+<span class="nc" id="L58">		s.removeHandler(ch);</span>
+<span class="nc" id="L59">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ClientTUI (28-jan-2015 18:46:14)</div></body></html>
