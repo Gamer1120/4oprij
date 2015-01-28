@@ -226,7 +226,7 @@ public class Server extends Thread {
 			ClientHandler client = null;
 			//@ loop_invariant threads.contains(ch);
 			for (ClientHandler ch : threads) {
-				if (ch.getClientName().equals(name)) {
+				if (ch.connected() && ch.getClientName().equals(name)) {
 					client = ch;
 					break;
 				}
