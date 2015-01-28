@@ -1004,6 +1004,7 @@ public class Client extends Thread {
 	public void shutdown() {
 		if (loop) {
 			loop = false;
+			mui.addMessage("Shutting down...");
 			sendMessage(Client.QUIT + " Shutdown");
 			try {
 				sock.close();
