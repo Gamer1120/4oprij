@@ -789,6 +789,7 @@ public class Client extends Thread {
 	 */
 	//@ requires isIngame();
 	private void makeMove(int player, int col) {
+		// TODO: Kijken wat protocol is.
 		if (player == myNumber - 1) {
 			board.insertDisc(col, Disc.YELLOW);
 		} else {
