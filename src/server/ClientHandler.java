@@ -759,9 +759,9 @@ public class ClientHandler extends Thread {
 		requires board.isEmptyField(col);
 	 */
 	private void move(int col) {
-		if (playerNumber == 0) {
+		if (playerNumber == 1) {
 			board.insertDisc(col, Disc.YELLOW);
-		} else if (playerNumber == 1) {
+		} else if (playerNumber == 2) {
 			board.insertDisc(col, Disc.RED);
 		}
 		sendMessage(Server.MOVE_OK + " " + playerNumber + " " + col + " "
@@ -910,10 +910,10 @@ public class ClientHandler extends Thread {
 	private void startGame(String[] command) {
 		server.removeInvite(clientName);
 		if (clientName.equals(command[1])) {
-			playerNumber = 0;
+			playerNumber = 1;
 			opponentName = command[2];
 		} else {
-			playerNumber = 1;
+			playerNumber = 2;
 			opponentName = command[1];
 		}
 		server.broadcastLobby();
