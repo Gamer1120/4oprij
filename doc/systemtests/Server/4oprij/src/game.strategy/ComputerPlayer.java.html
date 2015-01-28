@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ComputerPlayer.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ServerGUI (2) (28-jan-2015 12:07:20)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">game.strategy</a> &gt; <span class="el_source">ComputerPlayer.java</span></div><h1>ComputerPlayer.java</h1><pre class="source lang-java linenums">package game.strategy;
+
+import game.Board;
+import game.Disc;
+
+import java.util.Observable;
+
+/**
+ * Class for maintaining a ComputerPlayer in Connect4.&lt;br&gt;
+ * &lt;br&gt;
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 &lt;br&gt;
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+public class ComputerPlayer extends Observable {
+
+	/**
+	 * The Strategy used by this ComputerPlayer
+	 */
+	private Strategy s;
+	/**
+	 * The Disc this ComputerPlayer should use
+	 */
+	private Disc d;
+
+	/*@ private invariant s != null;
+		private invariant d == Disc.YELLOW || d == Disc.RED;
+	 */
+
+	/**
+	 * Creates a new ComputerPlayer object with a given Disc and a
+	 * SmartStrategy.
+	 * 
+	 * @param disc
+	 *            The Disc this ComputerPlayer should have.
+	 */
+	/*@	requires disc == Disc.YELLOW || disc == Disc.RED;
+	 	ensures getDisc() == disc;
+	 	ensures getStrategy() != null;
+	 */
+	public ComputerPlayer(Disc disc) {
+<span class="nc" id="L42">		this(disc, new SmartStrategy());</span>
+<span class="nc" id="L43">	}</span>
+
+	/**
+	 * Creates a new ComputerPlayer object with a given Disc and Strategy.
+	 * 
+	 * @param disc
+	 *            The Disc this ComputerPlayer should have.
+	 * @param game.strategy
+	 *            The Strategy this ComputerPlayer should use.
+	 */
+	/*@	requires disc == Disc.YELLOW || disc == Disc.RED;
+	  	requires strategy != null;
+	  	ensures getStrategy() == strategy;
+	  	ensures getDisc() == disc;
+	 */
+<span class="nc" id="L58">	public ComputerPlayer(Disc disc, Strategy strategy) {</span>
+<span class="nc" id="L59">		s = strategy;</span>
+<span class="nc" id="L60">		d = disc;</span>
+<span class="nc" id="L61">	}</span>
+
+	/**
+	 * Returns the disc of this player.
+	 * 
+	 * @return The Disc of this player.
+	 */
+	/*@pure*/public Disc getDisc() {
+<span class="nc" id="L69">		return d;</span>
+	}
+
+	/**
+	 * Returns the Strategy the ComputerPlayer uses.
+	 * 
+	 * @return The Strategy the ComputerPlayer uses.
+	 */
+	/*@ pure */public Strategy getStrategy() {
+<span class="nc" id="L78">		return s;</span>
+	}
+
+	/**
+	 * Sets the Strategy for this ComputerPlayer
+	 * 
+	 * @param game.strategy
+	 *            The Strategy this ComputerPlayer should have.
+	 */
+	//@ ensures getStrategy() == strategy;
+	public void setStrategy(Strategy strategy) {
+<span class="nc" id="L89">		s = strategy;</span>
+<span class="nc" id="L90">	}</span>
+
+	/**
+	 * Determines a move for this ComputerPlayer using it's Strategy.
+	 * 
+	 * @param b
+	 *            The Board the move should be made on.
+	 * @return A move determined by the Strategy this ComputerPlayer has.
+	 */
+	//@ requires b != null;
+	//@ ensures b.isField(\result) &amp;&amp; b.isEmptyField(\result);
+	public int determineMove(Board b) {
+<span class="nc" id="L102">		int move = s.determineMove(b, d);</span>
+<span class="nc" id="L103">		super.setChanged();</span>
+<span class="nc" id="L104">		super.notifyObservers(&quot;Determined a move&quot;);</span>
+<span class="nc" id="L105">		return move;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ServerGUI (2) (28-jan-2015 12:07:20)</div></body></html>

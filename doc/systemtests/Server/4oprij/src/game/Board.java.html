@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>Board.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ServerGUI (2) (28-jan-2015 12:07:20)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">game</a> &gt; <span class="el_source">Board.java</span></div><h1>Board.java</h1><pre class="source lang-java linenums">package game;
+
+import java.util.Arrays;
+import java.util.Observable;
+
+/**
+ * Board class for the Connect4 according to the protocol of the TI-2 group.&lt;br&gt;
+ * &lt;br&gt;
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 &lt;br&gt;
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+public class Board extends Observable {
+
+	/**
+	 * The amount of discs needed next to each other to win a game.
+	 */
+	public static final int CONNECT = 4;
+
+	/** The amount of rows. */
+	public int rows;
+
+	/** The amount of columns. */
+	public int columns;
+
+	/**
+	 * The rows by columns board of the connect4 game.
+	 */
+	private Disc[][] fields;
+
+	/*@ private invariant fields.length == getRows() * getColumns();
+		invariant (\forall int i; 0 &lt;= i &amp; i &lt; getRows(); (\forall int j; 0 &lt;= j &amp; j &lt; getColumns(); this.getField(i, j) == Disc.EMPTY || this.getField(i, j) == Disc.YELLOW || this.getField(i, j) == Disc.RED));
+	*/
+
+	/**
+	 * Creates an empty board with the default boardsize of 6 rows and 7
+	 * columns.
+	 */
+	public Board() {
+<span class="nc" id="L40">		this(6, 7);</span>
+<span class="nc" id="L41">	}</span>
+
+	/**
+	 * Creates an empty board with the specified board size.
+	 *
+	 * @param rowsArg
+	 *            the amount of rows of the specified board size
+	 * @param columnsArg
+	 *            the amount of rows of the specified board size
+	 */
+	//@ensures (\forall int i; 0 &lt;= i &amp; i &lt; rows; (\forall int j; 0 &lt;= j &amp; j &lt; columns; this.getField(i, j) == Disc.EMPTY));
+<span class="fc" id="L52">	public Board(int rowsArg, int columnsArg) {</span>
+<span class="fc" id="L53">		this.rows = rowsArg;</span>
+<span class="fc" id="L54">		this.columns = columnsArg;</span>
+<span class="fc" id="L55">		fields = new Disc[rows][columns];</span>
+		//@ loop_invariant row &lt;= rows;
+<span class="fc bfc" id="L57" title="All 2 branches covered.">		for (int row = 0; row &lt; rows; row++) {</span>
+			//@ loop_invariant col &lt;= columns;
+<span class="fc bfc" id="L59" title="All 2 branches covered.">			for (int col = 0; col &lt; columns; col++) {</span>
+<span class="fc" id="L60">				setField(row, col, Disc.EMPTY);</span>
+			}
+		}
+<span class="fc" id="L63">	}</span>
+
+	/**
+	 * Returns the amount of rows this board has.
+	 *
+	 * @return the amount of rows
+	 */
+	/*@ pure */public int getRows() {
+<span class="nc" id="L71">		return rows;</span>
+	}
+
+	/**
+	 * Returns the amount of columns this board has.
+	 *
+	 * @return the amount of columns
+	 */
+	/*@ pure */public int getColumns() {
+<span class="nc" id="L80">		return columns;</span>
+	}
+
+	// Queries:
+	/**
+	 * Creates a deep copy of this board.
+	 *
+	 * @return the board
+	 */
+	/*@ ensures \result != this;
+		ensures (\forall int i; 0 &lt;= i &amp; i &lt; rows; (\forall int j; 0 &lt;= j &amp; j &lt; columns; \result.getField(i, j) == this.getField(i, j)));
+	*/
+	public Board deepCopy() {
+<span class="nc" id="L93">		Board board = new Board(rows, columns);</span>
+		//@ loop_invariant row &lt;= rows;
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		for (int row = 0; row &lt; rows; row++) {</span>
+			//@ loop_invariant col &lt;= columns;
+<span class="nc bnc" id="L97" title="All 2 branches missed.">			for (int col = 0; col &lt; columns; col++) {</span>
+<span class="nc" id="L98">				board.setField(row, col, getField(row, col));</span>
+			}
+		}
+<span class="nc" id="L101">		return board;</span>
+	}
+
+	/**
+	 * Calculates the lowest empty row given the column.
+	 *
+	 * @param col
+	 *            the column
+	 * @return the vertical index belonging to the row
+	 */
+	//@requires isField(col);
+	/*@pure*/public int emptyRow(int col) {
+<span class="fc" id="L113">		int emptyRow = -1;</span>
+		//@ loop_invariant row &gt;= -1 &amp; row &lt;= rows - 1;
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">		for (int row = rows - 1; row &gt;= 0; row--) {</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">			if (getField(row, col) == Disc.EMPTY) {</span>
+<span class="fc" id="L117">				emptyRow = row;</span>
+<span class="fc" id="L118">				break;</span>
+			}
+		}
+<span class="fc" id="L121">		return emptyRow;</span>
+	}
+
+	/**
+	 * Calculates the highest full row given the column.
+	 *
+	 * @param col
+	 *            the column
+	 * @return the vertical index belonging to the row
+	 */
+	//@requires isField(col);
+	/*@pure*/public int fullRow(int col) {
+<span class="nc" id="L133">		int fullRow = -1;</span>
+		//@ loop_invariant row &lt;= rows;
+<span class="nc bnc" id="L135" title="All 2 branches missed.">		for (int row = 0; row &lt; rows; row++) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">			if (getField(row, col) != Disc.EMPTY) {</span>
+<span class="nc" id="L137">				fullRow = row;</span>
+<span class="nc" id="L138">				break;</span>
+			}
+		}
+<span class="nc" id="L141">		return fullRow;</span>
+	}
+
+	/**
+	 * Returns true if col is a valid column of the board.
+	 *
+	 * @param col
+	 *            the column
+	 * @return true if the column exists
+	 */
+	//@ensures \result == (0 &lt;= col &amp;&amp; col &lt; columns);
+	/*@pure*/public boolean isField(int col) {
+<span class="pc bpc" id="L153" title="1 of 4 branches missed.">		return 0 &lt;= col &amp;&amp; col &lt; columns;</span>
+	}
+
+	/**
+	 * Returns true of the (row,col) pair refers to a valid field on the board.
+	 *
+	 * @param row
+	 *            the row
+	 * @param col
+	 *            the column
+	 * @return true if both the row and the column exists
+	 */
+	//@ensures \result == (0 &lt;= row &amp;&amp; row &lt; rows &amp;&amp; 0 &lt;= col &amp;&amp; col &lt; columns);
+	/*@pure*/public boolean isField(int row, int col) {
+<span class="nc bnc" id="L167" title="All 8 branches missed.">		return 0 &lt;= row &amp;&amp; row &lt; rows &amp;&amp; 0 &lt;= col &amp;&amp; col &lt; columns;</span>
+	}
+
+	/**
+	 * Returns the content of the field referred to by the (row,col) pair.
+	 * 
+	 * @param row
+	 *            the row of the field
+	 * @param col
+	 *            the column of the field
+	 * @return the disc of the field
+	 */
+	/*@ requires this.isField(row,col);
+		ensures \result == Disc.EMPTY || \result == Disc.YELLOW || \result == Disc.RED;
+	*/
+	/*@pure*/public Disc getField(int row, int col) {
+<span class="fc" id="L183">		return fields[row][col];</span>
+	}
+
+	/**
+	 * Returns true if there is an empty field in the column.
+	 * 
+	 * @param col
+	 *            the column
+	 * @return true if there is an empty field
+	 */
+	/*@ requires this.isField(col);
+		ensures \result == (this.getField(emptyRow(col), col) == Disc.EMPTY);
+	*/
+	/*@pure*/public boolean isEmptyField(int col) {
+<span class="fc" id="L197">		boolean hasEmpty = false;</span>
+		//@ loop_invariant row &lt;= rows;
+<span class="fc bfc" id="L199" title="All 2 branches covered.">		for (int row = 0; row &lt; rows; row++) {</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">			if (isEmptyField(row, col)) {</span>
+<span class="fc" id="L201">				hasEmpty = true;</span>
+<span class="fc" id="L202">				break;</span>
+			}
+		}
+<span class="fc" id="L205">		return hasEmpty;</span>
+	}
+
+	/**
+	 * Returns true if the field referred to by the (row,col) pair is empty.
+	 * 
+	 * @param row
+	 *            the row of the field
+	 * @param col
+	 *            the column of the field
+	 * @return true if the field is empty
+	 */
+	/*@ requires this.isField(row,col);
+		ensures \result == (this.getField(row,col) == Disc.EMPTY);
+	*/
+	/*@pure*/public boolean isEmptyField(int row, int col) {
+<span class="fc bfc" id="L221" title="All 2 branches covered.">		return getField(row, col) == Disc.EMPTY;</span>
+	}
+
+	/**
+	 * Tests if the whole board is full.
+	 * 
+	 * @return true if all fields are occupied
+	 */
+	//@ensures \result == (\forall int i; 0 &lt;= i &amp; i &lt; rows; (\forall int j; 0 &lt;= j &amp; j &lt; columns; this.getField(i, j) != Disc.EMPTY));
+	/*@pure*/public boolean isFull() {
+<span class="fc" id="L231">		boolean isFull = true;</span>
+		// JML doesn't recognize this loop since loop: is in front of the loop.
+		// If you put JML after the loop:, the loop: can't be found.
+		// loop_invariant row &lt;= rows;
+<span class="pc bpc" id="L235" title="1 of 2 branches missed.">		loop: for (int row = 0; row &lt; rows; row++) {</span>
+			//@ loop_invariant col &lt;= columns;
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">			for (int col = 0; col &lt; columns; col++) {</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">				if (getField(row, col) == Disc.EMPTY) {</span>
+<span class="fc" id="L239">					isFull = false;</span>
+<span class="fc" id="L240">					break loop;</span>
+				}
+			}
+		}
+<span class="fc" id="L244">		return isFull;</span>
+	}
+
+	/**
+	 * Returns true if the game is over. The game is over when there is a winner
+	 * or the whole board is full.
+	 * 
+	 * @return true if the game is over
+	 */
+	//@ensures \result == this.isFull() || this.hasWinner();
+	/*@pure*/public boolean gameOver() {
+<span class="pc bpc" id="L255" title="1 of 4 branches missed.">		return isFull() || hasWinner();</span>
+	}
+
+	/**
+	 * Checks whether there is a row with 4 or more discs d.
+	 * 
+	 * @param d
+	 *            the disc of interest
+	 * @return true if there is a row controlled by d
+	 */
+	//@ requires d == Disc.YELLOW | d == Disc.RED;
+	/*@pure*/public boolean hasRow(Disc d) {
+<span class="fc" id="L267">		boolean hasRow = false;</span>
+		// JML doesn't recognize this loop since loop: is in front of the loop.
+		// If you put JML after the loop:, the loop: can't be found.
+		// loop_invariant row &lt;= rows;
+<span class="fc bfc" id="L271" title="All 2 branches covered.">		loop: for (int row = 0; row &lt; rows; row++) {</span>
+<span class="fc" id="L272">			int count = 0;</span>
+			//@ loop_invariant 0 &lt;= col &amp;&amp; col &lt;= columns + count - CONNECT;
+<span class="fc bfc" id="L274" title="All 2 branches covered.">			for (int col = 0; columns + count - col &gt;= CONNECT; col++) {</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">				if (getField(row, col) == d) {</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">					if (++count &gt;= CONNECT) {</span>
+<span class="nc" id="L277">						hasRow = true;</span>
+<span class="nc" id="L278">						break loop;</span>
+					}
+				} else {
+<span class="fc" id="L281">					count = 0;</span>
+				}
+			}
+		}
+<span class="fc" id="L285">		return hasRow;</span>
+	}
+
+	/**
+	 * Checks whether there is a column with 4 or more discs d.
+	 * 
+	 * @param d
+	 *            the disc of interest
+	 * @return true if there is a column controlled by d
+	 */
+	//@ requires d == Disc.YELLOW | d == Disc.RED;
+	/*@pure*/public boolean hasColumn(Disc d) {
+<span class="fc" id="L297">		boolean hasColumn = false;</span>
+		// JML doesn't recognize this loop since loop: is in front of the loop.
+		// If you put JML after the loop:, the loop: can't be found.
+		// loop_invariant col &lt;= columns;
+<span class="fc bfc" id="L301" title="All 2 branches covered.">		loop: for (int col = 0; col &lt; columns; col++) {</span>
+<span class="fc" id="L302">			int count = 0;</span>
+			//@ loop_invariant 0 &lt;= row &amp;&amp; row &lt;= rows + count - CONNECT;
+<span class="fc bfc" id="L304" title="All 2 branches covered.">			for (int row = 0; rows + count - row &gt;= CONNECT; row++) {</span>
+<span class="fc bfc" id="L305" title="All 2 branches covered.">				if (getField(row, col) == d) {</span>
+<span class="fc bfc" id="L306" title="All 2 branches covered.">					if (++count &gt;= CONNECT) {</span>
+<span class="fc" id="L307">						hasColumn = true;</span>
+<span class="fc" id="L308">						break loop;</span>
+					}
+				} else {
+<span class="fc" id="L311">					count = 0;</span>
+				}
+			}
+		}
+<span class="fc" id="L315">		return hasColumn;</span>
+	}
+
+	/**
+	 * Checks whether there is an diagonal with 4 or more discs d.
+	 * 
+	 * @param d
+	 *            the disc of interest
+	 * @return true if there is a diagonal controlled by d
+	 */
+	//@ requires d == Disc.YELLOW | d == Disc.RED;
+	/*@pure*/public boolean hasDiagonal(Disc d) {
+<span class="fc" id="L327">		boolean hasDiagonal = false;</span>
+<span class="fc" id="L328">		int r = rows - CONNECT;</span>
+<span class="fc" id="L329">		int c = 0;</span>
+		// JML doesn't recognize this loop since loop: is in front of the loop.
+		// If you put JML after the loop:, the loop: can't be found.
+		// loop_invariant c &lt;= columns;
+<span class="fc bfc" id="L333" title="All 2 branches covered.">		loop: while (c &lt; columns) {</span>
+<span class="fc" id="L334">			int row = r;</span>
+<span class="fc" id="L335">			int col = c;</span>
+<span class="fc" id="L336">			int count1 = 0;</span>
+<span class="fc" id="L337">			int count2 = 0;</span>
+<span class="pc bpc" id="L338" title="1 of 4 branches missed.">			boolean diag1 = (rows + count1 - row &gt;= CONNECT)</span>
+<span class="fc" id="L339">					&amp;&amp; (columns + count1 - col &gt;= CONNECT);</span>
+<span class="pc bpc" id="L340" title="1 of 4 branches missed.">			boolean diag2 = (rows + count2 - row &gt;= CONNECT)</span>
+<span class="fc" id="L341">					&amp;&amp; (columns + count2 - col &gt;= CONNECT);</span>
+<span class="fc bfc" id="L342" title="All 4 branches covered.">			while (diag1 || diag2) {</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">				if (diag1) {</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">					if (getField(row, col) == d) {</span>
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">						if (++count1 &gt;= CONNECT) {</span>
+<span class="nc" id="L346">							hasDiagonal = true;</span>
+<span class="nc" id="L347">							break loop;</span>
+						}
+					} else {
+<span class="fc" id="L350">						count1 = 0;</span>
+					}
+				}
+<span class="fc bfc" id="L353" title="All 2 branches covered.">				if (diag2) {</span>
+<span class="fc bfc" id="L354" title="All 2 branches covered.">					if (getField(rows - 1 - row, col) == d) {</span>
+<span class="pc bpc" id="L355" title="1 of 2 branches missed.">						if (++count2 &gt;= CONNECT) {</span>
+<span class="nc" id="L356">							hasDiagonal = true;</span>
+<span class="nc" id="L357">							break loop;</span>
+						}
+					} else {
+<span class="fc" id="L360">						count2 = 0;</span>
+					}
+				}
+<span class="fc" id="L363">				row++;</span>
+<span class="fc" id="L364">				col++;</span>
+<span class="fc bfc" id="L365" title="All 4 branches covered.">				diag1 = (rows + count1 - row &gt;= CONNECT)</span>
+<span class="fc" id="L366">						&amp;&amp; (columns + count1 - col &gt;= CONNECT);</span>
+<span class="fc bfc" id="L367" title="All 4 branches covered.">				diag2 = (rows + count2 - row &gt;= CONNECT)</span>
+<span class="fc" id="L368">						&amp;&amp; (columns + count2 - col &gt;= CONNECT);</span>
+			}
+<span class="fc bfc" id="L370" title="All 2 branches covered.">			if (r &gt; 0) {</span>
+<span class="fc" id="L371">				r--;</span>
+<span class="fc" id="L372">			} else {</span>
+<span class="fc" id="L373">				c++;</span>
+			}
+		}
+<span class="fc" id="L376">		return hasDiagonal;</span>
+	}
+
+	/**
+	 * Checks if the disc d has won. A disc wins if it controls at least one
+	 * row, column or diagonal.
+	 * 
+	 * @param d
+	 *            the disc of interest
+	 * @return true if the disc has won
+	 */
+	/*@ requires d == Disc.YELLOW | d == Disc.RED;
+		ensures \result == this.hasRow(d) | this.hasColumn(d) | this.hasDiagonal(d);
+	*/
+	/*@pure*/public boolean isWinner(Disc d) {
+<span class="pc bpc" id="L391" title="1 of 4 branches missed.">		return (d == Disc.YELLOW || d == Disc.RED)</span>
+<span class="pc bpc" id="L392" title="2 of 6 branches missed.">				&amp;&amp; (hasRow(d) || hasColumn(d) || hasDiagonal(d));</span>
+	}
+
+	/**
+	 * Returns true if the game has a winner. This is the case when one of the
+	 * discs controls at least one row, column or diagonal.
+	 * 
+	 * @return true if the board has a winner.
+	 */
+	//@ensures \result == isWinner(Disc.YELLOW) | \result == isWinner(Disc.RED);
+	/*@pure*/public boolean hasWinner() {
+<span class="pc bpc" id="L403" title="1 of 4 branches missed.">		return isWinner(Disc.YELLOW) || isWinner(Disc.RED);</span>
+	}
+
+	/**
+	 * Returns a String representation of this board.
+	 * 
+	 * @return the game situation as String
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L413">		String output = &quot;[&quot;;</span>
+		//@ loop_invariant i &lt;= columns;
+<span class="nc bnc" id="L415" title="All 2 branches missed.">		for (int i = 0; i &lt; columns; i++) {</span>
+<span class="nc" id="L416">			output += i;</span>
+<span class="nc bnc" id="L417" title="All 2 branches missed.">			if (i != columns - 1) {</span>
+<span class="nc" id="L418">				output += &quot;, &quot;;</span>
+			}
+		}
+<span class="nc" id="L421">		output += &quot;]\n&quot;;</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">		for (Disc[] d : fields) {</span>
+<span class="nc" id="L423">			output += Arrays.toString(d) + &quot;\n&quot;;</span>
+		}
+<span class="nc" id="L425">		return output;</span>
+	}
+
+	/**
+	 * Returns a String representation of this board following the protocol.
+	 * 
+	 * @return the game situation as String
+	 */
+	public String toProtocol() {
+<span class="nc" id="L434">		String output = columns + &quot; &quot; + rows;</span>
+		//@ loop_invariant 0 &lt;= row &amp; row &lt;= rows - 1;
+<span class="nc bnc" id="L436" title="All 2 branches missed.">		for (int row = rows - 1; row &gt;= 0; row--) {</span>
+			//@ loop_invariant 0 &lt;= col &amp; col &lt;= columns;
+<span class="nc bnc" id="L438" title="All 2 branches missed.">			for (int col = 0; col &lt; columns; col++) {</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">				if (getField(row, col) == Disc.EMPTY) {</span>
+<span class="nc" id="L440">					output += &quot; &quot; + 0;</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">				} else if (getField(row, col) == Disc.YELLOW) {</span>
+<span class="nc" id="L442">					output += &quot; &quot; + 1;</span>
+<span class="nc bnc" id="L443" title="All 2 branches missed.">				} else if (getField(row, col) == Disc.RED) {</span>
+<span class="nc" id="L444">					output += &quot; &quot; + 2;</span>
+				}
+			}
+		}
+<span class="nc" id="L448">		return output;</span>
+	}
+
+	/**
+	 * Empties all fields of this board (i.e., let them refer to the value
+	 * Disc.EMPTY).
+	 */
+	//@ensures (\forall int i; 0 &lt;= i &amp; i &lt; rows; (\forall int j; 0 &lt;= j &amp; j &lt; columns; this.getField(i, j) == Disc.EMPTY));
+	public void reset() {
+		//@ loop_invariant row &lt;= rows;
+<span class="nc bnc" id="L458" title="All 2 branches missed.">		for (int row = 0; row &lt; rows; row++) {</span>
+			//@ loop_invariant col &lt;= columns;
+<span class="nc bnc" id="L460" title="All 2 branches missed.">			for (int col = 0; col &lt; columns; col++) {</span>
+<span class="nc" id="L461">				setField(row, col, Disc.EMPTY);</span>
+			}
+		}
+<span class="nc" id="L464">	}</span>
+
+	/**
+	 * Places disc d in the lowest empty row in the column col.
+	 * 
+	 * @param col
+	 *            the field's column
+	 * @param d
+	 *            the disc to be placed
+	 */
+	/*@ requires d == Disc.YELLOW | d == Disc.RED;
+		requires this.isField(col) &amp; this.isEmptyField(col);
+		ensures emptyRow(col) != -1 ? this.getField(emptyRow(col) - 1, col) == d : this.getField(rows - 1, col) == d;
+	*/
+	public void insertDisc(int col, Disc d) {
+<span class="fc" id="L479">		int row = emptyRow(col);</span>
+<span class="fc" id="L480">		setField(row, col, d);</span>
+<span class="fc" id="L481">	}</span>
+
+	/**
+	 * Sets the content of the field represented by the (row,col) pair to the
+	 * disc m.
+	 * 
+	 * @param row
+	 *            the field's row
+	 * @param col
+	 *            the field's column
+	 * @param d
+	 *            the disc to be placed
+	 */
+	/*@ requires this.isField(row,col);
+		ensures this.getField(row,col) == d;
+	*/
+	public void setField(int row, int col, Disc d) {
+<span class="fc" id="L498">		fields[row][col] = d;</span>
+<span class="fc" id="L499">		super.setChanged();</span>
+<span class="fc" id="L500">		super.notifyObservers(new Object[] { d, col, row });</span>
+<span class="fc" id="L501">	}</span>
+
+	/**
+	 * Compares 2 boards, and returns true if they're the same.
+	 * 
+	 * @param compareTo
+	 *            The board this is compared to.
+	 * @return true if this and compareTo are equal.
+	 */
+	public boolean equals(Board compareTo) {
+<span class="nc" id="L511">		boolean equals = true;</span>
+<span class="nc" id="L512">		int columns = this.getColumns();</span>
+<span class="nc" id="L513">		int rows = this.getRows();</span>
+<span class="nc bnc" id="L514" title="All 4 branches missed.">		if (columns == compareTo.getColumns() &amp;&amp; rows == compareTo.getRows()) {</span>
+			//@ loop_invariant col &lt;= columns;
+<span class="nc bnc" id="L516" title="All 2 branches missed.">			for (int col = 0; col &lt; columns; col++) {</span>
+				//@ loop_invariant row &lt;= rows;
+<span class="nc bnc" id="L518" title="All 2 branches missed.">				for (int row = 0; row &lt; rows; row++) {</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">					if (this.getField(row, col) != compareTo.getField(row, col)) {</span>
+<span class="nc" id="L520">						equals = false;</span>
+					}
+				}
+			}
+<span class="nc" id="L524">		} else {</span>
+<span class="nc" id="L525">			equals = false;</span>
+		}
+<span class="nc" id="L527">		return equals;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ServerGUI (2) (28-jan-2015 12:07:20)</div></body></html>

@@ -181,42 +181,46 @@ public class Client extends Thread {
 	 */
 	public void setUpPlayer(String name) {
 		String[] splitName = name.split("\\s+");
-		if (splitName[0].equals("-N")) {
-			if (splitName.length == 1) {
-				this.clientName = "NaivePlayer";
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new NaiveStrategy());
-			} else {
-				this.clientName = splitName[1];
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new NaiveStrategy());
-			}
-		} else if (splitName[0].equals("-S")) {
-			if (splitName.length == 1) {
-				this.clientName = "SmartPlayer";
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new SmartStrategy());
-			} else {
-				this.clientName = splitName[1];
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new SmartStrategy());
-			}
-		} else if (splitName[0].equals("-M")) {
-			if (splitName.length == 1) {
-				this.clientName = "MiniMaxPlayer";
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new MinMaxStrategy());
-			} else {
-				this.clientName = splitName[1];
-				this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
-						new MinMaxStrategy());
-			}
+		if (splitName[0].equals("")) {
+			isConnected = null;
 		} else {
-			this.clientName = splitName[0];
-			this.computerPlayer = null;
+			if (splitName[0].equals("-N")) {
+				if (splitName.length == 1) {
+					this.clientName = "NaivePlayer";
+					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+							new NaiveStrategy());
+				} else {
+					this.clientName = splitName[1];
+					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+							new NaiveStrategy());
+				}
+			} else if (splitName[0].equals("-S")) {
+				if (splitName.length == 1) {
+					this.clientName = "SmartPlayer";
+					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+							new SmartStrategy());
+				} else {
+					this.clientName = splitName[1];
+					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+							new SmartStrategy());
+				}
+			} else if (splitName[0].equals("-M")) {
+				if (splitName.length == 1) {
+					this.clientName = "MiniMaxPlayer";
+					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+							new MinMaxStrategy());
+				} else {
+					this.clientName = splitName[1];
+					this.computerPlayer = new ComputerPlayer(Disc.YELLOW,
+							new MinMaxStrategy());
+				}
+			} else {
+				this.clientName = splitName[0];
+				this.computerPlayer = null;
+			}
+			isConnected = false;
+			sendMessage(CONNECT + " " + getClientName() + " " + CLIENT_FEATURES);
 		}
-		isConnected = false;
-		sendMessage(CONNECT + " " + getClientName() + " " + CLIENT_FEATURES);
 	}
 
 	/**

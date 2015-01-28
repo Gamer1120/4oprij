@@ -1,0 +1,963 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ClientHandler.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ServerGUI (2) (28-jan-2015 12:07:20)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">server</a> &gt; <span class="el_source">ClientHandler.java</span></div><h1>ClientHandler.java</h1><pre class="source lang-java linenums">package server;
+
+import game.Board;
+import game.Disc;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.util.HashSet;
+import java.util.Set;
+
+import client.Client;
+
+// TODO: Observable
+/**
+ * The ClientHandler that reads all the input from the Clients and send messages
+ * from the Server to the Clients.&lt;br&gt;
+ * &lt;br&gt;
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 &lt;br&gt;
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+public class ClientHandler extends Thread {
+
+	//PROTOCOL
+	public static final String CHAT = &quot;CHAT&quot;;
+	public static final String LEADERBOARD = &quot;LEADERBOARD&quot;;
+	public static final String CUSTOM_BOARD_SIZE = &quot;CUSTOM_BOARD_SIZE&quot;;
+	public static final String SECURITY = &quot;SECURITY&quot;;
+	public static final String MULTIPLAYER = &quot;MULTIPLAYER&quot;;
+<span class="fc" id="L34">	public static final String[] FEATURES = new String[] { CHAT, LEADERBOARD,</span>
+<span class="fc" id="L35">			CUSTOM_BOARD_SIZE, SECURITY, MULTIPLAYER };</span>
+	public static final String WIN = &quot;WIN&quot;;
+	public static final String DRAW = &quot;DRAW&quot;;
+<span class="fc" id="L38">	public static final String DISCONNECT = &quot;DISCONNECT&quot;;</span>
+	//END PROTOCOL
+
+	/**
+	 * The Server for this ClientHandler.
+	 */
+	private Server server;
+
+	/**
+	 * The Socket this ClientHandler will use to connect to the client.
+	 */
+	private Socket sock;
+
+	/**
+	 * The BufferedReader used to receive packets from the client.
+	 */
+	private BufferedReader in;
+
+	/**
+	 * The BufferedWriter used to send packets to the client.
+	 */
+	private BufferedWriter out;
+
+	/**
+	 * The name of the client this ClientHandler is associated with.
+	 */
+	private String clientName;
+
+	/**
+	 * The list of the clientFeatures of the client this ClientHandler is
+	 * associated with.
+	 */
+	private HashSet&lt;String&gt; clientFeatures;
+
+	/**
+	 * The playerNumber of this client when this client is in a game.
+	 */
+	private int playerNumber;
+
+	/**
+	 * The name of the client this client playing against when this client is in
+	 * a game.
+	 */
+	private String opponentName;
+
+	/**
+	 * The board this client is playing on when it is in a game.
+	 */
+	private Board board;
+
+	/**
+	 * A boolean indicating wether the server has requested a move.
+	 */
+	private boolean move;
+
+	/**
+	 * A loop variable used to check whether to keep looping or not.
+	 */
+	private boolean loop;
+
+	/*@ private invariant server != null;
+		private invariant sock != null;
+		private invariant in != null;
+		private invariant out != null;
+		private invariant playerNumber == -1 || playerNumber == 0 || playerNumber == 1;
+	 */
+
+	/**
+	 * Constructs a ClientHandler object. Initialises both the BufferedReader
+	 * and the BufferedWriter.
+	 * 
+	 *
+	 * @param server
+	 *            The server this ClientHandler is for.
+	 * @param sock
+	 *            The socket this ClientHandler uses.
+	 * @throws IOException
+	 *             Gets thrown when the Input- or Outputstream from the Socket
+	 *             can't be get.
+	 */
+	//@ requires server != null &amp;&amp; sock != null;
+<span class="fc" id="L119">	public ClientHandler(Server server, Socket sock) throws IOException {</span>
+<span class="fc" id="L120">		this.server = server;</span>
+<span class="fc" id="L121">		this.sock = sock;</span>
+<span class="fc" id="L122">		this.in = new BufferedReader(new InputStreamReader(</span>
+<span class="fc" id="L123">				sock.getInputStream()));</span>
+<span class="fc" id="L124">		this.out = new BufferedWriter(new OutputStreamWriter(</span>
+<span class="fc" id="L125">				sock.getOutputStream()));</span>
+<span class="fc" id="L126">		this.clientName = null;</span>
+<span class="fc" id="L127">		this.clientFeatures = new HashSet&lt;String&gt;();</span>
+<span class="fc" id="L128">		this.playerNumber = -1;</span>
+<span class="fc" id="L129">		this.opponentName = null;</span>
+<span class="fc" id="L130">		this.board = null;</span>
+<span class="fc" id="L131">		this.move = false;</span>
+<span class="fc" id="L132">		this.loop = true;</span>
+<span class="fc" id="L133">	}</span>
+
+	/**
+	 * This method takes care of sending messages from the client. Every message
+	 * that is received, is preprended with the name of the client, and the new
+	 * message is offered to the Server for broadcasting. If an IOException is
+	 * thrown while reading the message or the message is null and a
+	 * NullPointerException is thrown, the method concludes that the socket
+	 * connection is broken and shutdown() will be called.
+	 */
+	@Override
+	public void run() {
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">		while (loop) {</span>
+<span class="fc" id="L146">			String line = &quot;&quot;;</span>
+<span class="fc" id="L147">			String input = &quot;&quot;;</span>
+			try {
+				//Read till we have a command and there is a double newLine.
+				//@ loop_invariant line != null;
+<span class="fc bfc" id="L151" title="All 4 branches covered.">				while (!input.equals(&quot;&quot;) || line.equals(&quot;&quot;)) {</span>
+<span class="fc" id="L152">					input = in.readLine();</span>
+<span class="fc" id="L153">					line += input;</span>
+				}
+				/*
+				 * Calling in.readLine() when the connection is lost gives an
+				 * IOException, but when in.readLine() has already been called
+				 * and the connection is lost in.readLine will result in null and
+				 * input.equals() will result in an NullPointerException. If the
+				 * connection is lost the clienthandler shuts down
+				 */
+<span class="fc" id="L162">			} catch (IOException | NullPointerException e) {</span>
+<span class="fc" id="L163">				shutdown();</span>
+<span class="fc" id="L164">				break;</span>
+			}
+<span class="fc bfc" id="L166" title="All 2 branches covered.">			if (connected()) {</span>
+<span class="fc" id="L167">				server.print(clientName + &quot; to ClientHandler: &quot; + line);</span>
+<span class="fc" id="L168">			} else {</span>
+<span class="fc" id="L169">				server.print(&quot;unconnected client to ClientHandler: &quot; + line);</span>
+			}
+<span class="fc" id="L171">			String[] command = line.split(&quot;\\s+&quot;);</span>
+<span class="pc bpc" id="L172" title="21 of 37 branches missed.">			switch (command[0]) {</span>
+			case Client.CONNECT:
+<span class="fc" id="L174">				connectChecks(command);</span>
+<span class="fc" id="L175">				break;</span>
+			case Client.QUIT:
+<span class="nc" id="L177">				server.print(clientName + &quot;: &quot; + line);</span>
+<span class="nc" id="L178">				shutdown();</span>
+<span class="nc" id="L179">				break;</span>
+			case Client.INVITE:
+<span class="fc" id="L181">				inviteChecks(command);</span>
+<span class="fc" id="L182">				break;</span>
+			case Client.ACCEPT_INVITE:
+<span class="fc" id="L184">				acceptChecks(command);</span>
+<span class="fc" id="L185">				break;</span>
+			case Client.DECLINE_INVITE:
+<span class="fc" id="L187">				declineChecks(command);</span>
+<span class="fc" id="L188">				break;</span>
+			case Client.MOVE:
+<span class="fc" id="L190">				moveChecks(command);</span>
+<span class="fc" id="L191">				break;</span>
+			case Client.CHAT:
+<span class="fc" id="L193">				chatChecks(line);</span>
+<span class="fc" id="L194">				break;</span>
+			case Client.REQUEST_BOARD:
+<span class="nc" id="L196">				requestBoardChecks();</span>
+<span class="nc" id="L197">				break;</span>
+			case Client.REQUEST_LOBBY:
+<span class="fc" id="L199">				requestLobbyChecks();</span>
+<span class="fc" id="L200">				break;</span>
+			case Client.REQUEST_LEADERBOARD:
+<span class="fc" id="L202">				requestLeaderboardChecks();</span>
+<span class="fc" id="L203">				break;</span>
+			case Client.ERROR:
+<span class="nc" id="L205">				server.print(clientName + &quot;: &quot; + line);</span>
+<span class="nc" id="L206">				break;</span>
+			case Client.PING:
+<span class="nc" id="L208">				sendMessage(Server.PONG);</span>
+<span class="nc" id="L209">				break;</span>
+			default:
+<span class="nc" id="L211">				sendError(command[0], &quot;Invalid command.&quot;);</span>
+				break;
+			}
+
+		}
+<span class="fc" id="L216">	}</span>
+
+	/**
+	 * This method checks wether a game starts, ends or a move is requested
+	 * before sending the message
+	 *
+	 * @param msg
+	 *            the message
+	 */
+	//@ requires msg != null &amp; !msg.equals(&quot;&quot;);
+	public void sendMessage(String msg) {
+<span class="fc" id="L227">		String[] command = msg.split(&quot;\\s+&quot;);</span>
+<span class="pc bpc" id="L228" title="3 of 10 branches missed.">		switch (command[0]) {</span>
+		case Server.GAME_START:
+<span class="fc" id="L230">			write(msg);</span>
+<span class="fc" id="L231">			startGame(command);</span>
+<span class="fc" id="L232">			break;</span>
+		case Server.GAME_END:
+<span class="fc" id="L234">			write(msg);</span>
+<span class="fc" id="L235">			endGame();</span>
+<span class="fc" id="L236">			break;</span>
+		case Server.REQUEST_MOVE:
+<span class="fc" id="L238">			move = true;</span>
+<span class="fc" id="L239">			write(msg);</span>
+<span class="fc" id="L240">			break;</span>
+		default:
+<span class="fc" id="L242">			write(msg);</span>
+			break;
+		}
+<span class="fc" id="L245">	}</span>
+
+	//@ requires header != null &amp; !header.equals(&quot;&quot;);
+	//@ requires msg != null &amp; !msg.equals(&quot;&quot;);
+	private void sendError(String header, String msg) {
+<span class="fc" id="L250">		write(Server.ERROR + &quot; &quot; + header + &quot; &quot; + msg);</span>
+<span class="fc" id="L251">	}</span>
+
+	/**
+	 * This method can be used to send a message over the socket connection to
+	 * the client. If the writing of a message fails, the method concludes that
+	 * the socket connection has been lost and shutdown() is called.
+	 *
+	 * @param msg
+	 *            The message to write.
+	 */
+	//@ requires msg != null &amp; !msg.equals(&quot;&quot;);
+	private synchronized void write(String msg) {
+		try {
+<span class="fc" id="L264">			out.write(msg);</span>
+<span class="fc" id="L265">			out.newLine();</span>
+<span class="fc" id="L266">			out.newLine();</span>
+<span class="fc" id="L267">			out.flush();</span>
+<span class="pc" id="L268">		} catch (IOException e) {</span>
+<span class="nc" id="L269">			shutdown();</span>
+		}
+<span class="fc" id="L271">		server.print(&quot;ClientHandler to &quot; + clientName + &quot;: &quot; + msg);</span>
+<span class="fc" id="L272">	}</span>
+
+	/**
+	 * Returns the name of the client.
+	 *
+	 * @return the name of the client.
+	 */
+	/*@ pure */public String getClientName() {
+<span class="fc" id="L280">		return clientName;</span>
+	}
+
+	/**
+	 * Returns the clientFeatures of the client.
+	 *
+	 * @return the clientFeatures of the client.
+	 */
+	/*@ pure */public Set&lt;String&gt; getClientFeatures() {
+<span class="nc" id="L289">		return clientFeatures;</span>
+	}
+
+	/**
+	 * Returns whether this client has connected.
+	 *
+	 * @return true if the client has a name.
+	 */
+	/*@ pure */public boolean connected() {
+<span class="fc bfc" id="L298" title="All 2 branches covered.">		return clientName != null;</span>
+	}
+
+	/**
+	 * Returns whether the client is playing a game.
+	 *
+	 * @return true if there is a Board.
+	 */
+	/*@ pure */public boolean inGame() {
+<span class="fc bfc" id="L307" title="All 2 branches covered.">		return board != null;</span>
+	}
+
+	/**
+	 * Returns whether this client has the chat feature.
+	 *
+	 * @return true if the client has the chat feature.
+	 */
+	//@ requires connected();
+	/*@ pure */public boolean hasChat() {
+<span class="fc" id="L317">		return clientFeatures.contains(CHAT);</span>
+	}
+
+	/**
+	 * Returns whether this client has the custom board size feature.
+	 *
+	 * @return true if the client has the custom board size feature.
+	 */
+	//@ requires connected();
+	/*@ pure */public boolean hasCustomBoardSize() {
+<span class="fc" id="L327">		return clientFeatures.contains(CUSTOM_BOARD_SIZE);</span>
+	}
+
+	/**
+	 * Returns whether this client has the Leaderboard feature.
+	 *
+	 * @return true if the client has the Leaderboard feature.
+	 */
+	//@ requires connected();
+	/*@ pure */public boolean hasLeaderboard() {
+<span class="fc" id="L337">		return clientFeatures.contains(LEADERBOARD);</span>
+	}
+
+	/**
+	 * Gets the Board of this client.
+	 *
+	 * @return the Board of this client.
+	 */
+	/*@ pure */public Board getBoard() {
+<span class="nc" id="L346">		return board;</span>
+	}
+
+	/**
+	 * Sets the Board of this client.
+	 *
+	 * @param b
+	 *            The Board to set for this client.
+	 */
+	/*@ requires connected();
+		requires b != null;
+	 */
+	public void setBoard(Board b) {
+<span class="fc" id="L359">		board = b;</span>
+<span class="fc" id="L360">	}</span>
+
+	/**
+	 * Checks if the client has sent a command with valid arguments and with a
+	 * valid name. If this is the case, connect will be called to connect the
+	 * client
+	 *
+	 * @param command
+	 *            The command sent by the client.
+	 */
+	/*@ requires command != null &amp; !command.equals(&quot;&quot;);
+		requires command[0].equals(Client.CONNECT);
+	 */
+	private void connectChecks(String[] command) {
+<span class="pc bpc" id="L374" title="1 of 2 branches missed.">		if (command.length &lt; 2) {</span>
+<span class="nc" id="L375">			sendError(Client.CONNECT, &quot;Invalid arguments.&quot;);</span>
+<span class="pc bfc" id="L376" title="All 2 branches covered.">		} else if (command[1].length() &gt; 15) {</span>
+<span class="fc" id="L377">			sendError(Client.CONNECT, &quot;Name too long.&quot;);</span>
+<span class="fc bfc" id="L378" title="All 2 branches covered.">		} else if (server.nameExists(command[1])) {</span>
+<span class="fc" id="L379">			sendError(Client.CONNECT, &quot;Name in use.&quot;);</span>
+<span class="fc" id="L380">		} else {</span>
+<span class="fc" id="L381">			connect(command);</span>
+		}
+<span class="fc" id="L383">	}</span>
+
+	/**
+	 * Connects the Clients by assigning the name specified in the command and
+	 * storing the clientFeatures. Then it send an ACCEPT_CONNECT with the
+	 * clientFeatures of the client
+	 *
+	 * @param command
+	 *            The command sent by the client.
+	 */
+	/*@ requires command != null;
+		requires command.length &gt;= 2;
+		requires command[0].equals(Client.CONNECT);
+		requires command[1].length() &lt;= 15;
+		requires server.nameExists(command[1]);
+		ensures connected();
+		ensures command.length &gt; 2 ==&gt; clientFeatures != null;
+	 */
+	private void connect(String[] command) {
+<span class="fc" id="L402">		clientName = command[1];</span>
+<span class="pc bpc" id="L403" title="1 of 2 branches missed.">		if (command.length &gt; 2) {</span>
+			/*  JML doesn't recognize this loop since features: is in front of the loop.
+				If you put JML after the features:, the continue doesn't recognize it.
+				loop_invariant 2 &lt;= i &amp;&amp; i &lt;= command.length;
+				loop_invariant (\forall int k; 2 &lt;= k &amp; k &lt; i; command[k] != null);
+			 */
+<span class="fc bfc" id="L409" title="All 2 branches covered.">			features: for (int i = 2; i &lt; command.length; i++) {</span>
+				/*@ loop_invariant 0 &lt;= j &amp;&amp; j &lt;= command.length;
+					loop_invariant (\forall int l; 0 &lt;= l &amp; l &lt; j; FEATURES[l] != null);
+				 */
+<span class="pc bpc" id="L413" title="1 of 2 branches missed.">				for (int j = 0; j &lt; FEATURES.length; j++) {</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">					if (FEATURES[j].equals(command[i])) {</span>
+<span class="fc" id="L415">						clientFeatures.add(FEATURES[j]);</span>
+<span class="fc" id="L416">						continue features;</span>
+					}
+				}
+<span class="nc" id="L419">				sendError(Server.ACCEPT_CONNECT, &quot;Feature &quot; + command[i]</span>
+<span class="nc" id="L420">						+ &quot; unknown, not added to the feature list.&quot;);</span>
+			}
+		}
+<span class="fc" id="L423">		sendMessage(Server.ACCEPT_CONNECT + &quot; &quot; + Server.FEATURES);</span>
+<span class="fc" id="L424">		server.print(&quot;ClientHandler: &quot; + clientName + &quot; has joined.&quot;);</span>
+<span class="fc" id="L425">		server.broadcastLobby();</span>
+<span class="fc" id="L426">	}</span>
+
+	/**
+	 * Checks if the client is connected, if the client sent a command with
+	 * valid arguments, if the opponent exists, if neither player is in a game
+	 * and checks whether there is no invite between both player. If this is the
+	 * case, invite will be called and an invite will be sent to the opponent
+	 * specified in the command. If this isn't the case, an error will be sent
+	 * and the server sends an decline to let the client know the invite has
+	 * been cancelled.
+	 *
+	 * @param command
+	 *            The command send by the client.
+	 */
+	/*@ requires command != null;
+		requires command[0].equals(Client.INVITE);
+	 */
+	private void inviteChecks(String[] command) {
+<span class="pc bpc" id="L444" title="1 of 2 branches missed.">		if (command.length &lt; 2) {</span>
+<span class="nc" id="L445">			sendError(Client.INVITE, &quot;Invalid arguments.&quot;);</span>
+<span class="pc bpc" id="L446" title="1 of 2 branches missed.">		} else if (!connected()) {</span>
+<span class="nc" id="L447">			sendError(Client.INVITE, &quot;You have to connect first.&quot;);</span>
+<span class="nc" id="L448">			sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="pc bfc" id="L449" title="All 2 branches covered.">		} else if (clientName.equals(command[1])) {</span>
+<span class="fc" id="L450">			sendError(Client.INVITE, &quot;You can't invite yourself.&quot;);</span>
+<span class="fc" id="L451">			sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="fc bfc" id="L452" title="All 2 branches covered.">		} else if (!server.nameExists(command[1])) {</span>
+<span class="fc" id="L453">			sendError(Client.INVITE, &quot;Name doesn't exist.&quot;);</span>
+<span class="fc" id="L454">			sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="pc bpc" id="L455" title="1 of 2 branches missed.">		} else if (inGame()) {</span>
+<span class="nc" id="L456">			sendError(Client.INVITE, &quot;You are already in a game.&quot;);</span>
+<span class="nc" id="L457">			sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="pc bfc" id="L458" title="All 2 branches covered.">		} else if (server.inGame(command[1])) {</span>
+<span class="fc" id="L459">			sendError(Client.INVITE, &quot;The invited client is already in a game.&quot;);</span>
+<span class="fc" id="L460">			sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="fc bfc" id="L461" title="All 2 branches covered.">		} else if (server.isInvited(clientName, command[1])) {</span>
+<span class="fc" id="L462">			sendError(Client.INVITE, &quot;Already invited this client.&quot;);</span>
+<span class="fc" id="L463">			sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="fc bfc" id="L464" title="All 2 branches covered.">		} else if (server.isInvited(command[1], clientName)) {</span>
+<span class="fc" id="L465">			sendError(Client.INVITE, &quot;The invited client already invited you.&quot;);</span>
+<span class="fc" id="L466">			sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="fc bfc" id="L467" title="All 2 branches covered.">		} else if (command.length &gt;= 4) {</span>
+<span class="fc" id="L468">			inviteSizeChecks(command);</span>
+<span class="fc" id="L469">		} else {</span>
+<span class="fc" id="L470">			invite(command[1]);</span>
+		}
+<span class="fc" id="L472">	}</span>
+
+	/**
+	 * Checks if both Clients support a custom board size and tries to parse the
+	 * board size. The amount of rows and columns can't be smaller than 4 or
+	 * larger than 100. Then it calls invite to invite the opponent with a
+	 * custom board size. If one of the checks fail an error will be sent and
+	 * the invite will be automatically declined, to let the client know the
+	 * invite has been cancelled.
+	 *
+	 * @param command
+	 *            The command send by the client.
+	 */
+	/*@ requires command != null;
+		requires command[0].equals(Client.INVITE);
+		requires connected();
+		requires server.nameExists(command[1]);
+		requires !inGame();
+		requires !server.inGame(command[1]);
+		requires !server.isInvited(clientName, command[1]);
+		requires !server.isInvited(command[1], clientName);
+	 */
+	private void inviteSizeChecks(String[] command) {
+<span class="pc bpc" id="L495" title="1 of 2 branches missed.">		if (!hasCustomBoardSize()) {</span>
+<span class="nc" id="L496">			sendError(</span>
+<span class="nc" id="L497">					Client.INVITE,</span>
+<span class="nc" id="L498">					&quot;Your client doesn't support the &quot;</span>
+							+ CUSTOM_BOARD_SIZE
+							+ &quot; feature. Please add this feature if you want to use extras.&quot;);
+<span class="nc" id="L501">			sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">		} else if (!server.hasCustomBoardSize(command[1])) {</span>
+<span class="nc" id="L503">			sendError(Client.INVITE,</span>
+<span class="nc" id="L504">					&quot;The invited client doesn't support extras.&quot;);</span>
+<span class="nc" id="L505">			sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="nc" id="L506">		} else {</span>
+			try {
+<span class="fc" id="L508">				int boardX = Integer.parseInt(command[2]);</span>
+<span class="fc" id="L509">				int boardY = Integer.parseInt(command[3]);</span>
+<span class="pc bpc" id="L510" title="2 of 4 branches missed.">				if (boardX &lt; Board.CONNECT || boardY &lt; Board.CONNECT) {</span>
+<span class="nc" id="L511">					sendError(Server.INVITE,</span>
+<span class="nc" id="L512">							&quot;Boardsize too small. Minimun is 4&quot;);</span>
+<span class="nc" id="L513">					sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+					//TODO: niet hardcoden
+<span class="pc bpc" id="L515" title="2 of 4 branches missed.">				} else if (boardX &gt; 100 || boardY &gt; 100) {</span>
+<span class="nc" id="L516">					sendError(Server.INVITE,</span>
+<span class="nc" id="L517">							&quot;Boardsize too big. Maximum is 100&quot;);</span>
+<span class="nc" id="L518">					sendMessage(Server.DECLINE_INVITE + &quot; &quot; + command[1]);</span>
+<span class="nc" id="L519">				} else {</span>
+<span class="fc" id="L520">					invite(command[1], boardX, boardY);</span>
+				}
+<span class="pc" id="L522">			} catch (NumberFormatException e) {</span>
+<span class="nc" id="L523">				sendError(Server.INVITE, &quot;Couldn't parse boardsize.&quot;);</span>
+			}
+		}
+<span class="fc" id="L526">	}</span>
+
+	/**
+	 * Invites the player specified in the command and tries to read the board
+	 * size if specified. the invite will be saved on the server.
+	 *
+	 * @param command
+	 *            The command send by the client.
+	 */
+	/*@ requires name != null;
+		requires connected();
+		requires server.nameExists(name);
+		requires !inGame();
+		requires !server.inGame(name);
+		requires !server.isInvited(clientName, name);
+		requires !server.isInvited(name, clientName);
+		ensures server.isInvited(clientName, name);
+	 */
+	private void invite(String name) {
+<span class="fc" id="L545">		server.sendMessage(name, Server.INVITE + &quot; &quot; + clientName);</span>
+<span class="fc" id="L546">		server.addInvite(clientName, name, 7, 6);</span>
+<span class="fc" id="L547">	}</span>
+
+	/**
+	 * Invites the player specified in the command and tries to read the Board
+	 * size if specified. The invite will be saved on the Server.
+	 *
+	 * @param command
+	 *            The command send by the client.
+	 */
+	/*@ requires name != null;
+		requires boardX &gt;= 4;
+		requires boardY &gt;= 4;
+		requires connected();
+		requires server.nameExists(name);
+		requires !inGame();
+		requires !server.inGame(name);
+		requires !server.isInvited(clientName, name);
+		requires !server.isInvited(name, clientName);
+		ensures server.isInvited(clientName, name);
+	 */
+	private void invite(String name, int boardX, int boardY) {
+<span class="fc" id="L568">		server.sendMessage(name, Server.INVITE + &quot; &quot; + clientName + &quot; &quot;</span>
+<span class="fc" id="L569">				+ boardX + &quot; &quot; + boardY);</span>
+<span class="fc" id="L570">		server.addInvite(clientName, name, boardX, boardY);</span>
+<span class="fc" id="L571">	}</span>
+
+	/**
+	 * Checks if the client is connected, if the client send a command with
+	 * valid arguments, if the opponent exists and if the opponent specified in
+	 * the command sent an invite to this player. If this is the case accept
+	 * will be called to accept the invite.
+	 *
+	 * @param command
+	 *            The command sent by the client.
+	 */
+	/*@ requires command != null;
+		requires command[0].equals(Client.ACCEPT_INVITE);
+	*/
+	private void acceptChecks(String[] command) {
+<span class="pc bpc" id="L586" title="1 of 2 branches missed.">		if (!connected()) {</span>
+<span class="nc" id="L587">			sendError(Client.ACCEPT_INVITE, &quot;You have to connect first.&quot;);</span>
+<span class="pc bpc" id="L588" title="1 of 2 branches missed.">		} else if (command.length != 2) {</span>
+<span class="nc" id="L589">			sendError(Client.ACCEPT_INVITE, &quot;Invalid arguments.&quot;);</span>
+<span class="pc bfc" id="L590" title="All 2 branches covered.">		} else if (!server.nameExists(command[1])) {</span>
+<span class="fc" id="L591">			sendError(Client.ACCEPT_INVITE, &quot;Name doesn't exist.&quot;);</span>
+<span class="pc bpc" id="L592" title="1 of 2 branches missed.">		} else if (!server.isInvited(command[1], clientName)) {</span>
+<span class="nc" id="L593">			sendError(Client.ACCEPT_INVITE, &quot;Not invited by this client.&quot;);</span>
+<span class="nc" id="L594">		} else {</span>
+<span class="fc" id="L595">			accept(command[1]);</span>
+		}
+<span class="fc" id="L597">	}</span>
+
+	/**
+	 * Accepts the invite, creates a Board with the size specified in the invite
+	 * and announces the start of the game to this client and the specified
+	 * opponent.
+	 *
+	 * @param command
+	 *            The command sent by the client.
+	 */
+	/*@ requires name != null;
+		requires connected();
+		requires server.nameExists(name);
+		requires server.isInvited(name, clientName);
+	 */
+	private void accept(String name) {
+<span class="fc" id="L613">		server.generateBoard(name, clientName);</span>
+<span class="fc" id="L614">		sendMessage(Server.GAME_START + &quot; &quot; + clientName + &quot; &quot; + name);</span>
+<span class="fc" id="L615">		server.sendMessage(name, Server.GAME_START + &quot; &quot; + clientName + &quot; &quot;</span>
+<span class="fc" id="L616">				+ name);</span>
+<span class="fc" id="L617">		sendMessage(Server.REQUEST_MOVE);</span>
+<span class="fc" id="L618">	}</span>
+
+	/**
+	 * Checks if the client is connected, if the client sent a command with
+	 * valid arguments, if the opponent exists and if the opponent specified in
+	 * the command send an invite to this player or this player sent an invite
+	 * to the opponent. If this is the case decline will be called to decline
+	 * the invite.
+	 *
+	 * @param command
+	 *            The command send by the client.
+	 */
+	/*@ requires command != null;
+		requires command[0].equals(Client.DECLINE_INVITE);
+	*/
+	private void declineChecks(String[] command) {
+<span class="pc bpc" id="L634" title="1 of 2 branches missed.">		if (!connected()) {</span>
+<span class="nc" id="L635">			sendError(Client.DECLINE_INVITE, &quot;You have to connect first.&quot;);</span>
+<span class="pc bpc" id="L636" title="1 of 2 branches missed.">		} else if (command.length != 2) {</span>
+<span class="nc" id="L637">			sendError(Client.DECLINE_INVITE, &quot;Invalid arguments.&quot;);</span>
+<span class="pc bfc" id="L638" title="All 2 branches covered.">		} else if (!server.nameExists(command[1])) {</span>
+<span class="fc" id="L639">			sendError(Client.DECLINE_INVITE, &quot;Name doesn't exist.&quot;);</span>
+<span class="fc bfc" id="L640" title="All 2 branches covered.">		} else if (!(server.isInvited(command[1], clientName) || server</span>
+<span class="fc bfc" id="L641" title="All 2 branches covered.">				.isInvited(clientName, command[1]))) {</span>
+<span class="fc" id="L642">			sendError(Client.DECLINE_INVITE, &quot;Not invited by this client.&quot;);</span>
+<span class="fc" id="L643">		} else {</span>
+<span class="fc" id="L644">			decline(command[1]);</span>
+		}
+<span class="fc" id="L646">	}</span>
+
+	/**
+	 * Declines the invite, send a message to the opponent and deletes it from
+	 * the Server. You can decline invites sent by you.
+	 *
+	 * @param command
+	 *            The command sent by the client.
+	 */
+	/*@ requires name != null;
+		requires connected();
+		requires server.nameExists(name);
+		requires server.isInvited(name, clientName);
+		ensures !server.isInvited(name, clientName);
+	 */
+	private void decline(String name) {
+<span class="fc" id="L662">		server.removeInvite(name, clientName);</span>
+<span class="fc" id="L663">		server.removeInvite(clientName, name);</span>
+<span class="fc" id="L664">		server.sendMessage(name, Server.DECLINE_INVITE + &quot; &quot; + clientName);</span>
+<span class="fc" id="L665">	}</span>
+
+	/**
+	 * Checks if the client is connected, if the client is in game and if it's
+	 * the client's turn to move, if this is the case it calls validMove to
+	 * check if the move is valid.
+	 *
+	 * @param command
+	 *            The command sent by the client.
+	 */
+	/*@ requires command != null;
+		requires command[0].equals(Client.MOVE);
+	*/
+	private void moveChecks(String[] command) {
+<span class="pc bpc" id="L679" title="1 of 2 branches missed.">		if (!connected()) {</span>
+<span class="nc" id="L680">			sendError(Client.MOVE, &quot;You have to connect first.&quot;);</span>
+<span class="pc bpc" id="L681" title="1 of 2 branches missed.">		} else if (!inGame()) {</span>
+<span class="nc" id="L682">			sendError(Client.MOVE, &quot;You aren't in a game.&quot;);</span>
+<span class="nc" id="L683">		} else {</span>
+			/*
+			 * Make sure the board isn't deleted by game end (disconnect) while
+			 * whe determine a move.
+			 */
+<span class="pc" id="L688">			synchronized (board) {</span>
+<span class="pc bpc" id="L689" title="1 of 2 branches missed.">				if (!move) {</span>
+<span class="nc" id="L690">					sendError(Client.MOVE, &quot;It's not your turn to move.&quot;);</span>
+<span class="nc" id="L691">				} else {</span>
+<span class="fc" id="L692">					validMove(command);</span>
+				}
+			}
+		}
+<span class="fc" id="L696">	}</span>
+
+	/**
+	 * Checks if the client sent a command with valid arguments, tries to parse
+	 * the column specified in the command, checks if the column is a valid
+	 * column and if it isn't full. If one of these things fail it sends an
+	 * error and a new move request, otherwise it will call move to do the move.
+	 *
+	 * @param command
+	 *            The command send by the client.
+	 */
+	/*@ requires command != null;
+		requires command[0].equals(Client.MOVE);
+		requires connected();
+		requires opponentName != null;
+		requires playerNumber == 0 || playerNumber == 1;
+		requires inGame();
+	*/
+	private void validMove(String[] command) {
+<span class="fc" id="L715">		move = false;</span>
+<span class="pc bpc" id="L716" title="1 of 2 branches missed.">		if (command.length != 2) {</span>
+<span class="nc" id="L717">			sendError(Client.MOVE, &quot;Invalid arguments.&quot;);</span>
+<span class="nc" id="L718">			sendMessage(Server.REQUEST_MOVE);</span>
+<span class="nc" id="L719">		} else {</span>
+<span class="fc" id="L720">			int col = -1;</span>
+			try {
+<span class="fc" id="L722">				col = Integer.parseInt(command[1]);</span>
+<span class="fc" id="L723">			} catch (NumberFormatException e) {</span>
+<span class="fc" id="L724">				sendError(Client.MOVE, &quot;Can't parse move.&quot;);</span>
+<span class="fc" id="L725">				sendMessage(Server.REQUEST_MOVE);</span>
+<span class="fc" id="L726">				return;</span>
+			}
+<span class="fc bfc" id="L728" title="All 2 branches covered.">			if (!board.isField(col)) {</span>
+<span class="fc" id="L729">				sendError(Client.MOVE, &quot;That column doesn't exist.&quot;);</span>
+<span class="fc" id="L730">				sendMessage(Server.REQUEST_MOVE);</span>
+<span class="fc bfc" id="L731" title="All 2 branches covered.">			} else if (!board.isEmptyField(col)) {</span>
+<span class="fc" id="L732">				sendError(Client.MOVE, &quot;That column is full.&quot;);</span>
+<span class="fc" id="L733">				sendMessage(Server.REQUEST_MOVE);</span>
+<span class="fc" id="L734">			} else {</span>
+<span class="fc" id="L735">				move(col);</span>
+			}
+		}
+<span class="fc" id="L738">	}</span>
+
+	/**
+	 * Does the move on the board, sends the move to the Clients in the game and
+	 * checks if the game is over. If it isn't it, sends an request to the
+	 * opponent, otherwise it will send the result of the game.
+	 *
+	 * @param col
+	 *            The column to make the move in.
+	 */
+	/*@ requires connected();
+		requires opponentName != null;
+		requires playerNumber == 0 || playerNumber == 1;
+		requires inGame();
+		requires board.isField(col);
+		requires board.isEmptyField(col);
+	 */
+	private void move(int col) {
+<span class="fc bfc" id="L756" title="All 2 branches covered.">		if (playerNumber == 0) {</span>
+<span class="fc" id="L757">			board.insertDisc(col, Disc.YELLOW);</span>
+<span class="pc bpc" id="L758" title="1 of 2 branches missed.">		} else if (playerNumber == 1) {</span>
+<span class="fc" id="L759">			board.insertDisc(col, Disc.RED);</span>
+		}
+<span class="fc" id="L761">		sendMessage(Server.MOVE_OK + &quot; &quot; + playerNumber + &quot; &quot; + col + &quot; &quot;</span>
+<span class="fc" id="L762">				+ clientName);</span>
+<span class="fc" id="L763">		server.sendMessage(opponentName, Server.MOVE_OK + &quot; &quot; + playerNumber</span>
+<span class="fc" id="L764">				+ &quot; &quot; + col + &quot; &quot; + clientName);</span>
+<span class="fc bfc" id="L765" title="All 2 branches covered.">		if (!board.gameOver()) {</span>
+<span class="fc" id="L766">			server.sendMessage(opponentName, Server.REQUEST_MOVE);</span>
+<span class="pc bpc" id="L767" title="1 of 2 branches missed.">		} else if (board.hasWinner()) {</span>
+<span class="fc" id="L768">			server.updateLeaderboard(clientName, true);</span>
+<span class="fc" id="L769">			server.updateLeaderboard(opponentName, false);</span>
+<span class="fc" id="L770">			server.sendMessage(opponentName, Server.GAME_END + &quot; &quot; + WIN + &quot; &quot;</span>
+<span class="fc" id="L771">					+ clientName);</span>
+<span class="fc" id="L772">			sendMessage(Server.GAME_END + &quot; &quot; + WIN + &quot; &quot; + clientName);</span>
+<span class="fc" id="L773">		} else {</span>
+<span class="nc" id="L774">			server.updateLeaderboard(clientName, null);</span>
+<span class="nc" id="L775">			server.updateLeaderboard(opponentName, null);</span>
+<span class="nc" id="L776">			server.sendMessage(opponentName, Server.GAME_END + &quot; &quot; + DRAW);</span>
+<span class="nc" id="L777">			sendMessage(Server.GAME_END + &quot; &quot; + DRAW);</span>
+		}
+<span class="fc" id="L779">	}</span>
+
+	/**
+	 * Checks if the client is connected and if the command contains a message,
+	 * if this is the case it calls chat to broadcast the message.
+	 *
+	 * @param command
+	 *            The command sent by the client.
+	 */
+	/*@ requires line != null;
+	*/
+	private void chatChecks(String line) {
+		//TODO: niet hardcoden
+<span class="pc bpc" id="L792" title="1 of 2 branches missed.">		if (!connected()) {</span>
+<span class="nc" id="L793">			sendError(Server.CHAT, &quot;You have to connect first.&quot;);</span>
+<span class="pc bpc" id="L794" title="1 of 2 branches missed.">		} else if (line.length() &lt;= 5) {</span>
+<span class="nc" id="L795">			sendError(Server.CHAT, &quot;Invalid arguments.&quot;);</span>
+<span class="pc bpc" id="L796" title="1 of 2 branches missed.">		} else if (!hasChat()) {</span>
+<span class="nc" id="L797">			sendError(</span>
+<span class="nc" id="L798">					Server.CHAT,</span>
+<span class="nc" id="L799">					&quot;Your client doesn't support the &quot;</span>
+							+ CHAT
+							+ &quot; feature. Please add this feature if you want to use it.&quot;);
+<span class="pc bfc" id="L802" title="All 2 branches covered.">		} else if (line.length() &gt; 517) {</span>
+<span class="fc" id="L803">			sendError(Server.CHAT, &quot;Message longer than 512 characters.&quot;);</span>
+<span class="fc" id="L804">		} else {</span>
+<span class="fc" id="L805">			chat(line);</span>
+		}
+<span class="fc" id="L807">	}</span>
+
+	/**
+	 * Broadcasts the message to all connected clients.
+	 *
+	 * @param command
+	 *            The command sent by the client.
+	 */
+	/*@ requires line != null;
+		requires connected();
+		requires line.length() &gt; 5 &amp; line.length() &lt;= 517;
+	 */
+	private void chat(String line) {
+<span class="fc" id="L820">		server.broadcastChat(Server.CHAT + &quot; &quot; + clientName + &quot; &quot;</span>
+<span class="fc" id="L821">				+ line.split(&quot;\\s+&quot;, 2)[1]);</span>
+<span class="fc" id="L822">	}</span>
+
+	/**
+	 * Checks if the client is connected and if the client is in game. If this
+	 * is the case it calls requestBoard to send the board.
+	 */
+	private void requestBoardChecks() {
+<span class="nc bnc" id="L829" title="All 2 branches missed.">		if (!connected()) {</span>
+<span class="nc" id="L830">			sendError(Client.REQUEST_BOARD, &quot;You have to connect first.&quot;);</span>
+<span class="nc bnc" id="L831" title="All 2 branches missed.">		} else if (!inGame()) {</span>
+<span class="nc" id="L832">			sendError(Client.REQUEST_BOARD, &quot;You aren't in a game.&quot;);</span>
+<span class="nc" id="L833">		} else {</span>
+<span class="nc" id="L834">			requestBoard();</span>
+		}
+<span class="nc" id="L836">	}</span>
+
+	/**
+	 * Sends the board to the client.
+	 */
+	//@ requires connected();
+	//@ requires inGame();
+	private void requestBoard() {
+<span class="nc" id="L844">		sendMessage(Server.BOARD + &quot; &quot; + board.toProtocol());</span>
+<span class="nc" id="L845">	}</span>
+
+	/**
+	 * Checks if the client is connected. If this is the case it calls
+	 * requestLobby to send the lobby.
+	 */
+	private void requestLobbyChecks() {
+<span class="pc bpc" id="L852" title="1 of 2 branches missed.">		if (!connected()) {</span>
+<span class="nc" id="L853">			sendError(Client.REQUEST_LOBBY, &quot;You have to connect first.&quot;);</span>
+<span class="nc" id="L854">		} else {</span>
+<span class="fc" id="L855">			requestLobby();</span>
+		}
+<span class="fc" id="L857">	}</span>
+
+	/**
+	 * Sends the lobby to the client.
+	 */
+	//@ requires connected();
+	private void requestLobby() {
+<span class="fc" id="L864">		sendMessage(Server.LOBBY + server.lobbyToString());</span>
+<span class="fc" id="L865">	}</span>
+
+	/**
+	 * Checks if the client is connected. If this is the case it calls
+	 * requestLobby to send the lobby.
+	 */
+	private void requestLeaderboardChecks() {
+<span class="pc bpc" id="L872" title="1 of 2 branches missed.">		if (!connected()) {</span>
+<span class="nc" id="L873">			sendError(Client.REQUEST_LEADERBOARD, &quot;You have to connect first.&quot;);</span>
+<span class="pc bpc" id="L874" title="1 of 2 branches missed.">		} else if (!hasLeaderboard()) {</span>
+<span class="nc" id="L875">			sendError(</span>
+<span class="nc" id="L876">					Client.REQUEST_LEADERBOARD,</span>
+<span class="nc" id="L877">					&quot;Your client doesn't support the &quot;</span>
+							+ LEADERBOARD
+							+ &quot; feature. Please add this feature if you want to use it.&quot;);
+<span class="nc" id="L880">		} else {</span>
+<span class="fc" id="L881">			requestLeaderboard();</span>
+		}
+<span class="fc" id="L883">	}</span>
+
+	/**
+	 * Sends the leaderboard to the client.
+	 */
+	//@ requires connected();
+	//@ requires hasLeaderboard();
+	private void requestLeaderboard() {
+<span class="fc" id="L891">		sendMessage(Server.LEADERBOARD + server.leaderboardToString());</span>
+<span class="fc" id="L892">	}</span>
+
+	/**
+	 * Starts a game and sets the playerNumber and opponentName belonging to the
+	 * client. Also removes all the invites of the client and broadcasts the
+	 * lobby because the client just left the lobby.
+	 *
+	 * @param command
+	 *            The command send by the client.
+	 */
+	//@ ensures playerNumber == 0 || playerNumber == 1;
+	//@ ensures opponentName != null;
+	private void startGame(String[] command) {
+<span class="fc" id="L905">		server.removeInvite(clientName);</span>
+<span class="fc bfc" id="L906" title="All 2 branches covered.">		if (clientName.equals(command[1])) {</span>
+<span class="fc" id="L907">			playerNumber = 0;</span>
+<span class="fc" id="L908">			opponentName = command[2];</span>
+<span class="fc" id="L909">		} else {</span>
+<span class="fc" id="L910">			playerNumber = 1;</span>
+<span class="fc" id="L911">			opponentName = command[1];</span>
+		}
+<span class="fc" id="L913">		server.broadcastLobby();</span>
+<span class="fc" id="L914">	}</span>
+
+	/**
+	 * Ends the game, resets the values belonging to the game and broadcasts the
+	 * lobby because this client just joined the lobby again.
+	 */
+	//@ ensures playerNumber == -1;
+	//@ ensures opponentName == null;
+	//@ ensures !inGame();
+	private void endGame() {
+		//If we are still trying to do a move, wait till it's done
+<span class="pc" id="L925">		synchronized (board) {</span>
+<span class="fc" id="L926">			playerNumber = -1;</span>
+<span class="fc" id="L927">			board = null;</span>
+<span class="fc" id="L928">			opponentName = null;</span>
+<span class="fc" id="L929">			server.broadcastLobby();</span>
+		}
+<span class="fc" id="L931">	}</span>
+
+	/**
+	 * This ClientHandler signs off from the Server and subsequently sends a
+	 * last broadcast to the Server to inform that the client is no longer
+	 * participating in the lobby.
+	 */
+	//@ ensures !loop;
+	private void shutdown() {
+<span class="pc bpc" id="L940" title="1 of 2 branches missed.">		if (loop) {</span>
+<span class="fc" id="L941">			this.loop = false;</span>
+<span class="fc" id="L942">			server.removeHandler(this);</span>
+			try {
+<span class="fc" id="L944">				sock.close();</span>
+<span class="pc" id="L945">			} catch (IOException e) {</span>
+<span class="nc" id="L946">				server.print(&quot;Couldn't close sock.&quot;);</span>
+			}
+<span class="fc bfc" id="L948" title="All 2 branches covered.">			if (inGame()) {</span>
+<span class="fc" id="L949">				server.sendMessage(opponentName, Server.GAME_END + &quot; &quot;</span>
+						+ DISCONNECT);
+<span class="fc" id="L951">				server.print(&quot;ClientHandler: &quot; + clientName</span>
+<span class="fc" id="L952">						+ &quot; has left while in a game.&quot;);</span>
+<span class="fc bfc" id="L953" title="All 2 branches covered.">			} else if (connected()) {</span>
+<span class="fc" id="L954">				server.removeInvite(clientName);</span>
+<span class="fc" id="L955">				server.print(&quot;ClientHandler: &quot; + clientName + &quot; has left.&quot;);</span>
+<span class="fc" id="L956">				server.broadcastLobby();</span>
+<span class="fc" id="L957">			} else {</span>
+<span class="fc" id="L958">				server.print(&quot;ClientHandler: unconnected client has left.&quot;);</span>
+			}
+		}
+<span class="fc" id="L961">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ServerGUI (2) (28-jan-2015 12:07:20)</div></body></html>

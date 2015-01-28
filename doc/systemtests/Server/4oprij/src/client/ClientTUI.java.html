@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ClientTUI.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ServerGUI (2) (28-jan-2015 12:07:20)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">client</a> &gt; <span class="el_source">ClientTUI.java</span></div><h1>ClientTUI.java</h1><pre class="source lang-java linenums">package client;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+/**
+ * ClientTUI program for the Connect4 according to the protocol of the TI-2
+ * group.&lt;br&gt;
+ * &lt;br&gt;
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 &lt;br&gt;
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+public class ClientTUI implements ClientView {
+	/**
+	 * The client this ClientTUI is made for.
+	 */
+	private Client client;
+	/**
+	 * The reader used to read from System.in.
+	 */
+	private BufferedReader reader;
+
+	/**
+	 * The InetAddress the ClientTUI will be connecting to.
+	 */
+	private InetAddress host;
+	/**
+	 * The port the ClientTUI will be connecting to.
+	 */
+	private int port;
+
+	/*@	private invariant this.reader != null;
+	  	private invariant client != null;
+	  	private invariant host != null;
+	 */
+
+	/**
+	 * Creates a ClientTUI object.
+	 */
+<span class="nc" id="L44">	public ClientTUI() {</span>
+<span class="nc" id="L45">		this.reader = new BufferedReader(new InputStreamReader(System.in));</span>
+<span class="nc" id="L46">	}</span>
+
+	/**
+	 * Prints a message to System.out.
+	 * 
+	 * @param msg
+	 *            The message to print.
+	 */
+	//@ requires msg != null;
+	/*@ pure */@Override
+	public void addMessage(String msg) {
+<span class="nc" id="L57">		System.out.println(msg);</span>
+<span class="nc" id="L58">	}</span>
+
+	/**
+	 * This method reads the messages in the InputStream. Then, it decides which
+	 * command was sent, and executes this command by forwarding it to the
+	 * client.
+	 */
+	public void readInput() {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">		while (client.isAlive()) {</span>
+<span class="nc" id="L67">			String input = null;</span>
+<span class="nc" id="L68">			String[] splitInput = null;</span>
+			try {
+<span class="nc" id="L70">				input = reader.readLine();</span>
+<span class="nc" id="L71">				splitInput = input.split(&quot;\\s+&quot;);</span>
+<span class="nc" id="L72">			} catch (IOException | NullPointerException e) {</span>
+<span class="nc" id="L73">				client.shutdown();</span>
+<span class="nc" id="L74">				break;</span>
+			}
+<span class="nc bnc" id="L76" title="All 40 branches missed.">			switch (splitInput[0]) {</span>
+			case Client.QUIT:
+<span class="nc" id="L78">				client.shutdown();</span>
+<span class="nc" id="L79">				break;</span>
+			case Client.INVITE:
+<span class="nc" id="L81">				client.clientInvite(input, splitInput);</span>
+<span class="nc" id="L82">				break;</span>
+			case Client.ACCEPT_INVITE:
+<span class="nc" id="L84">				client.clientAccept(input, splitInput);</span>
+<span class="nc" id="L85">				break;</span>
+			case Client.DECLINE_INVITE:
+<span class="nc" id="L87">				client.clientDecline(input, splitInput);</span>
+<span class="nc" id="L88">				break;</span>
+			case Client.MOVE:
+<span class="nc" id="L90">				client.clientMove(input, splitInput);</span>
+<span class="nc" id="L91">				break;</span>
+			case Client.CHAT:
+<span class="nc" id="L93">				client.sendMessage(input);</span>
+<span class="nc" id="L94">				break;</span>
+			case Client.REQUEST_BOARD:
+<span class="nc" id="L96">				client.clientRequestBoard();</span>
+<span class="nc" id="L97">				break;</span>
+			case Client.REQUEST_LOBBY:
+<span class="nc" id="L99">				client.sendMessage(input);</span>
+<span class="nc" id="L100">				break;</span>
+			case Client.REQUEST_LEADERBOARD:
+<span class="nc" id="L102">				client.sendMessage(Client.REQUEST_LEADERBOARD);</span>
+<span class="nc" id="L103">				break;</span>
+			case Client.PING:
+<span class="nc" id="L105">				client.sendMessage(Client.PING);</span>
+<span class="nc" id="L106">				break;</span>
+			// CUSTOM COMMANDS
+			case Client.HELP:
+<span class="nc" id="L109">				client.clientHelp();</span>
+<span class="nc" id="L110">				break;</span>
+			case Client.HINT:
+<span class="nc" id="L112">				client.clientHint();</span>
+<span class="nc" id="L113">				break;</span>
+			case Client.DIFFICULTY:
+<span class="nc" id="L115">				client.clientDifficulty(splitInput[1]);</span>
+<span class="nc" id="L116">				break;</span>
+			// END OF CUSTOM COMMANDS
+			default:
+<span class="nc" id="L119">				addMessage(&quot;[ERROR]Unknown command.&quot;);</span>
+				break;
+			}
+		}
+<span class="nc" id="L123">	}</span>
+
+	/**
+	 * The main method to start a new ClientTUI.
+	 * 
+	 * @param args
+	 *            The command line arguments. These aren't used.
+	 */
+	public static void main(String[] args) {
+<span class="nc" id="L132">		new ClientTUI().setUpClient();</span>
+<span class="nc" id="L133">	}</span>
+
+	/**
+	 * Asks the user for their name. After this, the setUpPlayer method is
+	 * called.
+	 */
+	@Override
+	public void askName() {
+<span class="nc bnc" id="L141" title="All 4 branches missed.">		while (client.isConnected() == null || !client.isConnected()) {</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			if (client.isConnected() == null) {</span>
+<span class="nc" id="L143">				addMessage(&quot;Please enter your name.&quot;);</span>
+<span class="nc" id="L144">				addMessage(&quot;If you want to use a game.strategy, and make the computer play for you, use -&lt;LETTER&gt; &lt;NAME&gt;.&quot;);</span>
+<span class="nc" id="L145">				addMessage(&quot;Available strategies are: &quot;);</span>
+<span class="nc" id="L146">				addMessage(&quot;-N for a NaiveStrategy (makes random moves)&quot;);</span>
+<span class="nc" id="L147">				addMessage(&quot;-S for Smart (thinks ahead 1 turn)&quot;);</span>
+<span class="nc" id="L148">				addMessage(&quot;-M for Minimax (thinks ahead several turns)&quot;);</span>
+				try {
+<span class="nc" id="L150">					client.setUpPlayer(reader.readLine());</span>
+<span class="nc" id="L151">				} catch (IOException e) {</span>
+<span class="nc" id="L152">					addMessage(&quot;[ERROR]Input disconnected. Shutting down.&quot;);</span>
+<span class="nc" id="L153">					System.exit(0);</span>
+				}
+			}
+		}
+<span class="nc" id="L157">		client.clientHelp();</span>
+<span class="nc" id="L158">		readInput();</span>
+<span class="nc" id="L159">	}</span>
+
+	/**
+	 * Asks the user for the IP of the server they want to connect to.
+	 * 
+	 * @return The InetAddress the person wants to connect to.
+	 */
+	public InetAddress askHost() {
+<span class="nc" id="L167">		InetAddress host = null;</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">		while (host == null) {</span>
+<span class="nc" id="L169">			addMessage(&quot;Please enter the IP address you'd like to connect to.&quot;);</span>
+			try {
+<span class="nc" id="L171">				host = InetAddress.getByName(reader.readLine());</span>
+<span class="nc" id="L172">			} catch (UnknownHostException e) {</span>
+<span class="nc" id="L173">				addMessage(&quot;[ERROR]Unknown host.&quot;);</span>
+<span class="nc" id="L174">			} catch (IOException e) {</span>
+<span class="nc" id="L175">				addMessage(&quot;[ERROR]Input disconnected. Shutting down.&quot;);</span>
+<span class="nc" id="L176">				System.exit(0);</span>
+			}
+		}
+<span class="nc" id="L179">		return host;</span>
+	}
+
+	/**
+	 * Asks the user for the port of the server they want to connect to.
+	 * 
+	 * @return The port the person wants to connect to.
+	 */
+	public int askPort() {
+<span class="nc" id="L188">		int port = 0;</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">		while (port == 0) {</span>
+<span class="nc" id="L190">			addMessage(&quot;Please enter the port you'd like to connect to.&quot;);</span>
+			try {
+<span class="nc" id="L192">				port = (Integer.parseInt(reader.readLine()));</span>
+<span class="nc bnc" id="L193" title="All 6 branches missed.">				if (!(port &gt;= 1 &amp; port &lt;= 65535)) {</span>
+<span class="nc" id="L194">					addMessage(&quot;[ERROR]That is not a valid port number.&quot;);</span>
+<span class="nc" id="L195">					port = 0;</span>
+				}
+<span class="nc" id="L197">			} catch (NumberFormatException e) {</span>
+<span class="nc" id="L198">				addMessage(&quot;[ERROR]That is not a valid number.&quot;);</span>
+<span class="nc" id="L199">			} catch (IOException e) {</span>
+<span class="nc" id="L200">				addMessage(&quot;[ERROR]Input disconnected. Shutting down.&quot;);</span>
+<span class="nc" id="L201">				System.exit(0);</span>
+			}
+		}
+<span class="nc" id="L204">		return port;</span>
+	}
+
+	/**
+	 * Creates a new client with the host and port specified.
+	 */
+	//@ ensures getClient() != null;
+	public void setUpClient() {
+<span class="nc" id="L212">		this.host = askHost();</span>
+<span class="nc" id="L213">		this.port = askPort();</span>
+		try {
+<span class="nc" id="L215">			this.client = new Client(host, port, this);</span>
+<span class="nc" id="L216">		} catch (IOException e) {</span>
+<span class="nc" id="L217">			addMessage(&quot;[ERROR]Couldn't connect to the server.&quot;);</span>
+<span class="nc" id="L218">			setUpClient();</span>
+<span class="nc" id="L219">			return;</span>
+		}
+<span class="nc" id="L221">		client.start();</span>
+<span class="nc" id="L222">		askName();</span>
+<span class="nc" id="L223">	}</span>
+
+	/**
+	 * Adds a connect message to the TUI. It prefixes the message with [CONNECT]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message !=null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addConnectMessage(String message) {
+<span class="nc" id="L234">		addMessage(&quot;[CONNECT]&quot; + message);</span>
+<span class="nc" id="L235">	}</span>
+
+	/**
+	 * Adds an invite message to the TUI. It prefixes the message with [INVITE]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message !=null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addInviteMessage(String message) {
+<span class="nc" id="L246">		addMessage(&quot;[INVITE]&quot; + message);</span>
+<span class="nc" id="L247">	}</span>
+
+	/**
+	 * Adds a move message to the TUI. It prefixes the message with [MOVE]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message !=null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addMoveMessage(String message) {
+<span class="nc" id="L258">		addMessage(message);</span>
+<span class="nc" id="L259">	}</span>
+
+	/**
+	 * Adds a chat message to the TUI. It prefixes the message with [CHAT]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message !=null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addChatMessage(String message) {
+<span class="nc" id="L270">		String[] split = message.split(&quot;\\s+&quot;);</span>
+<span class="nc" id="L271">		addMessage(&quot;[CHAT]&quot; + split[0] + &quot;:&quot; + client.arrayToLine(split));</span>
+<span class="nc" id="L272">	}</span>
+
+	/**
+	 * Adds the current board to the TUI.
+	 */
+	//@ requires getClient().isIngame();
+	/*@ pure */@Override
+	public void addBoard() {
+<span class="nc" id="L280">		addMessage(client.getBoard().toString());</span>
+<span class="nc" id="L281">	}</span>
+
+	/**
+	 * Adds a lobby message to the TUI. It prefixes the message with [LOBBY]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message !=null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addLobbyMessage(String message) {
+<span class="nc" id="L292">		addMessage(&quot;[LOBBY]&quot; + message);</span>
+<span class="nc" id="L293">	}</span>
+
+	/**
+	 * Adds a line of the leaderboard to the TUI.
+	 * 
+	 * @param rank
+	 *            The rank this player is.
+	 * @param name
+	 *            The name of this player.
+	 * @param wins
+	 *            The amount of wins this player has.
+	 * @param losses
+	 *            The amount of losses this player has.
+	 * @param gamesPlayed
+	 *            The amount of games this player has played.
+	 */
+	/*@ requires !rank.equals(&quot;&quot;);
+	  	requires !name.equals(&quot;&quot;);
+	  	requires !wins.equals(&quot;&quot;);
+	  	requires !losses.equals(&quot;&quot;);
+	  	requires !gamesPlayed.equals(&quot;&quot;);
+	 */
+	/*@ pure */@Override
+	public void addLeaderBoardLine(String rank, String name, String wins,
+			String losses, String gamesPlayed) {
+<span class="nc" id="L318">		addMessage(rank + &quot;. &quot; + name + &quot; Wins: &quot; + wins + &quot; Losses: &quot; + losses</span>
+<span class="nc" id="L319">				+ &quot; Games played: &quot; + gamesPlayed);</span>
+
+<span class="nc" id="L321">	}</span>
+
+	/**
+	 * Adds an error message to the TUI. It prefixes the message with [ERROR]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message != null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addErrorMessage(String message) {
+<span class="nc" id="L332">		addMessage(&quot;[ERROR]&quot; + message);</span>
+<span class="nc" id="L333">	}</span>
+
+	/**
+	 * Adds a ping message to the TUI. It prefixes the message with [PING]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message != null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addPingMessage(String message) {
+<span class="nc" id="L344">		addMessage(&quot;[PING]&quot; + message);</span>
+<span class="nc" id="L345">	}</span>
+
+	/**
+	 * Adds a help message to the TUI. It prefixes the message with [HELP]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message != null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addHelpMessage(String message) {
+<span class="nc" id="L356">		addMessage(&quot;[HELP]&quot; + message);</span>
+<span class="nc" id="L357">	}</span>
+
+	/**
+	 * Adds a hint message to the TUI. It prefixes the message with [HINT]You
+	 * could make a move in column:
+	 * 
+	 * @param move
+	 *            The move to suggest.
+	 */
+	/*@ pure */@Override
+	public void addHintMessage(int move) {
+<span class="nc" id="L368">		addMessage(&quot;[HINT]You could make a move in column: &quot; + move);</span>
+<span class="nc" id="L369">	}</span>
+
+	/**
+	 * Adds a features message to the TUI. It prefixes the message with
+	 * [FEATURES]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message != null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addFeaturesMessage(String message) {
+<span class="nc" id="L381">		addMessage(&quot;[FEATURES]&quot; + message);</span>
+<span class="nc" id="L382">	}</span>
+
+	/**
+	 * Adds a game message to the TUI. It prefixes the message with [GAME]
+	 * 
+	 * @param message
+	 *            The message to add.
+	 */
+	//@ requires message != null &amp; !message.equals(&quot;&quot;);
+	/*@ pure */@Override
+	public void addGameMessage(String message) {
+<span class="nc" id="L393">		addMessage(&quot;[GAME]&quot; + message);</span>
+<span class="nc" id="L394">	}</span>
+
+	/**
+	 * Adds a difficulty message to the TUI. It prefixes the message with
+	 * [DIFFICULTY]
+	 * 
+	 * @param success
+	 *            To determine whether the difficulty was successfully switched.
+	 */
+	/*@ pure */@Override
+	public void addDifficultyMessage(boolean success) {
+<span class="nc bnc" id="L405" title="All 2 branches missed.">		if (success) {</span>
+<span class="nc" id="L406">			addMessage(&quot;Difficulty set&quot;);</span>
+<span class="nc" id="L407">		} else {</span>
+<span class="nc" id="L408">			addMessage(&quot;Couldn't change the difficulty&quot;);</span>
+		}
+<span class="nc" id="L410">	}</span>
+	
+	/*@ pure */public Client getClient(){
+<span class="nc" id="L413">		return client;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ServerGUI (2) (28-jan-2015 12:07:20)</div></body></html>

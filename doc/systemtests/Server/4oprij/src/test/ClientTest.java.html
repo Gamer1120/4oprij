@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ClientTest.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ServerGUI (2) (28-jan-2015 12:07:20)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">test</a> &gt; <span class="el_source">ClientTest.java</span></div><h1>ClientTest.java</h1><pre class="source lang-java linenums">package test;
+
+import game.Disc;
+
+import java.io.IOException;
+import java.net.InetAddress;
+
+import server.Server;
+import client.Client;
+import client.ClientTUI;
+
+<span class="nc" id="L12">public class ClientTest {</span>
+	// HOW TO SETUP THIS TEST
+	// 1. Launch ServerGUI on port 2727.
+	// 2. Run a ClientTUI. Enter localhost for the IP, 2727 for the port and -N TestOpponent as name.
+	// 3. Run this test.
+	public static void main(String[] args) {
+<span class="nc" id="L18">		Client cl = null;</span>
+		try {
+<span class="nc" id="L20">			cl = new Client(InetAddress.getByName(&quot;localhost&quot;), 2727,</span>
+<span class="nc" id="L21">					new ClientTUI());</span>
+<span class="nc" id="L22">		} catch (IOException e) {</span>
+<span class="nc" id="L23">			System.out</span>
+<span class="nc" id="L24">					.println(&quot;Couldn't create a client. Did you turn on the server?&quot;);</span>
+		}
+<span class="nc" id="L26">		cl.setUpPlayer(&quot;ClientTest&quot;);</span>
+<span class="nc" id="L27">		System.out</span>
+<span class="nc" id="L28">				.println(&quot;The name of this Client should be ClientTest. It acutally is: &quot;</span>
+<span class="nc" id="L29">						+ cl.getClientName());</span>
+<span class="nc" id="L30">		cl.sendMessage(Client.CONNECT + &quot; &quot; + cl.getClientName());</span>
+<span class="nc" id="L31">		cl.sendMessage(Client.PING);</span>
+<span class="nc" id="L32">		cl.sendMessage(Client.PING);</span>
+<span class="nc" id="L33">		cl.sendMessage(Client.PING);</span>
+<span class="nc" id="L34">		System.out</span>
+<span class="nc" id="L35">				.println(&quot;On the console of the server, it should say that ClientTest has connected, sent 3 pings and left.&quot;);</span>
+<span class="nc" id="L36">		System.out.println(&quot;From now on, faking client commands.&quot;);</span>
+<span class="nc" id="L37">		System.out.println(Client.HELP + &quot;:&quot;);</span>
+<span class="nc" id="L38">		cl.clientHelp();</span>
+<span class="nc" id="L39">		System.out.println(Client.MOVE + &quot;:&quot;);</span>
+<span class="nc" id="L40">		cl.clientMove(Client.MOVE + &quot; 1&quot;, (Client.MOVE + &quot; 1&quot;).split(&quot;\\s+&quot;));</span>
+<span class="nc" id="L41">		System.out.println(Client.INVITE + &quot;:&quot;);</span>
+<span class="nc" id="L42">		cl.clientInvite(Client.INVITE + &quot; lalala&quot;,</span>
+<span class="nc" id="L43">				(Client.INVITE + &quot; lalala&quot;).split(&quot;\\s+&quot;));</span>
+<span class="nc" id="L44">		cl.clientInvite(Client.INVITE + &quot; lalala&quot;,</span>
+<span class="nc" id="L45">				(Client.INVITE + &quot; lalala 8&quot;).split(&quot;\\s+&quot;));</span>
+<span class="nc" id="L46">		cl.clientInvite(Client.INVITE + &quot; lalala 10 10&quot;,</span>
+<span class="nc" id="L47">				(Client.INVITE + &quot; lalala 10 10&quot;).split(&quot;\\s+&quot;));</span>
+<span class="nc" id="L48">		System.out.println(&quot;ACCEPT_INVITE:&quot;);</span>
+<span class="nc" id="L49">		cl.clientAccept(Client.ACCEPT_INVITE,</span>
+<span class="nc" id="L50">				(Client.ACCEPT_INVITE).split(&quot;\\s+&quot;));</span>
+<span class="nc" id="L51">		cl.clientAccept(Client.ACCEPT_INVITE + &quot; nobody lol&quot;,</span>
+<span class="nc" id="L52">				(Client.ACCEPT_INVITE + &quot; nobody lol&quot;).split(&quot;\\s+&quot;));</span>
+<span class="nc" id="L53">		System.out.println(&quot;DECLINE_INVITE&quot;);</span>
+<span class="nc" id="L54">		cl.clientDecline(Client.DECLINE_INVITE,</span>
+<span class="nc" id="L55">				Client.DECLINE_INVITE.split(&quot;\\s+&quot;));</span>
+<span class="nc" id="L56">		cl.clientDecline(Client.DECLINE_INVITE + &quot; nobody lol&quot;,</span>
+<span class="nc" id="L57">				(Client.DECLINE_INVITE + &quot; nobody lol&quot;).split(&quot;\\s+&quot;));</span>
+<span class="nc" id="L58">		System.out.println(Client.HINT + &quot;:&quot;);</span>
+<span class="nc" id="L59">		cl.clientHint();</span>
+<span class="nc" id="L60">		cl.clientRequestBoard();</span>
+<span class="nc" id="L61">		System.out.println(&quot;isConnected() == &quot; + cl.isConnected());</span>
+<span class="nc" id="L62">		System.out.println(&quot;isIngame() == &quot; + cl.isIngame());</span>
+<span class="nc" id="L63">		System.out.println(&quot;getBoard() == &quot; + cl.getBoard());</span>
+<span class="nc" id="L64">		System.out</span>
+<span class="nc" id="L65">				.println(&quot;cl.arrayToLine((\&quot;This is a line.\&quot;).split(regex); == &quot;</span>
+<span class="nc" id="L66">						+ cl.arrayToLine(&quot;This is a line.&quot;.split(&quot;\\s+&quot;))</span>
+<span class="nc" id="L67">						+ &quot; Expected:  is a line.&quot;);</span>
+<span class="nc" id="L68">		System.out.println(&quot;Adding a server invite from Test with default board size&quot;);</span>
+<span class="nc" id="L69">		cl.addServerInvite(&quot;Test&quot;);</span>
+<span class="nc" id="L70">		System.out.println(&quot;Adding a server invite from Test with custom board size&quot;);</span>
+<span class="nc" id="L71">		cl.addServerInvite(&quot;Test&quot;, 4, 4);</span>
+<span class="nc" id="L72">		System.out.println(&quot;Removing a server invite from Test&quot;);</span>
+<span class="nc" id="L73">		cl.removeServerInvite(&quot;Test&quot;);</span>
+<span class="nc" id="L74">		Client clNaiveWithoutName = null;</span>
+		try {
+<span class="nc" id="L76">			clNaiveWithoutName = new Client(InetAddress.getByName(&quot;localhost&quot;),</span>
+<span class="nc" id="L77">					2727, new ClientTUI());</span>
+<span class="nc" id="L78">		} catch (IOException e) {</span>
+<span class="nc" id="L79">			System.out</span>
+<span class="nc" id="L80">					.println(&quot;Couldn't create a client. Did you turn on the server?&quot;);</span>
+		}
+<span class="nc" id="L82">		clNaiveWithoutName.setUpPlayer(&quot;-N&quot;);</span>
+<span class="nc" id="L83">		System.out</span>
+<span class="nc" id="L84">				.println(&quot;Created a ComputerPlayer with a NaiveStrategy without name.&quot;);</span>
+<span class="nc" id="L85">		Client clSmartWithoutName = null;</span>
+		try {
+<span class="nc" id="L87">			clSmartWithoutName = new Client(InetAddress.getByName(&quot;localhost&quot;),</span>
+<span class="nc" id="L88">					2727, new ClientTUI());</span>
+<span class="nc" id="L89">		} catch (IOException e) {</span>
+<span class="nc" id="L90">			System.out</span>
+<span class="nc" id="L91">					.println(&quot;Couldn't create a client. Did you turn on the server?&quot;);</span>
+		}
+<span class="nc" id="L93">		clSmartWithoutName.setUpPlayer(&quot;-S&quot;);</span>
+<span class="nc" id="L94">		System.out</span>
+<span class="nc" id="L95">				.println(&quot;Created a ComputerPlayer with a SmartStrategy without name.&quot;);</span>
+<span class="nc" id="L96">		Client clMinMaxWithoutName = null;</span>
+		try {
+<span class="nc" id="L98">			clMinMaxWithoutName = new Client(</span>
+<span class="nc" id="L99">					InetAddress.getByName(&quot;localhost&quot;), 2727, new ClientTUI());</span>
+<span class="nc" id="L100">		} catch (IOException e) {</span>
+<span class="nc" id="L101">			System.out</span>
+<span class="nc" id="L102">					.println(&quot;Couldn't create a client. Did you turn on the server?&quot;);</span>
+		}
+<span class="nc" id="L104">		clMinMaxWithoutName.setUpPlayer(&quot;-M&quot;);</span>
+<span class="nc" id="L105">		System.out</span>
+<span class="nc" id="L106">				.println(&quot;Created a ComputerPlayer with a MinMaxStrategy without name.&quot;);</span>
+<span class="nc" id="L107">		Client clNaiveWithName = null;</span>
+		try {
+<span class="nc" id="L109">			clNaiveWithName = new Client(InetAddress.getByName(&quot;localhost&quot;),</span>
+<span class="nc" id="L110">					2727, new ClientTUI());</span>
+<span class="nc" id="L111">		} catch (IOException e) {</span>
+<span class="nc" id="L112">			System.out</span>
+<span class="nc" id="L113">					.println(&quot;Couldn't create a client. Did you turn on the server?&quot;);</span>
+		}
+<span class="nc" id="L115">		clNaiveWithName.setUpPlayer(&quot;-N ClientTest&quot;);</span>
+<span class="nc" id="L116">		System.out</span>
+<span class="nc" id="L117">				.println(&quot;Created a ComputerPlayer with a NaiveStrategy with the name ClientTest.&quot;);</span>
+<span class="nc" id="L118">		Client clSmartWithName = null;</span>
+		try {
+<span class="nc" id="L120">			clSmartWithName = new Client(InetAddress.getByName(&quot;localhost&quot;),</span>
+<span class="nc" id="L121">					2727, new ClientTUI());</span>
+<span class="nc" id="L122">		} catch (IOException e) {</span>
+<span class="nc" id="L123">			System.out</span>
+<span class="nc" id="L124">					.println(&quot;Couldn't create a client. Did you turn on the server?&quot;);</span>
+		}
+<span class="nc" id="L126">		clSmartWithName.setUpPlayer(&quot;-S ClientTest&quot;);</span>
+<span class="nc" id="L127">		System.out</span>
+<span class="nc" id="L128">				.println(&quot;Created a ComputerPlayer with a SmartStrategy with the name ClientTest.&quot;);</span>
+<span class="nc" id="L129">		Client clMinMaxWithName = null;</span>
+		try {
+<span class="nc" id="L131">			clMinMaxWithName = new Client(InetAddress.getByName(&quot;localhost&quot;),</span>
+<span class="nc" id="L132">					2727, new ClientTUI());</span>
+<span class="nc" id="L133">		} catch (IOException e) {</span>
+<span class="nc" id="L134">			System.out</span>
+<span class="nc" id="L135">					.println(&quot;Couldn't create a client. Did you turn on the server?&quot;);</span>
+		}
+<span class="nc" id="L137">		clMinMaxWithName.setUpPlayer(&quot;-M ClientTest&quot;);</span>
+<span class="nc" id="L138">		System.out</span>
+<span class="nc" id="L139">				.println(&quot;Created a ComputerPlayer with a MinMaxStrategy with the name ClientTest.&quot;);</span>
+<span class="nc" id="L140">		System.out.println(&quot;Using the toBoard when myNumber is not set gives: &quot;</span>
+<span class="nc" id="L141">				+ cl.toBoard(&quot;4 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0&quot;));</span>
+<span class="nc" id="L142">		System.out</span>
+<span class="nc" id="L143">				.println(&quot;Using the makeBoard on an empty board of 4x4 gives: &quot;</span>
+<span class="nc" id="L144">						+ cl.makeBoard(4, 4, Disc.YELLOW, Disc.RED,</span>
+<span class="nc" id="L145">								&quot;BOARD 4 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0&quot;.split(&quot; &quot;)));</span>
+<span class="nc" id="L146">		System.out</span>
+<span class="nc" id="L147">		.println(&quot;Using the makeBoard on an filled board of 4x4 gives: &quot;</span>
+<span class="nc" id="L148">				+ cl.makeBoard(4, 4, Disc.YELLOW, Disc.RED,</span>
+<span class="nc" id="L149">						&quot;BOARD 4 4 1 2 2 1 1 2 1 1 2 2 2 1 1 1 2 1&quot;.split(&quot; &quot;)));</span>
+<span class="nc" id="L150">		cl.start();</span>
+<span class="nc" id="L151">		cl.shutdown();</span>
+<span class="nc" id="L152">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ServerGUI (2) (28-jan-2015 12:07:20)</div></body></html>

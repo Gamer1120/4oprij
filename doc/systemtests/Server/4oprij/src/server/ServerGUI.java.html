@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>ServerGUI.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ServerGUI (2) (28-jan-2015 12:07:20)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">server</a> &gt; <span class="el_source">ServerGUI.java</span></div><h1>ServerGUI.java</h1><pre class="source lang-java linenums"><span class="fc" id="L1">package server;</span>
+
+import game.Board;
+
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Observable;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+
+/**
+ * A GUI for the server, as provided in the files in week 7 for the Multiclient
+ * chat. Limited Javadoc/OpenJML is provided in this class.
+ * 
+ * @author Theo Ruys, modified by Michael Koopman s1401335 and Sven Konings
+ *         s1534130
+ */
+public class ServerGUI extends JFrame implements ActionListener, MessageUI {
+
+	private static final long serialVersionUID = 1L;
+	private JButton bConnect;
+	private JTextField tfPort;
+	private JTextArea taMessages;
+	private Server server;
+
+	//@ private invariant server != null;
+
+	/** Constructs a ServerGUI object. */
+	public ServerGUI() {
+<span class="fc" id="L45">		super(&quot;ServerGUI&quot;);</span>
+
+<span class="fc" id="L47">		buildGUI();</span>
+<span class="fc" id="L48">		setVisible(true);</span>
+
+<span class="fc" id="L50">		addWindowListener(new WindowAdapter() {</span>
+			@Override
+			public void windowClosing(WindowEvent e) {
+<span class="fc" id="L53">				e.getWindow().dispose();</span>
+<span class="fc" id="L54">			}</span>
+
+			@Override
+			public void windowClosed(WindowEvent e) {
+<span class="nc" id="L58">				System.exit(0);</span>
+<span class="nc" id="L59">			}</span>
+		});
+<span class="fc" id="L61">	}</span>
+
+	/** builds the GUI. */
+	public void buildGUI() {
+<span class="fc" id="L65">		setSize(600, 400);</span>
+
+		// Panel p1 - Listen
+
+<span class="fc" id="L69">		JPanel p1 = new JPanel(new FlowLayout());</span>
+<span class="fc" id="L70">		JPanel pp = new JPanel(new GridLayout(2, 2));</span>
+
+<span class="fc" id="L72">		JLabel lbAddress = new JLabel(&quot;Address: &quot;);</span>
+<span class="fc" id="L73">		JTextField tfAddress = new JTextField(getHostAddress(), 12);</span>
+<span class="fc" id="L74">		tfAddress.setEditable(false);</span>
+
+<span class="fc" id="L76">		JLabel lbPort = new JLabel(&quot;Port:&quot;);</span>
+<span class="fc" id="L77">		tfPort = new JTextField(&quot;2727&quot;, 5);</span>
+
+<span class="fc" id="L79">		pp.add(lbAddress);</span>
+<span class="fc" id="L80">		pp.add(tfAddress);</span>
+<span class="fc" id="L81">		pp.add(lbPort);</span>
+<span class="fc" id="L82">		pp.add(tfPort);</span>
+
+<span class="fc" id="L84">		bConnect = new JButton(&quot;Start Listening&quot;);</span>
+<span class="fc" id="L85">		bConnect.addActionListener(this);</span>
+
+<span class="fc" id="L87">		p1.add(pp, BorderLayout.WEST);</span>
+<span class="fc" id="L88">		p1.add(bConnect, BorderLayout.EAST);</span>
+
+		// Panel p2 - Messages
+
+<span class="fc" id="L92">		JPanel p2 = new JPanel();</span>
+<span class="fc" id="L93">		p2.setLayout(new BorderLayout());</span>
+
+<span class="fc" id="L95">		JLabel lbMessages = new JLabel(&quot;Messages:&quot;);</span>
+<span class="fc" id="L96">		taMessages = new JTextArea(&quot;&quot;, 15, 50);</span>
+<span class="fc" id="L97">		taMessages.setLineWrap(true);</span>
+<span class="fc" id="L98">		taMessages.setEditable(false);</span>
+<span class="fc" id="L99">		JScrollPane scroll = new JScrollPane(taMessages);</span>
+<span class="fc" id="L100">		p2.add(lbMessages);</span>
+<span class="fc" id="L101">		p2.add(scroll, BorderLayout.SOUTH);</span>
+
+<span class="fc" id="L103">		Container cc = getContentPane();</span>
+<span class="fc" id="L104">		cc.setLayout(new FlowLayout());</span>
+<span class="fc" id="L105">		cc.add(p1);</span>
+<span class="fc" id="L106">		cc.add(p2);</span>
+<span class="fc" id="L107">	}</span>
+
+	/** returns the Internetadress of this computer */
+	private String getHostAddress() {
+		try {
+<span class="fc" id="L112">			InetAddress iaddr = InetAddress.getLocalHost();</span>
+<span class="fc" id="L113">			return iaddr.getHostAddress();</span>
+<span class="nc" id="L114">		} catch (UnknownHostException e) {</span>
+<span class="nc" id="L115">			return &quot;unknown&quot;;</span>
+		}
+	}
+
+	/**
+	 * listener for the &quot;Start Listening&quot; button
+	 */
+	//@ requires ev != null;
+	@Override
+	public void actionPerformed(ActionEvent ev) {
+<span class="fc" id="L125">		Object src = ev.getSource();</span>
+<span class="pc bpc" id="L126" title="1 of 2 branches missed.">		if (src == bConnect) {</span>
+<span class="fc" id="L127">			startListening();</span>
+		}
+<span class="fc" id="L129">	}</span>
+
+	/**
+	 * Construct a Server-object, which is waiting for clients. The port field
+	 * and button should be disabled
+	 */
+	private void startListening() {
+<span class="fc" id="L136">		tfPort.setEditable(false);</span>
+<span class="fc" id="L137">		bConnect.setEnabled(false);</span>
+<span class="fc" id="L138">		int port = 0;</span>
+		try {
+<span class="fc" id="L140">			port = Integer.parseInt(tfPort.getText());</span>
+<span class="fc" id="L141">		} catch (NumberFormatException e) {</span>
+<span class="fc" id="L142">			tfPort.setEditable(true);</span>
+<span class="fc" id="L143">			bConnect.setEnabled(true);</span>
+<span class="fc" id="L144">			addMessage(&quot;ERROR: not a valid portnumber!&quot;);</span>
+<span class="fc" id="L145">			return;</span>
+		}
+		try {
+<span class="fc" id="L148">			server = new Server(port, this);</span>
+<span class="fc" id="L149">			server.start();</span>
+<span class="fc" id="L150">			addMessage(&quot;Started listening on port &quot; + port + &quot;...&quot;);</span>
+<span class="fc" id="L151">		} catch (IOException e) {</span>
+<span class="fc" id="L152">			tfPort.setEditable(true);</span>
+<span class="fc" id="L153">			bConnect.setEnabled(true);</span>
+<span class="fc" id="L154">			addMessage(&quot;Error listening on port &quot; + port</span>
+<span class="fc" id="L155">					+ &quot;, please select a different one&quot;);</span>
+<span class="fc" id="L156">			return;</span>
+		}
+
+<span class="fc" id="L159">	}</span>
+
+	/** add a message to the textarea */
+	//@ requires msg != null &amp; !msg.equals(&quot;&quot;);
+	@Override
+	public void addMessage(String msg) {
+<span class="fc" id="L165">		taMessages.append(msg + &quot;\n&quot;);</span>
+<span class="fc" id="L166">	}</span>
+
+	/** Start a ServerGUI application */
+	public static void main(String[] args) {
+<span class="fc" id="L170">		new ServerGUI();</span>
+<span class="fc" id="L171">	}</span>
+
+	/** Notify's the server user when an observable object has changed */
+	@Override
+	public void update(Observable object, Object arg) {
+<span class="pc bpc" id="L176" title="2 of 4 branches missed.">		if (object instanceof Board &amp;&amp; arg instanceof Object[]) {</span>
+			// Board notify sends an Object array with the disc, the col and the row.
+<span class="fc" id="L178">			Object[] move = (Object[]) arg;</span>
+<span class="fc" id="L179">			addMessage(&quot;Board with code &quot; + object.hashCode() + &quot;: &quot; + move[0]</span>
+<span class="fc" id="L180">					+ &quot; disc placed in column &quot; + move[1] + &quot; and row &quot;</span>
+<span class="fc" id="L181">					+ move[2]);</span>
+		}
+
+<span class="fc" id="L184">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ServerGUI (2) (28-jan-2015 12:07:20)</div></body></html>

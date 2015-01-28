@@ -1,0 +1,613 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>Protocol.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ServerGUI (2) (28-jan-2015 12:07:20)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">temp</a> &gt; <span class="el_source">Protocol.java</span></div><h1>Protocol.java</h1><pre class="source lang-java linenums">package temp;
+
+
+
+/**
+ * &lt;!-- Versie 1.3
+ *
+ * -------------
+ * - CHANGELOG -
+ * -------------
+ *
+ * Versie 1.3
+ *
+ * + Ping/Pong
+ * + Name in Chat sent by server
+ * + Default port (WARNING)
+ * + Error codes documented
+ * * fixed leaderboard packet
+ * - multitypes
+ *
+ * Versie 1.2
+ *
+ * + Protocol.Features
+ * + Protocol.Settings
+ * * Protocol.Client.CHAT fixed
+ *
+ * Versie 1.1
+ *
+ * + Package aangepast naar bruikbaar formaat
+ * + Javadocs gelayout voor verbeterde readability.
+ *
+ * Versie 1.0
+ *
+ * + Eerste versie protocol
+ *
+ * --&gt;
+*/
+
+/**
+ * &lt;h1 id=&quot;protocol-ti-2&quot;&gt;Protocol TI-2&lt;/h1&gt;
+ *
+ * &lt;p&gt;In dit bestand staat het protocol van werkgroep TI-2 zoals dat op do. 8 januari is afgesproken. &lt;/p&gt;
+ *
+ *
+ * &lt;h2 id=&quot;1-over-standaarden&quot;&gt;1. Over Standaarden&lt;/h2&gt;
+ *
+ * &lt;p&gt;Bij het afspreken van het protocol zijn de volgende standaarden overwogen:&lt;/p&gt;
+ *
+ * &lt;ol&gt;
+ *     &lt;li&gt;Objectstream&lt;/li&gt;
+ *     &lt;li&gt;Printstream&lt;/li&gt;
+ *     &lt;li&gt;Datastream&lt;/li&gt;
+ * &lt;/ol&gt;
+ *
+ * &lt;p&gt;Na verschillende keren stemmen is voor de printstream-optie gekozen.  &lt;br&gt;
+ *     De stemmingen waren als volgt:&lt;/p&gt;
+ *
+ * &lt;ol&gt;
+ *     &lt;li&gt;&lt;code&gt;9&lt;/code&gt; stemmen voor &lt;code&gt;Datastream&lt;/code&gt;, &lt;code&gt;8&lt;/code&gt; stemmen voor &lt;code&gt;Printstream&lt;/code&gt;, verder geen mening. Ergo: &lt;code&gt;Datastream&lt;/code&gt;, met 1 stem winst&lt;/li&gt;
+ *     &lt;li&gt;&lt;code&gt;5&lt;/code&gt; stemmen voor &lt;code&gt;Datastream&lt;/code&gt;, &lt;code&gt;7&lt;/code&gt; stemmen voor &lt;code&gt;Printstream&lt;/code&gt;, verder geen mening. Ergo: &lt;code&gt;Printstream&lt;/code&gt;, met 2 stemmen winst&lt;/li&gt;
+ * &lt;/ol&gt;
+ *
+ * &lt;p&gt;Hierop volgen de overwegingen die hierbij in acht zijn genomen.&lt;/p&gt;
+ *
+ *
+ * &lt;h3 id=&quot;objectstream&quot;&gt;Objectstream&lt;/h3&gt;
+ *
+ * &lt;p&gt;Tegen de objectstream zijn de volgende argumenten ingebracht:&lt;/p&gt;
+ *
+ * &lt;ul&gt;
+ *     &lt;li&gt;Een objectstream is niet compatible met verschillend geprogrammeerde programmaâ€™s.&lt;/li&gt;
+ *     &lt;li&gt;Een objectstream is heel inefficient.&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ *
+ * &lt;h3 id=&quot;printstream&quot;&gt;Printstream&lt;/h3&gt;
+ *
+ * &lt;p&gt;Voor de printstream zijn de volgende argumenten ingebracht:&lt;/p&gt;
+ *
+ * &lt;ul&gt;
+ *     &lt;li&gt;Een printstream is makkelijk te debuggen&lt;/li&gt;
+ *     &lt;li&gt;Een printstream is makkelijk door mensen te lezen&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;Tegen de printstream zijn de volgende argumenten ingebracht:&lt;/p&gt;
+ *
+ * &lt;ul&gt;
+ *     &lt;li&gt;Een printstream is inefficient in het uitlezen&lt;/li&gt;
+ *     &lt;li&gt;Een printstream kan gemakkelijk zorgen voor type conflicts&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ *
+ * &lt;h3 id=&quot;datastream&quot;&gt;Datastream&lt;/h3&gt;
+ *
+ * &lt;p&gt;Voor de datastream zijn de volgende argumenten ingebracht:&lt;/p&gt;
+ *
+ * &lt;ul&gt;
+ *     &lt;li&gt;Een datastream is heel makkelijk uit te lezen&lt;/li&gt;
+ *     &lt;li&gt;Een datastream is heel efficient&lt;/li&gt;
+ *     &lt;li&gt;Een datastream zorgt voor minder type conflicts tussen verschillende programmaâ€™s&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ * &lt;p&gt;Tegen de datastream zijn de volgende argumenten ingebracht:&lt;/p&gt;
+ *
+ * &lt;ul&gt;
+ *     &lt;li&gt;Een datastream is lastig debuggen&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ *
+ * &lt;h2 id=&quot;beslissingen&quot;&gt;Beslissingen&lt;/h2&gt;
+ *
+ * &lt;p&gt;Omdat niet alle datatypen voor iedereen gelijk zouden zijn, heb ik (Matthias) besloten enkele datatypen zelf vast te leggen. In veel gevallen is het wel mogelijk om het anders te implementeren, maar de typen die ik nu heb neergezet zijn er vanwege gebruiksgemak ingezet.&lt;/p&gt;
+ *
+ *
+ * &lt;h3 id=&quot;board&quot;&gt;Board&lt;/h3&gt;
+ *
+ * &lt;p&gt;Zoals later in dit document zal blijken wordt de boardgrootte doorgegeven met behulp van &lt;code&gt;short&lt;/code&gt;s. Dit heb ik besloten zo te doen omdat de maximale array length van Java &lt;code&gt;Integer.MAX_SIZE - 8&lt;/code&gt; is in veel JREs. &lt;/p&gt;
+ *
+ * &lt;p&gt;Natuurlijk mag iedereen zijn eigen maximale grootte verder zelf bepalen, maar om compatibiliteit te behouden gebruiken we hier &lt;code&gt;Short.MAX_SIZE&lt;/code&gt; als absoluut maximum.&lt;/p&gt;
+ *
+ * &lt;p&gt;Ook heb ik besloten om de waarden in het board in bytes op te slaan. Dit doe ik omdat ik me niet kan voorstellen dat meer dan 255 spelers tegelijk zoâ€™n spel zullen spelen. &lt;/p&gt;
+ *
+ * &lt;p&gt;Een board wordt verstuurd in 1 keer. Een leeg veld heeft de waarde 0. De velden die gevuld zijn hebben de waarde van de speler die daar zijn/haar zet heeft gedaan, deze waarde is het startnummer. &lt;code&gt;Player1 = 1&lt;/code&gt;, &lt;code&gt;Player2 = 2&lt;/code&gt; â€¦ &lt;code&gt;PlayerN = N&lt;/code&gt;.&lt;/p&gt;
+ *
+ * &lt;p&gt;De telling van kolommen begint links, en start bij 0 (net als bij een &lt;code&gt;array&lt;/code&gt;). Bij een bord van 7 breed heb je dus kolommen &lt;code&gt;0&lt;/code&gt;, &lt;code&gt;1&lt;/code&gt;, &lt;code&gt;2&lt;/code&gt;, &lt;code&gt;3&lt;/code&gt;, &lt;code&gt;4&lt;/code&gt;, &lt;code&gt;5&lt;/code&gt; en &lt;code&gt;6&lt;/code&gt; van links naar rechts.&lt;/p&gt;
+ *
+ *
+ * &lt;h3 id=&quot;player-names&quot;&gt;Player Names&lt;/h3&gt;
+ *
+ * &lt;p&gt;Vanwege gebruiksgemak en het vergemakkelijken van het renderen heb ik besloten om de maximale lengte van de naam van een player op 15 karakters te zetten. Dit is in de meeste, zo niet alle, gevallen wel genoeg, en zal door de maximale lengte ook geen problemen meer opleveren door veel te lange usernames in bijvoorbeeld de chat.&lt;/p&gt;
+ *
+ * &lt;p&gt;Punt van aandacht bij het programmeren: Players &lt;strong&gt;moeten&lt;/strong&gt; een unieke naam hebben: De naam wordt veel gebruikt voor identificatie.&lt;/p&gt;
+ *
+ *
+ * &lt;h3 id=&quot;leaderboard&quot;&gt;Leaderboard&lt;/h3&gt;
+ *
+ * &lt;p&gt;Het leaderboard is een extra optie waar we het bij het bespreken van het protocol niet aan toe zijn gekomen. Ik heb daarom een eigen packet hiervoor geschreven. Hierin worden maximaal 50 entries verstuurd, met daarin naam, winst, verlies en spellen gespeeld.&lt;/p&gt;
+ *
+ *
+ * &lt;h3 id=&quot;errorcodes&quot;&gt;Errorcodes&lt;/h3&gt;
+ *
+ * &lt;p&gt;Als er een error wordt verstuurd, wordt dit gedaan met een 'id', de header van de packet waardoor de fout is ontstaan. Aangezien numerieke ID's veel gedoe zijn, en lastig debuggen, heb ik gekozen voor deze makkelijkere optie. &lt;/p&gt;
+ *
+ *
+ * &lt;h3 id=&quot;over-delimiters&quot;&gt;Over Delimiters&lt;/h3&gt;
+ *
+ * &lt;p&gt;Ik heb gekozen voor een dubbele carriage return (&lt;code&gt;\n\n&lt;/code&gt;) als delimiter als footer omdat dit het debuggen iets makkelijker maakt: je kunt hiermee ook heel lange packets maken met enige layout erin, zoals in &lt;code&gt;BOARD&lt;/code&gt;. Hierin zou je dan bijvoorbeeld elke rij een newline kunnen geven, zodat je het in de terminal ook als nieuwe lijnen ziet.&lt;/p&gt;
+ *
+ * &lt;p&gt;Als delimiter tussen argumenten gebruiken wij een spatie (&lt;code&gt; &lt;\code&gt;) omdat dit makkelijk en handig is.&lt;/p&gt;
+ *
+ * &lt;p&gt;Een losse carriage return mag overal in een packet voorkomen, behalve:
+ *
+ * &lt;ul&gt;
+ *     &lt;li&gt;In een argument&lt;/li&gt;
+ *     &lt;li&gt;Achter een andere carriage return&lt;/li&gt;
+ * &lt;/ul&gt;&lt;/p&gt;
+ *
+ *
+ * &lt;h2 id=&quot;packets&quot;&gt;Packets&lt;/h2&gt;
+ *
+ * &lt;p&gt;Hierop volgt een lijst met overeengekomen packets. Deze zijn gesorteerd op type en waar ze geimplementeerd moeten zijn. &lt;/p&gt;
+ *
+ * &lt;p&gt;Per packet wordt ook het datatype erbijgegeven, dit om type conflicts tegen te werken. Ook is de maximale lengte van een &lt;code&gt;String&lt;/code&gt;-object gegeven, om hier de verschillende conflicten tegen te gaan.&lt;/p&gt;
+ *
+ * &lt;p&gt;Als laatste opmerking over de packets: Packets zijn op deze manier opgebouwd: eerst de waarde die hier bij het veld Name is ingevuld, daarna de waarden van Content. Als einde van een packet hebben we een delimiter, dit is een dubbele newline (&lt;code&gt;\n\n&lt;/code&gt;). Voorbeeld:&lt;/p&gt;
+ *
+ * &lt;p&gt;&lt;code&gt;CONNECT Matthias CHAT CUSTOM_BOARD\n\n&lt;/code&gt;&lt;/p&gt;
+ *
+ * &lt;p&gt;De opbouw van een packet is als volgt:&lt;/p&gt;
+ *
+ * &lt;p&gt;&amp;lt; nr &amp;gt; &amp;lt; Name &amp;gt; &lt;br&gt;
+ *     Name: &amp;lt; header van packet &amp;gt; &lt;br&gt;
+ *     Descriptie: &amp;lt; descriptie &amp;gt; &lt;br&gt;
+ *     Content: &amp;lt; lijst van dingen die het packet bevat&amp;gt; &lt;br&gt;
+ *         * &amp;lt; Name content&amp;gt;: &amp;lt; Content type&amp;gt; - &amp;lt; Verdere info over content &amp;gt;&lt;/p&gt;
+ *
+ * &lt;p&gt;Voorbeeld:&lt;/p&gt;
+ *
+ * &lt;ol&gt;
+ *     &lt;li&gt;Connect &lt;br&gt;
+ *         Name: &lt;code&gt;CONNECT&lt;/code&gt; &lt;br&gt;
+ *         Descriptie: Packet dat verzonden wordt naar de server om een connectie te starten. &lt;br&gt;
+ *         Content: &lt;code&gt;&amp;lt;Player Name&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Features[]&amp;gt;&lt;/code&gt; &lt;br&gt;
+ *         &lt;ul&gt;
+ *             &lt;li&gt;&lt;code&gt;Player Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (31) - De naam van de speler die wil connecten.&lt;/li&gt;
+ *             &lt;li&gt;&lt;code&gt;Features&lt;/code&gt;: &lt;code&gt;Feature[]&lt;/code&gt; - Een lijst van &lt;code&gt;Feature&lt;/code&gt;s, met spaties van elkaar gescheiden. &lt;br&gt;
+ *                 &lt;code&gt;Feature&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - Een unieke naam van een feature.
+ *             &lt;/li&gt;
+ *     	   &lt;/ul&gt;
+ *     &lt;/li&gt;
+ * &lt;/ol&gt;
+ *
+ *
+ * &lt;h2 id=&quot;constanten&quot;&gt;Constanten&lt;/h2&gt;
+ *
+ * &lt;p&gt;De settings die (nu) op een server kunnen zitten zijn:&lt;/p&gt;
+ *
+ * &lt;ul&gt;
+ *     &lt;li&gt;&lt;code&gt;CUSTOM_BOARD&lt;/code&gt; - Maak een bord aan met een andere grootte dan 7 * 6&lt;/li&gt;
+ *     &lt;li&gt;&lt;code&gt;CHAT&lt;/code&gt; - Chat client in je gameclient&lt;/li&gt;
+ *     &lt;li&gt;&lt;code&gt;STATISTICS&lt;/code&gt; - Player Statistics worden in je server bijgehouden.&lt;/li&gt;
+ * &lt;/ul&gt;
+ *
+ *
+ * &lt;h2 id=&quot;tot-slot&quot;&gt;Tot slot&lt;/h2&gt;
+ *
+ * &lt;p&gt;Deze specificatie is gemaakt naar wat ik heb meegekregen van de vergadering op 7 januari, en naar eigen inzicht. Zit er een fout in, heb je een opmerking of wil je meer features? Stuur voor specifieke vragen een mail naar &lt;code&gt;m.j.vandemeent@student.utwente.nl&lt;/code&gt;&lt;/p&gt;
+ *
+ * &lt;p&gt;Parameters omringd met blokhaken (&lt;code&gt;[]&lt;/code&gt; zijn optioneel. Dit hoeft niet per se gebruikt te worden bij het communiceren, maar kunnen voor extra features gebruikt worden. Hoekhaken daarentegen (&lt;code&gt;&lt;&gt;&lt;/code&gt;)zijn verplicht. &lt;/p&gt;
+ *
+ */
+
+<span class="nc" id="L213">public class Protocol {</span>
+<span class="nc" id="L214">	public static class Client {</span>
+		/**
+		 * &lt;h3 id=&quot;client&quot;&gt;client&lt;/h3&gt;
+		 */
+
+		/**
+		 * &lt;p&gt;Connect &lt;br&gt;
+		 *     Name: &lt;code&gt;CONNECT&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Packet dat verzonden wordt om een connectie te starten. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Player Name&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Features&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Player Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De naam van de speler die wil connecten.&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Features&lt;/code&gt;: &lt;code&gt;Feature[]&lt;/code&gt; - Een lijst van &lt;code&gt;Feature&lt;/code&gt;s, met spaties van elkaar gescheiden. &lt;br&gt;
+		 *             &lt;code&gt;Feature&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - Een unieke naam voor een feature.
+		 *         &lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String CONNECT = &quot;CONNECT&quot;;
+
+		/**
+		 * &lt;p&gt;Quit &lt;br&gt;
+		 *     Name: &lt;code&gt;QUIT&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Packet dat verzonden wordt om de verbinding te verbreken. &lt;br&gt;
+		 *     Content: [&lt;code&gt;&amp;lt;Reason&amp;gt;&lt;/code&gt;]&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Reason&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De reden van het verbreken van de verbinding.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String QUIT = &quot;QUIT&quot;;
+
+		/**
+		 * &lt;p&gt;Invite &lt;br&gt;
+		 *     Name: &lt;code&gt;INVITE&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Packet dat verzonden wordt om een spel te starten met de aangegeven tegenstander. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Opponent Name&amp;gt;&lt;/code&gt;  [&lt;code&gt;&amp;lt;BoardX&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;BoardY&amp;gt;&lt;/code&gt; [&lt;code&gt;&amp;lt;Settings&amp;gt;&lt;/code&gt;]]&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Opponent Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De naam van de speler die de invite moet ontvangen.&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;BoardX&lt;/code&gt;: &lt;code&gt;short&lt;/code&gt; - De breedte van het spelbord. Standaardwaarde is 7. Minimaal 4.&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;BoardY&lt;/code&gt;: &lt;code&gt;short&lt;/code&gt; - De hoogte van het spelbord. Standaardwaarde is 6. Minimaal 4.&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Settings&lt;/code&gt;: Eigen inbreng - Verdere settings die je mee wilt geven in het spel. &lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String INVITE = &quot;INVITE&quot;;
+
+		/**
+		 * &lt;p&gt;Accept Invite &lt;br&gt;
+		 *     Name: &lt;code&gt;ACCEPT&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Packet door de uitgedaagde partij wordt verzonden om op een invite in te gaan. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Opponent Name&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Opponent Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De naam van degene die de uitgedaagde partij heeft uitgedaagd.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String ACCEPT_INVITE = &quot;ACCEPT&quot;;
+
+		/**
+		 * &lt;p&gt;Decline Invite &lt;br&gt;
+		 *     Name: &lt;code&gt;DECLINE&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Packet die door de uitgedaagde partij wordt verzonden om een invite af te slaan. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Opponent Name&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Opponent Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De naam van degene die de uitgedaagde partij heeft uitgedaagd.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String DECLINE_INVITE = &quot;DECLINE&quot;;
+
+		/**
+		 * &lt;p&gt;Move &lt;br&gt;
+		 *     Name: &lt;code&gt;MOVE&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Bevat de kolom waarin de volgende steen in wordt gedaan. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Column&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Column&lt;/code&gt;: &lt;code&gt;short&lt;/code&gt; - De kolom waarin de move wordt gezet.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String MOVE = &quot;MOVE&quot;;
+
+		/**
+		 * &lt;p&gt;Chat &lt;br&gt;
+		 *     Name: &lt;code&gt;CHAT&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Bevat een chatmessage &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Chat&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Chat&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (512) - De boodschap aan de server chat&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String CHAT = &quot;CHAT&quot;;
+
+		/**
+		 * &lt;p&gt;Request Board &lt;br&gt;
+		 *     Name: &lt;code&gt;REQUEST&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Vraagt het &lt;code&gt;Board&lt;/code&gt; aan van de server &lt;br&gt;
+		 *     Content: none&lt;/p&gt;
+		 */
+
+		public static final String REQUEST_BOARD = &quot;REQUEST&quot;;
+
+		/**
+		 * &lt;p&gt;Request Lobby &lt;br&gt;
+		 *     Name: &lt;code&gt;LOBBY&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Vraag de lijst met on-line spelers aan. &lt;br&gt;
+		 *     Content: none&lt;/p&gt;
+		 */
+
+		public static final String REQUEST_LOBBY = &quot;LOBBY&quot;;
+
+		/**
+		 * &lt;p&gt;Request Leaderboard &lt;br&gt;
+		 *     Name: &lt;code&gt;LEADERBOARD&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Vraag het leaderboard aan &lt;br&gt;
+		 *     Content: none&lt;/p&gt;
+		 */
+
+		public static final String REQUEST_LEADERBOARD = &quot;LEADERBOARD&quot;;
+
+		/**
+		 * &lt;p&gt;Error &lt;br&gt;
+		 *     Name: &lt;code&gt;ERROR&lt;/code&gt;&lt;br/&gt;
+		 *     Descriptie: Zend een error naar de server toe.&lt;br/&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Error Code&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Message&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Error Code&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; - De code is de header van het bericht waar de fout door is ontstaan. &lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Message&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (255) - Het bericht dat je aan je error hangt. Hierin kan je extra info tonen over wat er precies is foutgegaan.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String ERROR = &quot;ERROR&quot;;
+
+		/**
+		 * &lt;p&gt;Ping &lt;br&gt;
+		 *     Name: &lt;code&gt;PING&lt;/code&gt;&lt;br/&gt;
+		 *     Descriptie: Vraag een respons van de server aan, om te kijken hoe snel deze reageert en om te kijken of de verbinding nog bestaat.&lt;br/&gt;
+		 *     Content: none&lt;/p&gt;
+		 */
+
+		public static final String PING = &quot;PING&quot;;
+
+	}
+
+<span class="nc" id="L367">	public static class Server {</span>
+		/**
+		 * &lt;h3 id=&quot;server&quot;&gt;Server&lt;/h3&gt;
+		 */
+
+		/**
+		 * &lt;p&gt;Accept Connect &lt;br&gt;
+		 *     Name: &lt;code&gt;OK&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Signaal dat de connectie is gemaakt en het aangeven van welke functies allemaal zijn toegestaan op deze server. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Features&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Features&lt;/code&gt;: &lt;code&gt;Feature&lt;/code&gt; [] - De lijst met &lt;code&gt;Feature&lt;/code&gt;s die wordt toegestaan op de server voor die client, gescheiden door spaties. &lt;br&gt;
+		 *         	   &lt;code&gt;Feature&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De unieken naam van een feature.
+		 *         &lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String ACCEPT_CONNECT = &quot;OK&quot;;
+
+		/**
+		 * &lt;p&gt;Error &lt;br&gt;
+		 *     Name: &lt;code&gt;ERROR&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een errormessage &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Error Code&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Message&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Error Code&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; - De code is de header van het bericht waar de fout door is ontstaan. &lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Message&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (255) - Het bericht dat je aan je error hangt. Hierin kan je extra info tonen over wat er precies is foutgegaan.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String ERROR = &quot;ERROR&quot;;
+
+		/**
+		 * &lt;p&gt;Lobby &lt;br&gt;
+		 *     Name: &lt;code&gt;LOBBY&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een lijst met mensen die zich op het moment in de lobby bevinden. Wordt door de server verstuurd bij Connect/Disconnect van een speler, en wanneer aangevraagd. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Players&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Players&lt;/code&gt;: &lt;code&gt;Player[]&lt;/code&gt; - Een lijst met players &lt;br&gt;
+		 *             &lt;code&gt;Player&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De naam van de player
+		 *         &lt;/li&gt;
+		 *     &lt;/ul&gt;
+
+		*/
+
+		public static final String LOBBY = &quot;LOBBY&quot;;
+
+		/**
+		 * &lt;p&gt;Invite &lt;br&gt;
+		 *     Name: &lt;code&gt;INVITE&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een packet die naar de uitgedaagde speler wordt gestuurd. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Opponent Name&amp;gt;&lt;/code&gt; [&lt;code&gt;&amp;lt;BoardX&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;BoardY&amp;gt;&lt;/code&gt; [&lt;code&gt;&amp;lt;Settings&amp;gt;&lt;/code&gt;]]&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Opponent Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De naam van de tegenstander&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;BoardX&lt;/code&gt;: &lt;code&gt;short&lt;/code&gt; | &lt;code&gt;int&lt;/code&gt; - De breedte van het bord. Standaard 7, kleinste waarde 4.&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;BoardY&lt;/code&gt;: &lt;code&gt;short&lt;/code&gt; | &lt;code&gt;int&lt;/code&gt; - De hoogte van het bord. Standaard 6, kleinste waarde 4.&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Settings&lt;/code&gt;: Eigen type - Zelf in te vullen ruimte, dit kan gebruikt worden voor extra settings.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String INVITE = &quot;INVITE&quot;;
+
+		/**
+		 * &lt;p&gt;Decline invite&lt;br&gt;
+		 *     Name: &lt;code&gt;DECLINE&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: De packet die naar de uitdager wordt teruggestuurt om te zeggen dat zijn uitdaging is afgewezen.. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Opponent Name&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Opponent Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De naam van de uitdagende partij.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String DECLINE_INVITE = &quot;DECLINE&quot;;
+
+		/**
+		 * &lt;p&gt;Game Start &lt;br&gt;
+		 *     Name: &lt;code&gt;START&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een packet dat naar de spelers wordt gestuurd om te laten weten dat het spel gestart is. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Player 1&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Player 2&amp;gt;&lt;/code&gt; [&lt;code&gt;&amp;lt;Extras&amp;gt;&lt;/code&gt;]&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Player 1&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - Naam van de eerste speler&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Player 2&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - Naam van de tweede speler&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Extras&lt;/code&gt;: Eigen type - Zelf in te vullen ruimte, die gebruikt kan worden voor bijvoorbeeld extra spelers of meekijkers&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String GAME_START = &quot;START&quot;;
+
+		/**
+		 * &lt;p&gt;Game End &lt;br&gt;
+		 *     Name: &lt;code&gt;END&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een packet dat naar de spelers wordt gestuurd om te laten weten dat het spel is gestopt &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Type&amp;gt;&lt;/code&gt; [&lt;code&gt;&amp;lt;Winner Name&amp;gt;&lt;/code&gt;]&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Type&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; &amp;gt; &lt;code&gt;'WIN'&lt;/code&gt; &lt;code&gt;'DISCONNECT'&lt;/code&gt; &lt;code&gt;'DRAW'&lt;/code&gt; - Type van einde spel&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Winner Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - Naam van de winnaar, of andere info over de reden van het einde.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String GAME_END = &quot;END&quot;;
+
+		/**
+		 * &lt;p&gt;Request Move &lt;br&gt;
+		 *     Name: &lt;code&gt;REQUEST&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een packet dat verstuurd wordt naar de speler om aan te geven dat deze persoon aan de beurt is om een zet te doen. &lt;br&gt;
+		 *     Content: none&lt;/p&gt;
+		 */
+
+		public static final String REQUEST_MOVE = &quot;REQUEST&quot;;
+
+		/**
+		 * &lt;p&gt;Move OK &lt;br&gt;
+		 *     Name: &lt;code&gt;MOVE&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een packet dat naar de spelers gestuurd wordt om een move te laten doorgaan. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Player Number&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Column&amp;gt;&lt;/code&gt; [&lt;code&gt;&amp;lt;Player Name&amp;gt;&lt;/code&gt;]&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Player Number&lt;/code&gt;: &lt;code&gt;byte&lt;/code&gt; | &lt;code&gt;short&lt;/code&gt; | &lt;code&gt;int&lt;/code&gt; - Het startnummer van de speler die de zet heeft gedaan.&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Column&lt;/code&gt;: &lt;code&gt;short&lt;/code&gt; - De kolom waar de zet in gedaan wordt.&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Player Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - De naam van de speler die net een zet heeft gedaan.&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String MOVE_OK = &quot;MOVE&quot;;
+
+		/**
+		 * &lt;p&gt;Board &lt;br&gt;
+		 *     Name: &lt;code&gt;BOARD&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een packet waarin het huidige bord verstuurd wordt. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;BoardX&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;BoardY&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Board&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;BoardX&lt;/code&gt;: &lt;code&gt;short&lt;/code&gt; - De breedte van het bord&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;BoardY&lt;/code&gt;: &lt;code&gt;short&lt;/code&gt; - De hoogte van het bord&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Board&lt;/code&gt;: &lt;code&gt;byte[]&lt;/code&gt; - Een array van (breedte * hoogte) getallen lang, waarin de nummers van de spelers staan. Start links onderin het bord, het wordt per rij weggeschreven, van links naar rechts in de rij, beginnend bij de onderste rij, naar boven..&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String BOARD = &quot;BOARD&quot;;
+
+		/**
+		 * &lt;p&gt;Chat &lt;br&gt;
+		 *     Name: &lt;code&gt;CHAT&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een packet wat een chatbericht bevat &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Player Name&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Chat&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Player Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt;&lt;/li&gt;
+		 *         &lt;li&gt;&lt;code&gt;Chat&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (512)&lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String CHAT = &quot;CHAT&quot;;
+
+		/**
+		 * &lt;p&gt;Leaderboard &lt;br&gt;
+		 *     Name: &lt;code&gt;LEADERBOARD&lt;/code&gt; &lt;br&gt;
+		 *     Descriptie: Een packet waarin de statistieken van een aantal spelers worden verstuurd. &lt;br&gt;
+		 *     Content: &lt;code&gt;&amp;lt;Player Statistics&amp;gt;&lt;/code&gt;&lt;/p&gt;
+		 *
+		 *     &lt;ul&gt;
+		 *         &lt;li&gt;&lt;code&gt;Player Statistics&lt;/code&gt;: &lt;code&gt;Player Statistic&lt;/code&gt; (50) - De statistieken van maximaal 50 spelers tegelijk worden verstuurd. &lt;br&gt;
+		 *             &lt;code&gt;Player Statistic&lt;/code&gt;: &lt;code&gt;&amp;lt;Player Name&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Games Won&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Games Lost&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Games Played&amp;gt;&lt;/code&gt; &lt;code&gt;&amp;lt;Ranking&amp;gt;&lt;/code&gt; &lt;br&gt;
+		 *             &lt;ul&gt;
+		 *                 &lt;li&gt;&lt;code&gt;Player Name&lt;/code&gt;: &lt;code&gt;String&lt;/code&gt; (15) - Naam van de speler in de betreffende statistiek&lt;/li&gt;
+		 *                 &lt;li&gt;&lt;code&gt;Games Won&lt;/code&gt;: &lt;code&gt;int&lt;/code&gt; - Aantal games gewonnen&lt;/li&gt;
+		 *                 &lt;li&gt;&lt;code&gt;Games Lost&lt;/code&gt;: &lt;code&gt;int&lt;/code&gt; - Aantal games verloren&lt;/li&gt;
+		 *                 &lt;li&gt;&lt;code&gt;Games Played&lt;/code&gt;: &lt;code&gt;int&lt;/code&gt; - Aantal games gespeeld&lt;/li&gt;
+		 *                 &lt;li&gt;&lt;code&gt;Ranking&lt;/code&gt;: &lt;code&gt;int&lt;/code&gt; - Ranking op de server&lt;/li&gt;
+		 *             &lt;/ul&gt;
+		 *         &lt;/li&gt;
+		 *     &lt;/ul&gt;
+		 */
+
+		public static final String LEADERBOARD = &quot;LEADERBOARD&quot;;
+
+		/**
+		 * &lt;p&gt;Pong &lt;br&gt;
+		 *     Name: &lt;code&gt;PONG&lt;/code&gt;&lt;br/&gt;
+		 *     Descriptie: De respons van de server op een &lt;code&gt;PING&lt;/code&gt;-packet.&lt;br/&gt;
+		 *     Content: none&lt;/p&gt;
+		 */
+
+		public static final String PONG = &quot;PONG&quot;;
+	}
+
+<span class="nc" id="L559">	public static class Features {</span>
+
+		/**
+		 * &lt;p&gt;De verschillende features die geimplementeerd kunnen worden.&lt;/p&gt;
+		 *
+		 * &lt;p&gt;Let op! Het protocol voor &lt;code&gt;SECURITY&lt;/code&gt; en &lt;code&gt;MULTIPLAYER&lt;/code&gt; is (nog) niet vastgelegd.&lt;/p&gt;
+		 */
+
+		public static final String CHAT = &quot;CHAT&quot;;
+		public static final String LEADERBOARD = &quot;LEADERBOARD&quot;;
+		public static final String CUSTOM_BOARD_SIZE = &quot;CUSTOM_BOARD&quot;;
+
+		public static final String SECURITY = &quot;SECURITY&quot;;
+		public static final String MULTIPLAYER = &quot;MULTIPLAYER&quot;; // Deze functie wordt niet door het protocol gespecificeerd.
+	}
+
+<span class="nc" id="L575">	public static class Settings {</span>
+
+		/**
+		 * &lt;p&gt;De verschillende settings van het protocol.&lt;/p&gt;
+		 */
+
+		/**
+		 * &lt;p&gt;Het protocol heeft characterencoding UTF-16. Dit is de standaard encoding van een string in java, dus daar zouden geen problemen mee moeten zijn.&lt;/p&gt;
+		 */
+
+		public static final String ENCODING = &quot;UTF-16&quot;;
+
+		/**
+		 * &lt;p&gt;Het aantal seconden voordat een client timeout. Dit is in de opdracht vastgesteld, en zal dus niet veranderen.&lt;/p&gt;
+		 */
+
+		public static final int TIMEOUTSECONDS = 15;
+
+		/**
+		 * &lt;p&gt;Default server port nummer. &lt;br&gt;
+		 *     &lt;b&gt;BELANGRIJK:&lt;/b&gt; In de opdracht staat dat je bij het opstarten van de server een poortnummer moet invoeren. De waarde hier is dus niet een waarde die altijd opgaat. &lt;/p&gt;
+		 */
+
+		public static final short DEFAULT_PORT = 2707;
+
+		/**
+		 * &lt;p&gt;Default delimiter tussen header en content, en tussen twee waarden in de content&lt;/p&gt;
+		 */
+
+		public static final char DELIMITER = ' ';
+
+		/**
+		 * &lt;p&gt;Teken dat aan het einde van elke packet moet zitten, en dus niet in de rest van de waarden mag zitten.&lt;/p&gt;
+		 */
+
+		public static final char PACKET_END = '\n';
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ServerGUI (2) (28-jan-2015 12:07:20)</div></body></html>

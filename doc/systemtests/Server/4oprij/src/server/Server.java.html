@@ -1,0 +1,724 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="nl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../../../.resources/report.css" type="text/css"/><link rel="shortcut icon" href="../../../.resources/report.gif" type="image/gif"/><title>Server.java</title><link rel="stylesheet" href="../../../.resources/prettify.css" type="text/css"/><script type="text/javascript" src="../../../.resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../../../.sessions.html" class="el_session">Sessions</a></span><a href="../../../index.html" class="el_report">ServerGUI (2) (28-jan-2015 12:07:20)</a> &gt; <a href="../../index.html" class="el_group">4oprij</a> &gt; <a href="../index.html" class="el_bundle">src</a> &gt; <a href="index.source.html" class="el_package">server</a> &gt; <span class="el_source">Server.java</span></div><h1>Server.java</h1><pre class="source lang-java linenums">package server;
+
+import game.Board;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+
+/**
+ * Server. A Thread class that listens to a socket connection on a specified
+ * port. For every socket connection with a client, a new ClientHandler thread
+ * is started.&lt;br&gt;
+ * Programming Project Connect4 Module 2 Softwaresystems 2014-2015 &lt;br&gt;
+ * 
+ * @author Michael Koopman s1401335 and Sven Konings s1534130
+ */
+public class Server extends Thread {
+	// PROTOCOL
+	public static final String ACCEPT_CONNECT = &quot;OK&quot;;
+	public static final String ERROR = &quot;ERROR&quot;;
+	public static final String LOBBY = &quot;LOBBY&quot;;
+	public static final String INVITE = &quot;INVITE&quot;;
+	public static final String DECLINE_INVITE = &quot;DECLINE&quot;;
+	public static final String GAME_START = &quot;START&quot;;
+	public static final String GAME_END = &quot;END&quot;;
+	public static final String REQUEST_MOVE = &quot;REQUEST&quot;;
+	public static final String MOVE_OK = &quot;MOVE&quot;;
+	public static final String BOARD = &quot;BOARD&quot;;
+	public static final String CHAT = &quot;CHAT&quot;;
+	public static final String LEADERBOARD = &quot;LEADERBOARD&quot;;
+	public static final String PONG = &quot;PONG&quot;;
+	// END OF PROTOCOL
+
+	public static final String FEATURES = ClientHandler.CHAT + &quot; &quot;
+			+ ClientHandler.LEADERBOARD + &quot; &quot; + ClientHandler.CUSTOM_BOARD_SIZE;
+	public static final String FILENAME = &quot;leaderboard.txt&quot;;
+
+	/** The socket of the server. */
+	private ServerSocket ss;
+
+	/** The User Interface of the server. */
+	private MessageUI mui;
+
+	/** The set of all the clientHanlders connected to this server. */
+	private HashSet&lt;ClientHandler&gt; threads;
+
+	/**
+	 * The map of invites with a String array with the name of the client who
+	 * sent the invite and the name of the client who received the invite
+	 * respectively, and with an Integer array with the boardsize.
+	 */
+	private HashMap&lt;String[], Integer[]&gt; invites;
+
+	/**
+	 * The leaderboard list, sorted using Collections.sort. The order is based
+	 * on the natural ordering of LeaderboardPair.
+	 */
+	private ArrayList&lt;LeaderboardPair&gt; leaderboard;
+
+	/*@ private invariant ss != null;
+		private invariant mui != null;
+		private invariant threads != null;
+		private invariant invites != null;
+		private invariant leaderboard != null;
+	 */
+	/**
+	 * Constructs a new Server object. Tries to read the leaderboard, if the
+	 * leaderboard file can't be read it creates a new leaderboard.
+	 *
+	 * @param portArg
+	 *            the port of the server
+	 * @param muiArg
+	 *            the view of the server
+	 * @throws IOException
+	 *             if the server can't be created, most likely due too the port
+	 *             being occupied
+	 */
+	/*@ requires portArg &gt;= 1 &amp; portArg &lt;= 65535;
+		requires muiArg != null;
+	 */
+<span class="fc" id="L89">	public Server(int portArg, MessageUI muiArg) throws IOException {</span>
+<span class="fc" id="L90">		this.ss = new ServerSocket(portArg);</span>
+<span class="fc" id="L91">		this.mui = muiArg;</span>
+<span class="fc" id="L92">		this.threads = new HashSet&lt;ClientHandler&gt;();</span>
+<span class="fc" id="L93">		this.invites = new HashMap&lt;String[], Integer[]&gt;();</span>
+		try {
+<span class="fc" id="L95">			this.leaderboard = readLeaderboard();</span>
+<span class="fc" id="L96">			mui.addMessage(&quot;Read leaderboard.&quot;);</span>
+<span class="pc" id="L97">		} catch (IOException e) {</span>
+<span class="nc" id="L98">			this.leaderboard = new ArrayList&lt;LeaderboardPair&gt;();</span>
+<span class="nc" id="L99">			mui.addMessage(&quot;Created new leaderboard.&quot;);</span>
+		}
+<span class="fc" id="L101">	}</span>
+
+	/**
+	 * Listens to a port of this Server if there are any Clients that would like
+	 * to connect. For every new socket connection a new ClientHandler thread is
+	 * started that takes care of the further communication with the client.
+	 */
+	@Override
+	public void run() {
+<span class="nc" id="L110">		while (true) {</span>
+			try {
+<span class="fc" id="L112">				Socket s = ss.accept();</span>
+<span class="fc" id="L113">				ClientHandler ch = new ClientHandler(this, s);</span>
+<span class="fc" id="L114">				addHandler(ch);</span>
+<span class="fc" id="L115">				ch.start();</span>
+<span class="pc" id="L116">			} catch (IOException e) {</span>
+<span class="nc" id="L117">				mui.addMessage(&quot;Error adding client.&quot;);</span>
+				continue;
+			}
+		}
+	}
+
+	/**
+	 * Sends a message using the collection of connected ClientHandlers to all
+	 * connected Clients.
+	 * 
+	 * @param msg
+	 *            message that is send
+	 */
+	//@ requires msg != null;
+	public void broadcast(String msg) {
+<span class="nc" id="L132">		synchronized (threads) {</span>
+<span class="nc" id="L133">			mui.addMessage(&quot;Broadcast: &quot; + msg);</span>
+			//@ loop_invariant threads.contains(ch);
+<span class="nc bnc" id="L135" title="All 2 branches missed.">			for (ClientHandler ch : threads) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">				if (ch.connected()) {</span>
+<span class="nc" id="L137">					ch.sendMessage(msg);</span>
+				}
+			}
+		}
+<span class="nc" id="L141">	}</span>
+
+	/**
+	 * Sends a message using the collection of connected ClientHandlers to all
+	 * connected Clients without a game.
+	 */
+	public void broadcastLobby() {
+<span class="pc" id="L148">		synchronized (threads) {</span>
+<span class="fc" id="L149">			String lobby = lobbyToString();</span>
+<span class="fc" id="L150">			mui.addMessage(&quot;Lobby:&quot; + lobby);</span>
+			//@ loop_invariant threads.contains(ch);
+<span class="fc bfc" id="L152" title="All 2 branches covered.">			for (ClientHandler ch : threads) {</span>
+<span class="fc bfc" id="L153" title="All 4 branches covered.">				if (ch.connected() &amp;&amp; !ch.inGame()) {</span>
+<span class="fc" id="L154">					ch.sendMessage(LOBBY + lobby);</span>
+				}
+			}
+		}
+<span class="fc" id="L158">	}</span>
+
+	/**
+	 * Sends a message using the collection of connected ClientHandlers to all
+	 * connected Clients with the chat feature.
+	 * 
+	 * @param msg
+	 *            message that is send
+	 */
+	/*@ requires msg != null;
+		requires msg.startsWith(CHAT);
+	 */
+	public void broadcastChat(String msg) {
+<span class="pc" id="L171">		synchronized (threads) {</span>
+<span class="fc" id="L172">			mui.addMessage(&quot;Chat: &quot; + msg);</span>
+			//@ loop_invariant threads.contains(ch);
+<span class="fc bfc" id="L174" title="All 2 branches covered.">			for (ClientHandler ch : threads) {</span>
+<span class="pc bpc" id="L175" title="2 of 4 branches missed.">				if (ch.connected() &amp;&amp; ch.hasChat()) {</span>
+<span class="fc" id="L176">					ch.sendMessage(msg);</span>
+				}
+			}
+		}
+<span class="fc" id="L180">	}</span>
+
+	/**
+	 * Print the message on the server view.
+	 *
+	 * @param msg
+	 *            message that is printed
+	 */
+	//@ requires msg != null;
+	public void print(String msg) {
+<span class="fc" id="L190">		mui.addMessage(msg);</span>
+<span class="fc" id="L191">	}</span>
+
+	/**
+	 * Checks if a client with the specified name exists.
+	 *
+	 * @param name
+	 *            name of the client
+	 * @return true, if the name is found
+	 */
+	/*@ pure */public boolean nameExists(String name) {
+<span class="pc" id="L201">		synchronized (threads) {</span>
+<span class="fc" id="L202">			boolean exists = false;</span>
+			//@ loop_invariant threads.contains(ch);
+<span class="fc bfc" id="L204" title="All 2 branches covered.">			for (ClientHandler ch : threads) {</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">				if (name.equals(ch.getClientName())) {</span>
+<span class="fc" id="L206">					exists = true;</span>
+<span class="fc" id="L207">					break;</span>
+				}
+			}
+<span class="fc" id="L210">			return exists;</span>
+		}
+	}
+
+	/**
+	 * Returns the client with the specified name.
+	 *
+	 * @param name
+	 *            name of the client
+	 * @return the client
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+	 */
+	/*@ pure */public ClientHandler getClient(String name) {
+<span class="pc" id="L225">		synchronized (threads) {</span>
+<span class="fc" id="L226">			ClientHandler client = null;</span>
+			//@ loop_invariant threads.contains(ch);
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">			for (ClientHandler ch : threads) {</span>
+<span class="fc bfc" id="L229" title="All 2 branches covered.">				if (ch.getClientName().equals(name)) {</span>
+<span class="fc" id="L230">					client = ch;</span>
+<span class="fc" id="L231">					break;</span>
+				}
+			}
+<span class="fc" id="L234">			return client;</span>
+		}
+	}
+
+	/**
+	 * Sends a message to the client with the specified name.
+	 *
+	 * @param name
+	 *            name of the client
+	 * @param msg
+	 *            message that is send
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires msg != null;
+	 */
+	public void sendMessage(String name, String msg) {
+<span class="fc" id="L251">		mui.addMessage(&quot;Message to &quot; + name + &quot;: &quot; + msg);</span>
+<span class="fc" id="L252">		getClient(name).sendMessage(msg);</span>
+<span class="fc" id="L253">	}</span>
+
+	/**
+	 * Checks wether the client with the specified name is in a game.
+	 *
+	 * @param name
+	 *            name of the client
+	 * @return true, if the client has a board
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+	*/
+	/*@ pure */public boolean inGame(String name) {
+<span class="fc" id="L266">		return getClient(name).inGame();</span>
+	}
+
+	/**
+	 * Checks if the client with the specified name has the custom board size
+	 * feature.
+	 *
+	 * @param name
+	 *            the name
+	 * @return true, if successful
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+	*/
+	/*@ pure */public boolean hasCustomBoardSize(String name) {
+<span class="fc" id="L281">		return getClient(name).hasCustomBoardSize();</span>
+	}
+
+	/**
+	 * Looks up the specified invite, generates a board with the boardsize
+	 * specified in the invite and assignes the board to both clients.
+	 *
+	 * @param name
+	 *            the name of the client
+	 * @param invited
+	 *            the invited client
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires isInvited(name, invited);
+	*/
+	public void generateBoard(String name, String invited) {
+<span class="pc" id="L298">		synchronized (invites) {</span>
+<span class="fc" id="L299">			Board board = null;</span>
+<span class="fc" id="L300">			String[] invite = getInvite(name, invited);</span>
+<span class="fc" id="L301">			Integer[] boardSize = invites.get(invite);</span>
+<span class="fc" id="L302">			invites.remove(invite);</span>
+<span class="fc" id="L303">			board = new Board(boardSize[1].intValue(), boardSize[0].intValue());</span>
+<span class="fc" id="L304">			board.addObserver(mui);</span>
+<span class="fc" id="L305">			mui.addMessage(&quot;Created a board for &quot; + name + &quot; and &quot; + invited</span>
+<span class="fc" id="L306">					+ &quot; with code &quot; + board.hashCode());</span>
+<span class="fc" id="L307">			setBoard(name, board);</span>
+<span class="fc" id="L308">			setBoard(invited, board);</span>
+		}
+<span class="fc" id="L310">	}</span>
+
+	/**
+	 * Sets the board for the clientHandler with the specified name.
+	 *
+	 * @param name
+	 *            name of the client
+	 * @param board
+	 *            board that is send
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires board != null;
+		ensures getClient(name).getBoard() == board;
+	*/
+	private void setBoard(String name, Board board) {
+<span class="fc" id="L326">		mui.addMessage(&quot;Set board for &quot; + name + &quot;.&quot;);</span>
+<span class="fc" id="L327">		getClient(name).setBoard(board);</span>
+<span class="fc" id="L328">	}</span>
+
+	/**
+	 * Sends an string with the connected client names that aren't playing a
+	 * game.
+	 *
+	 * @return the lobby
+	 */
+	/*@ pure */public String lobbyToString() {
+<span class="pc" id="L337">		synchronized (threads) {</span>
+<span class="fc" id="L338">			String clients = &quot;&quot;;</span>
+			//@ loop_invariant threads.contains(ch);
+<span class="fc bfc" id="L340" title="All 2 branches covered.">			for (ClientHandler ch : threads) {</span>
+<span class="fc bfc" id="L341" title="All 4 branches covered.">				if (ch.connected() &amp;&amp; !ch.inGame()) {</span>
+<span class="fc" id="L342">					clients += &quot; &quot; + ch.getClientName();</span>
+				}
+			}
+<span class="fc" id="L345">			return clients;</span>
+		}
+	}
+
+	/**
+	 * Add a ClientHandler to the collection of ClientHandlers.
+	 * 
+	 * @param handler
+	 *            ClientHandler that will be added
+	 */
+	/*@ requires handler != null;
+		ensures getHandlers().contains(handler);
+	 */
+	public void addHandler(ClientHandler handler) {
+<span class="pc" id="L359">		synchronized (threads) {</span>
+<span class="fc" id="L360">			threads.add(handler);</span>
+<span class="fc" id="L361">			mui.addMessage(&quot;Added clientHandler.&quot;);</span>
+		}
+<span class="fc" id="L363">	}</span>
+
+	/**
+	 * Gets the set of connected client Handlers.
+	 * 
+	 * @return threads, the set of connected clientHandlers
+	 */
+	/*@ pure */public HashSet&lt;ClientHandler&gt; getHandlers() {
+<span class="nc" id="L371">		return threads;</span>
+	}
+
+	/**
+	 * Remove a ClientHandler from the collection of ClientHanlders.
+	 * 
+	 * @param handler
+	 *            ClientHandler that will be removed
+	 */
+	/*@ requires handler != null;
+		ensures !getHandlers().contains(handler);
+	 */
+	public void removeHandler(ClientHandler handler) {
+<span class="pc" id="L384">		synchronized (threads) {</span>
+<span class="fc" id="L385">			threads.remove(handler);</span>
+<span class="fc" id="L386">			mui.addMessage(&quot;Removed clientHandler.&quot;);</span>
+		}
+<span class="fc" id="L388">	}</span>
+
+	/**
+	 * Add the names of the inviting and the invited client in a map with the
+	 * specified boardsize.
+	 *
+	 * @param name
+	 *            name of the inviting client
+	 * @param invited
+	 *            name of the invited client
+	 * @param boardX
+	 *            the amount of columns the board should have
+	 * @param boardY
+	 *            the amount of rowss the board should have
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires invited != null;
+		requires nameExists(invited);
+		requires boardX &gt;= 4 &amp; boardX &lt;= 100;
+		requires boardY &gt;= 4 &amp; boardY &lt;= 100;
+		ensures isInvited(name, invited);
+	*/
+	public void addInvite(String name, String invited, int boardX, int boardY) {
+<span class="pc" id="L412">		synchronized (invites) {</span>
+<span class="fc" id="L413">			invites.put(new String[] { name, invited }, new Integer[] { boardX,</span>
+<span class="fc" id="L414">					boardY });</span>
+<span class="fc" id="L415">			mui.addMessage(&quot;Added invite from &quot; + name + &quot; to &quot; + invited</span>
+<span class="fc" id="L416">					+ &quot; with boardsize &quot; + boardX + &quot; x &quot; + boardY + &quot;.&quot;);</span>
+		}
+<span class="fc" id="L418">	}</span>
+
+	/**
+	 * Checks whether the client is invited.
+	 *
+	 * @param name
+	 *            the name of the client
+	 * @return true, if is invited
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+	*/
+	/*@ pure */public boolean isInvited(String name) {
+<span class="nc" id="L431">		synchronized (invites) {</span>
+<span class="nc" id="L432">			boolean retBool = false;</span>
+			//@ loop_invariant invites.containsKey(invite);
+<span class="nc bnc" id="L434" title="All 2 branches missed.">			for (String[] invite : invites.keySet()) {</span>
+<span class="nc bnc" id="L435" title="All 4 branches missed.">				if (invite[0].equals(name) || invite[1].equals(name)) {</span>
+<span class="nc" id="L436">					retBool = true;</span>
+<span class="nc" id="L437">					break;</span>
+				}
+			}
+<span class="nc" id="L440">			return retBool;</span>
+		}
+	}
+
+	/**
+	 * Checks whether the client is invited by the client with the specified
+	 * name.
+	 *
+	 * @param name
+	 *            the name of the client that send the invite
+	 * @param invited
+	 *            the name of the client that received the invite
+	 * @return true, if is invited
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires invited != null;
+		requires nameExists(invited);
+	*/
+	/*@ pure */public boolean isInvited(String name, String invited) {
+<span class="pc" id="L460">		synchronized (invites) {</span>
+<span class="fc" id="L461">			boolean retBool = false;</span>
+			//@ loop_invariant invites.containsKey(invite);
+<span class="fc bfc" id="L463" title="All 2 branches covered.">			for (String[] invite : invites.keySet()) {</span>
+<span class="pc bpc" id="L464" title="1 of 4 branches missed.">				if (invite[0].equals(name) &amp;&amp; invite[1].equals(invited)) {</span>
+<span class="fc" id="L465">					retBool = true;</span>
+<span class="fc" id="L466">					break;</span>
+				}
+			}
+<span class="fc" id="L469">			return retBool;</span>
+		}
+	}
+
+	/**
+	 * Gets the map of invites.
+	 * 
+	 * @return the map of invites
+	 */
+	/*@ pure */public HashMap&lt;String[], Integer[]&gt; getInvites() {
+<span class="nc" id="L479">		return invites;</span>
+	}
+
+	/**
+	 * Returns the invite with the specified names.
+	 * 
+	 * @param name
+	 *            name of the client who send the invite
+	 * @param invited
+	 *            name of th client who received the invite
+	 * @return the invite, a String[] with both names
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires invited != null;
+		requires nameExists(invited);
+		requires isInvited(name, invited);
+		ensures getInvites().containsKey(\result);
+	 */
+	/*@ pure */public String[] getInvite(String name, String invited) {
+<span class="pc" id="L499">		synchronized (invites) {</span>
+<span class="fc" id="L500">			String[] retInvite = null;</span>
+			//@ loop_invariant invites.containsKey(invite);
+<span class="pc bpc" id="L502" title="1 of 2 branches missed.">			for (String[] invite : invites.keySet()) {</span>
+<span class="pc bpc" id="L503" title="2 of 4 branches missed.">				if (invite[0].equals(name) &amp;&amp; invite[1].equals(invited)) {</span>
+<span class="fc" id="L504">					retInvite = invite;</span>
+<span class="fc" id="L505">					break;</span>
+				}
+			}
+<span class="fc" id="L508">			return retInvite;</span>
+		}
+	}
+
+	/**
+	 * Removes all invites of the client with the specified name.
+	 * 
+	 * @param name
+	 *            the name of the client
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		ensures !isInvited(name);
+	*/
+	public void removeInvite(String name) {
+<span class="pc" id="L523">		synchronized (invites) {</span>
+<span class="fc" id="L524">			mui.addMessage(&quot;removing all invites with &quot; + name + &quot;.&quot;);</span>
+			//@ loop_invariant invites.containsKey(invite);
+<span class="pc bpc" id="L526" title="1 of 2 branches missed.">			for (String[] invite : invites.keySet()) {</span>
+<span class="nc bnc" id="L527" title="All 2 branches missed.">				if (invite[0].equals(name)) {</span>
+<span class="nc" id="L528">					sendMessage(invite[1], Server.DECLINE_INVITE + &quot; &quot; + name);</span>
+<span class="nc" id="L529">					invites.remove(invite);</span>
+<span class="nc" id="L530">					mui.addMessage(&quot;Server removed invite from &quot; + invite[0]</span>
+<span class="nc" id="L531">							+ &quot; to &quot; + invite[1] + &quot;.&quot;);</span>
+<span class="nc bnc" id="L532" title="All 2 branches missed.">				} else if (invite[1].equals(name)) {</span>
+<span class="nc" id="L533">					sendMessage(invite[0], Server.DECLINE_INVITE + &quot; &quot; + name);</span>
+<span class="nc" id="L534">					invites.remove(invite);</span>
+<span class="nc" id="L535">					mui.addMessage(&quot;Server removed invite from &quot; + invite[0]</span>
+<span class="nc" id="L536">							+ &quot; to &quot; + invite[1] + &quot;.&quot;);</span>
+				}
+			}
+		}
+<span class="fc" id="L540">	}</span>
+
+	/**
+	 * Removes the invite of the client with the specified name.
+	 * 
+	 * @param name
+	 *            the name of the client
+	 * @param invited
+	 *            the name of the invited client
+	 */
+	/*@ requires name != null;
+		requires nameExists(name);
+		requires invited != null;
+		requires nameExists(invited);
+		ensures !isInvited(name, invited);
+	*/
+	public void removeInvite(String name, String invited) {
+<span class="pc" id="L557">		synchronized (invites) {</span>
+			//@ loop_invariant invites.containsKey(invite);
+<span class="fc bfc" id="L559" title="All 2 branches covered.">			for (String[] invite : invites.keySet()) {</span>
+<span class="pc bpc" id="L560" title="1 of 4 branches missed.">				if (invite[0].equals(name) &amp;&amp; invite[1].equals(invited)) {</span>
+<span class="fc" id="L561">					invites.remove(invite);</span>
+<span class="fc" id="L562">					mui.addMessage(&quot;Server removed invite from &quot; + name</span>
+<span class="fc" id="L563">							+ &quot; to &quot; + invited + &quot;.&quot;);</span>
+<span class="fc" id="L564">					break;</span>
+				}
+			}
+		}
+<span class="fc" id="L568">	}</span>
+
+	/**
+	 * Generates a line with all players on the leaderboard.
+	 */
+	/*@ pure */public String leaderboardToString() {
+<span class="pc" id="L574">		synchronized (leaderboard) {</span>
+<span class="fc" id="L575">			String scores = &quot;&quot;;</span>
+<span class="fc" id="L576">			int rank = 0;</span>
+<span class="fc" id="L577">			LeaderboardPair oldPair = null;</span>
+			/*@ loop_invariant 0 &lt;= i &amp;&amp; i &lt;= 50;
+				loop_invariant i &lt;= leaderboard.size();
+				loop_invariant 0 &lt;= rank &amp;&amp; rank &lt;= i;
+			*/
+<span class="fc bfc" id="L582" title="All 2 branches covered.">			for (int i = 0; i &lt; leaderboard.size(); i++) {</span>
+<span class="pc bpc" id="L583" title="1 of 2 branches missed.">				if (i &lt; 50) {</span>
+<span class="fc" id="L584">					LeaderboardPair pair = leaderboard.get(i);</span>
+<span class="pc bpc" id="L585" title="1 of 2 branches missed.">					if (!pair.equalScore(oldPair)) {</span>
+<span class="fc" id="L586">						rank++;</span>
+<span class="fc" id="L587">						oldPair = pair;</span>
+					}
+<span class="fc" id="L589">					scores += &quot; &quot; + pair + &quot; &quot; + rank;</span>
+				} else {
+					break;
+				}
+			}
+<span class="fc" id="L594">			return scores;</span>
+		}
+	}
+
+	/**
+	 * Updates the score of the LeaderboardPair with the givin name. If the name
+	 * doesn't exists it creates a new LeaderboardPair. If win is null 1 is
+	 * added to games played and if it's true or false 1 is added to gamse
+	 * playad and to games won or games lost repectively. Then sorts the
+	 * leaderboardbased on the natural ordering of leaderboardpair.
+	 * 
+	 * @param name
+	 *            Name of he LeaderboardPair
+	 * @param increment
+	 *            Wether to increment or decrement the score
+	 */
+	//@ requires name != null;
+	public void updateLeaderboard(String name, Boolean win) {
+<span class="pc" id="L612">		synchronized (leaderboard) {</span>
+<span class="fc" id="L613">			boolean found = false;</span>
+			//@ loop_invariant leaderboard.contains(pair);
+<span class="fc bfc" id="L615" title="All 2 branches covered.">			for (LeaderboardPair pair : leaderboard) {</span>
+<span class="pc bpc" id="L616" title="1 of 2 branches missed.">				if (pair.getName().equals(name)) {</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">					if (win == null) {</span>
+<span class="nc" id="L618">						pair.updateDraw();</span>
+<span class="nc" id="L619">						mui.addMessage(&quot;Leaderboard: Added draw to &quot; + name</span>
+<span class="nc" id="L620">								+ &quot;.&quot;);</span>
+<span class="nc bnc" id="L621" title="All 2 branches missed.">					} else if (win) {</span>
+<span class="nc" id="L622">						pair.updateWin();</span>
+<span class="nc" id="L623">						mui.addMessage(&quot;Leaderboard: Added win to &quot; + name</span>
+<span class="nc" id="L624">								+ &quot;.&quot;);</span>
+<span class="nc" id="L625">					} else {</span>
+<span class="nc" id="L626">						pair.updateLoss();</span>
+<span class="nc" id="L627">						mui.addMessage(&quot;Leaderboard: Added loss to &quot; + name</span>
+<span class="nc" id="L628">								+ &quot;.&quot;);</span>
+					}
+<span class="nc" id="L630">					found = true;</span>
+<span class="nc" id="L631">					break;</span>
+				}
+			}
+<span class="pc bpc" id="L634" title="1 of 2 branches missed.">			if (!found) {</span>
+<span class="fc" id="L635">				LeaderboardPair pair = null;</span>
+<span class="pc bpc" id="L636" title="1 of 2 branches missed.">				if (win == null) {</span>
+<span class="nc" id="L637">					pair = new LeaderboardPair(name, 0, 0, 1);</span>
+<span class="nc" id="L638">					mui.addMessage(&quot;Leaderboard: Created new entry for &quot; + name</span>
+<span class="nc" id="L639">							+ &quot; with 1 draw.&quot;);</span>
+<span class="pc bfc" id="L640" title="All 2 branches covered.">				} else if (win) {</span>
+<span class="fc" id="L641">					pair = new LeaderboardPair(name, 1, 0, 1);</span>
+<span class="fc" id="L642">					mui.addMessage(&quot;Leaderboard: Created new entry for &quot; + name</span>
+<span class="fc" id="L643">							+ &quot; with 1 win.&quot;);</span>
+<span class="fc" id="L644">				} else {</span>
+<span class="fc" id="L645">					pair = new LeaderboardPair(name, 0, 1, 1);</span>
+<span class="fc" id="L646">					mui.addMessage(&quot;Leaderboard: Created new entry for &quot; + name</span>
+<span class="fc" id="L647">							+ &quot; with 1 loss.&quot;);</span>
+				}
+<span class="fc" id="L649">				leaderboard.add(pair);</span>
+			}
+<span class="fc" id="L651">			Collections.sort(leaderboard);</span>
+<span class="fc" id="L652">			writeLeaderboard();</span>
+		}
+<span class="fc" id="L654">	}</span>
+
+	/**
+	 * Gets the leaderboard.
+	 * 
+	 * @return the leaderboard, a ArrayList of LeaderboardPairs
+	 */
+	/*@ pure */public ArrayList&lt;LeaderboardPair&gt; getLeaderboard() {
+<span class="nc" id="L662">		return leaderboard;</span>
+	}
+
+	/**
+	 * Tries to read the leaderboard from the file specified in the FILENAME
+	 * final and creates and sorts an ArrayList with the read values.
+	 * 
+	 * @return the created ArrayList
+	 * @throws IOException
+	 *             if the file can't be found
+	 */
+	/*@ pure */public ArrayList&lt;LeaderboardPair&gt; readLeaderboard()
+			throws IOException {
+<span class="fc" id="L675">		BufferedReader in = new BufferedReader(new FileReader(FILENAME));</span>
+<span class="fc" id="L676">		ArrayList&lt;LeaderboardPair&gt; leaderboard = new ArrayList&lt;LeaderboardPair&gt;();</span>
+		//@ loop_invariant in != null;
+<span class="fc bfc" id="L678" title="All 2 branches covered.">		while (in.ready()) {</span>
+<span class="fc" id="L679">			String[] pair = in.readLine().split(&quot;\\s+&quot;);</span>
+			try {
+<span class="fc" id="L681">				leaderboard.add(new LeaderboardPair(pair[0], Integer</span>
+<span class="fc" id="L682">						.parseInt(pair[1]), Integer.parseInt(pair[2]), Integer</span>
+<span class="fc" id="L683">						.parseInt(pair[3])));</span>
+<span class="pc" id="L684">			} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {</span>
+<span class="nc" id="L685">				mui.addMessage(&quot;Error couldn't read leaderboard entry&quot;);</span>
+				/*
+				 * Incorrect entry. Tries to continue to read entries, if all entries are
+				 * incorrect none will be added and an empty set will be returned.
+				 */
+				continue;
+			}
+		}
+<span class="fc" id="L693">		in.close();</span>
+<span class="fc" id="L694">		Collections.sort(leaderboard);</span>
+<span class="fc" id="L695">		return leaderboard;</span>
+	}
+
+	/**
+	 * Tries to write the leaderboard to the file specified in the FILENAME
+	 * final. If the write fails an error will be printed, but the server won't
+	 * terminate.
+	 */
+	public void writeLeaderboard() {
+<span class="fc" id="L704">		PrintWriter out = null;</span>
+		try {
+<span class="fc" id="L706">			out = new PrintWriter(FILENAME);</span>
+<span class="pc" id="L707">		} catch (FileNotFoundException e) {</span>
+<span class="nc" id="L708">			mui.addMessage(&quot;Error couldn't save leaderboard.&quot;);</span>
+<span class="nc" id="L709">			return;</span>
+		}
+		/*@ loop_invariant out != null;
+			loop_invariant leaderboard.contains(pair);
+		*/
+<span class="fc bfc" id="L714" title="All 2 branches covered.">		for (LeaderboardPair pair : leaderboard) {</span>
+<span class="fc" id="L715">			out.println(pair);</span>
+		}
+		// checkError() also flushes the stream.
+<span class="pc bpc" id="L718" title="1 of 2 branches missed.">		if (out.checkError()) {</span>
+<span class="nc" id="L719">			mui.addMessage(&quot;Error couldn't save leaderboard.&quot;);</span>
+		}
+<span class="fc" id="L721">		out.close();</span>
+<span class="fc" id="L722">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.eclemma.org/jacoco">JaCoCo</a> 0.7.2.201409121644</span>ServerGUI (2) (28-jan-2015 12:07:20)</div></body></html>
