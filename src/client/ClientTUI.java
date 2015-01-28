@@ -138,37 +138,31 @@ public class ClientTUI implements ClientView {
 	 */
 	@Override
 	public void askName() {
-		while (client.isConnected() == Client.Connection.FALSE
-				|| client.isConnected() == Client.Connection.CONNECTING) {
-			if (client.isConnected() == Client.Connection.TRUE) {
-				break;
-			}
-			if (client.isConnected() == Client.Connection.FALSE) {
-				addMessage("Please enter your name.");
-				addMessage("If you want to use a game.strategy, and make the computer play for you, use -<LETTER> <NAME>.");
-				addMessage("Available strategies are: ");
-				addMessage("-N for a NaiveStrategy (makes random moves)");
-				addMessage("-S for Smart (thinks ahead 1 turn)");
-				addMessage("-M for Minimax (thinks ahead several turns)");
-				try {
-					client.setUpPlayer(reader.readLine());
-				} catch (IOException e) {
-					addMessage("[ERROR]Input disconnected. Shutting down.");
-					System.exit(0);
-				}
-				if (!client.isAlive()) {
-					client.start();
-				}
-				if (client.isConnected() == Client.Connection.TRUE) {
-					break;
-				}
-			}
-			if (client.isConnected() == Client.Connection.TRUE) {
-				break;
-			}
+		addMessage("Please enter your name.");
+		addMessage("If you want to use a game.strategy, and make the computer play for you, use -<LETTER> <NAME>.");
+		addMessage("Available strategies are: ");
+		addMessage("-N for a NaiveStrategy (makes random moves)");
+		addMessage("-S for Smart (thinks ahead 1 turn)");
+		addMessage("-M for Minimax (thinks ahead several turns)");
+		try {
+			client.setUpPlayer(reader.readLine());
+		} catch (IOException e) {
+			addMessage("[ERROR]Input disconnected. Shutting down.");
+			System.exit(0);
 		}
-		client.clientHelp();
-		readInput();
+		if (!client.isAlive()) {
+			client.start();
+		}
+		int count = -1;
+		while (client.isConnected() == Client.Connection.CONNECTING) {
+			addMessage("Debug: " + ++count);
+		}
+		if (client.isConnected() == Client.Connection.FALSE) {
+			askName();
+		} else if (client.isConnected() == Client.Connection.TRUE) {
+			client.clientHelp();
+			readInput();
+		}
 	}
 
 	/**
