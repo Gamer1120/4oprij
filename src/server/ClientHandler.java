@@ -676,15 +676,21 @@ public class ClientHandler extends Thread {
 		requires command[0].equals(Client.MOVE);
 	*/
 	private void moveChecks(String[] command) {
-		synchronized (board) {
-			if (!connected()) {
-				sendError(Client.MOVE, "You have to connect first.");
-			} else if (!inGame()) {
-				sendError(Client.MOVE, "You aren't in a game.");
-			} else if (!move) {
-				sendError(Client.MOVE, "It's not your turn to move.");
-			} else {
-				validMove(command);
+		if (!connected()) {
+			sendError(Client.MOVE, "You have to connect first.");
+		} else if (!inGame()) {
+			sendError(Client.MOVE, "You aren't in a game.");
+		} else {
+			/*
+			 * Make sure the board isn't deleted by game end (disconnect) while
+			 * whe determine a move.
+			 */
+			synchronized (board) {
+				if (!move) {
+					sendError(Client.MOVE, "It's not your turn to move.");
+				} else {
+					validMove(command);
+				}
 			}
 		}
 	}
@@ -914,6 +920,7 @@ public class ClientHandler extends Thread {
 	//@ ensures opponentName == null;
 	//@ ensures !inGame();
 	private void endGame() {
+		//If we are still trying to do a move, wait till it's done
 		synchronized (board) {
 			playerNumber = -1;
 			board = null;
