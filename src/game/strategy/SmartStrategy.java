@@ -3,8 +3,8 @@ package game.strategy;
 import game.Board;
 import game.Disc;
 
-import java.util.Random;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * SmartStrategy for the Connect4 according to the protocol of the TI-2 group.<br>

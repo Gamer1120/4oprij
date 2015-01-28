@@ -64,9 +64,11 @@ public class ClientTest {
 				.println("cl.arrayToLine((\"This is a line.\").split(regex); == "
 						+ cl.arrayToLine("This is a line.".split("\\s+"))
 						+ " Expected:  is a line.");
-		System.out.println("Adding a server invite from Test with default board size");
+		System.out
+				.println("Adding a server invite from Test with default board size");
 		cl.addServerInvite("Test");
-		System.out.println("Adding a server invite from Test with custom board size");
+		System.out
+				.println("Adding a server invite from Test with custom board size");
 		cl.addServerInvite("Test", 4, 4);
 		System.out.println("Removing a server invite from Test");
 		cl.removeServerInvite("Test");
@@ -141,11 +143,13 @@ public class ClientTest {
 		System.out
 				.println("Using the makeBoard on an empty board of 4x4 gives: "
 						+ cl.makeBoard(4, 4, Disc.YELLOW, Disc.RED,
-								"BOARD 4 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0".split(" ")));
+								"BOARD 4 4 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"
+										.split(" ")));
 		System.out
-		.println("Using the makeBoard on an filled board of 4x4 gives: "
-				+ cl.makeBoard(4, 4, Disc.YELLOW, Disc.RED,
-						"BOARD 4 4 1 2 2 1 1 2 1 1 2 2 2 1 1 1 2 1".split(" ")));
+				.println("Using the makeBoard on an filled board of 4x4 gives: "
+						+ cl.makeBoard(4, 4, Disc.YELLOW, Disc.RED,
+								"BOARD 4 4 1 2 2 1 1 2 1 1 2 2 2 1 1 1 2 1"
+										.split(" ")));
 		cl.start();
 		cl.shutdown();
 	}

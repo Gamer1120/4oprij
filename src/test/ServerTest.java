@@ -50,7 +50,8 @@ public class ServerTest {
 				+ s.isInvited("Player1", "Player2"));
 		sgui.addMessage("Player2 is now invited: " + s.isInvited("Player2"));
 		sgui.addMessage("s.getInvites() --> " + s.getInvites());
-		sgui.addMessage("s.getInvite(Player1, Player2) --> "+Arrays.toString(s.getInvite("Player1", "Player2")));
+		sgui.addMessage("s.getInvite(Player1, Player2) --> "
+				+ Arrays.toString(s.getInvite("Player1", "Player2")));
 		sgui.addMessage(s.leaderboardToString().toString());
 		s.updateLeaderboard("TestUser", true);
 		sgui.addMessage(s.leaderboardToString().toString());

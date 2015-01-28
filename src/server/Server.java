@@ -569,6 +569,7 @@ public class Server extends Thread {
 
 	/**
 	 * Generates a line with all players on the leaderboard.
+	 * 
 	 * @return a line with all players on the leaderboard.
 	 */
 	/*@ pure */public String leaderboardToString() {

@@ -10,7 +10,7 @@ import java.util.Observer;
  * 
  * @author Michael Koopman s1401335 and Sven Konings s1534130
  */
-interface MessageUI extends Observer{
+interface MessageUI extends Observer {
 	/**
 	 * Adds a message to the MessageUI.
 	 * 
