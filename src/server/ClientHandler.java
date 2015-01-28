@@ -15,7 +15,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import client.Client;
 
-// TODO: Observable
 /**
  * The ClientHandler that reads all the input from the Clients and send messages
  * from the Server to the Clients.<br>
@@ -106,7 +105,7 @@ public class ClientHandler extends Thread {
 		private invariant sock != null;
 		private invariant in != null;
 		private invariant out != null;
-		private invariant playerNumber == -1 || playerNumber == 0 || playerNumber == 1;
+		private invariant playerNumber == -1 || playerNumber == 1 || playerNumber == 2;
 		private invariant boardLock != null;
 	 */
 
@@ -161,7 +160,7 @@ public class ClientHandler extends Thread {
 				 * IOException, but when in.readLine() has already been called
 				 * and the connection is lost in.readLine will result in null and
 				 * input.equals() will result in an NullPointerException. If the
-				 * connection is lost the clienthandler shuts down
+				 * connection is lost the clienthandler shuts down.
 				 */
 			} catch (IOException | NullPointerException e) {
 				shutdown();
@@ -516,7 +515,6 @@ public class ClientHandler extends Thread {
 					sendError(Server.INVITE,
 							"Boardsize too small. Minimun is 4");
 					sendMessage(Server.DECLINE_INVITE + " " + command[1]);
-					//TODO: niet hardcoden
 				} else if (boardX > 100 || boardY > 100) {
 					sendError(Server.INVITE,
 							"Boardsize too big. Maximum is 100");
@@ -714,7 +712,7 @@ public class ClientHandler extends Thread {
 		requires command[0].equals(Client.MOVE);
 		requires connected();
 		requires opponentName != null;
-		requires playerNumber == 0 || playerNumber == 1;
+		requires playerNumber == 1 || playerNumber == 2;
 		requires inGame();
 	*/
 	private void validMove(String[] command) {
@@ -753,7 +751,7 @@ public class ClientHandler extends Thread {
 	 */
 	/*@ requires connected();
 		requires opponentName != null;
-		requires playerNumber == 0 || playerNumber == 1;
+		requires playerNumber == 1 || playerNumber == 2;
 		requires inGame();
 		requires board.isField(col);
 		requires board.isEmptyField(col);
@@ -794,7 +792,6 @@ public class ClientHandler extends Thread {
 	/*@ requires line != null;
 	*/
 	private void chatChecks(String line) {
-		//TODO: niet hardcoden
 		if (!connected()) {
 			sendError(Server.CHAT, "You have to connect first.");
 		} else if (line.length() <= 5) {
@@ -905,7 +902,7 @@ public class ClientHandler extends Thread {
 	 * @param command
 	 *            The command send by the client.
 	 */
-	//@ ensures playerNumber == 0 || playerNumber == 1;
+	//@ ensures playerNumber == 1 || playerNumber == 2;
 	//@ ensures opponentName != null;
 	private void startGame(String[] command) {
 		server.removeInvite(clientName);

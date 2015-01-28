@@ -249,15 +249,13 @@ public class Client extends Thread {
 				 * IOException, but when in.readLine() has already been called
 				 * and the connection is lost in.readLine will result in null and
 				 * input.equals() will result in an NullPointerException. If the
-				 * connection is lost the clienthandler shuts down
+				 * connection is lost the client shuts down.
 				 */
 			} catch (IOException | NullPointerException e) {
 				shutdown();
 				break;
 			}
 			String[] serverMessage = line.split("\\s+");
-			//TODO: later weghalen
-			mui.addMessage("[SERVER]" + line);
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
 				isConnected = Connection.TRUE;
@@ -798,7 +796,6 @@ public class Client extends Thread {
 	 */
 	//@ requires isIngame();
 	private void makeMove(int player, int col) {
-		// TODO: Kijken wat protocol is.
 		if (player == myNumber) {
 			board.insertDisc(col, Disc.YELLOW);
 		} else {
