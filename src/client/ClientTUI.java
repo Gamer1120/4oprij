@@ -149,13 +149,16 @@ public class ClientTUI implements ClientView {
 				addMessage("-M for Minimax (thinks ahead several turns)");
 				try {
 					client.setUpPlayer(reader.readLine());
-					if (!client.isAlive()) {
-						client.start();
-					}
+
 				} catch (IOException e) {
 					addMessage("[ERROR]Input disconnected. Shutting down.");
 					System.exit(0);
 				}
+				if (!client.isAlive()) {
+					client.start();
+				}
+			} else if (client.isConnected() == Client.Connection.TRUE) {
+				break;
 			}
 		}
 		client.clientHelp();
