@@ -381,7 +381,7 @@ public class ClientHandler extends Thread {
 	private void connectChecks(String[] command) {
 		if (command.length < 2) {
 			sendError(Client.CONNECT, "Invalid arguments.");
-		} else if (command[1].length() > 15) {
+		} else if (command[1].length() > 31) {
 			sendError(Client.CONNECT, "Name too long.");
 		} else if (server.nameExists(command[1])) {
 			sendError(Client.CONNECT, "Name in use.");
