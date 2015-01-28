@@ -153,9 +153,14 @@ public class ClientTUI implements ClientView {
 		if (!client.isAlive()) {
 			client.start();
 		}
-		int count = -1;
+		/*
+		 * When the entrire method was in a while loop until connected was
+		 * true, the client didn't always respond fast enough causing this
+		 * method to get stuck on setUpPlayer and never proceed. So instead of
+		 * putting the entire method in a while loop we wait here until
+		 * connection is no longer connecting.
+		 */
 		while (client.isConnected() == Client.Connection.CONNECTING) {
-			addMessage("Debug: " + ++count);
 		}
 		if (client.isConnected() == Client.Connection.FALSE) {
 			askName();
