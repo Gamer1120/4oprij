@@ -138,7 +138,8 @@ public class ClientTUI implements ClientView {
 	 */
 	@Override
 	public void askName() {
-		while (client.isConnected() == Client.Connection.FALSE || client.isConnected() == Client.Connection.CONNECTING) {
+		while (client.isConnected() == Client.Connection.FALSE
+				|| client.isConnected() == Client.Connection.CONNECTING) {
 			if (client.isConnected() == Client.Connection.FALSE) {
 				addMessage("Please enter your name.");
 				addMessage("If you want to use a game.strategy, and make the computer play for you, use -<LETTER> <NAME>.");
@@ -148,6 +149,9 @@ public class ClientTUI implements ClientView {
 				addMessage("-M for Minimax (thinks ahead several turns)");
 				try {
 					client.setUpPlayer(reader.readLine());
+					if (!client.isAlive()) {
+						client.start();
+					}
 				} catch (IOException e) {
 					addMessage("[ERROR]Input disconnected. Shutting down.");
 					System.exit(0);
@@ -218,7 +222,6 @@ public class ClientTUI implements ClientView {
 			setUpClient();
 			return;
 		}
-		client.start();
 		askName();
 	}
 
@@ -408,8 +411,8 @@ public class ClientTUI implements ClientView {
 			addMessage("Couldn't change the difficulty");
 		}
 	}
-	
-	/*@ pure */public Client getClient(){
+
+	/*@ pure */public Client getClient() {
 		return client;
 	}
 }
