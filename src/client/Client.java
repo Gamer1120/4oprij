@@ -316,7 +316,7 @@ public class Client extends Thread {
 	 *            The message to be sent.
 	 */
 	//@ requires msg != null;
-	public void sendMessage(String msg) {
+	public synchronized void sendMessage(String msg) {
 		try {
 			out.write(msg);
 			out.newLine();
