@@ -240,11 +240,9 @@ public class Client extends Thread {
 	public void run() {
 		while (loop) {
 			String line = "";
-			String input = "";
 			try {
-				while (!input.equals("") || line.equals("")) {
-					input = in.readLine();
-					line += input;
+				while (line.equals("")) {
+					line = in.readLine();
 				}
 				/*
 				 * Calling in.readLine() when the connection is lost gives an
@@ -257,9 +255,9 @@ public class Client extends Thread {
 				shutdown();
 				break;
 			}
+			String[] serverMessage = line.split("\\s+");
 			//TODO: later weghalen
 			mui.addMessage("[SERVER]" + line);
-			String[] serverMessage = line.split("\\s+");
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
 				isConnected = Connection.TRUE;
@@ -323,7 +321,6 @@ public class Client extends Thread {
 	public void sendMessage(String msg) {
 		try {
 			out.write(msg);
-			out.newLine();
 			out.newLine();
 			out.flush();
 		} catch (IOException e) {

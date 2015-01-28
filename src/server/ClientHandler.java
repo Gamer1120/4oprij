@@ -152,13 +152,9 @@ public class ClientHandler extends Thread {
 	public void run() {
 		while (loop) {
 			String line = "";
-			String input = "";
 			try {
-				//Read till we have a command and there is a double newLine.
-				//@ loop_invariant line != null;
-				while (!input.equals("") || line.equals("")) {
-					input = in.readLine();
-					line += input;
+				while (line.equals("")) {
+					line = in.readLine();
 				}
 				/*
 				 * Calling in.readLine() when the connection is lost gives an
@@ -270,7 +266,6 @@ public class ClientHandler extends Thread {
 	private synchronized void write(String msg) {
 		try {
 			out.write(msg);
-			out.newLine();
 			out.newLine();
 			out.flush();
 		} catch (IOException e) {
