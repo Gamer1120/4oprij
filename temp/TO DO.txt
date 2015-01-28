@@ -1,0 +1,46 @@
+Protocol implementeren
+Checkstyle installeren
+Server game logic
+Client game logic
+Commando INVITES
+
+Class Diagram
+A systematic overview of which part of the requirements is implemented by which classes.
+Describe the use of Observer and Model-View-Controller patterns.
+Describe formats for data storage and communication protocols (refer to protocol for TI-2)
+For every class: summarize: the role of the class in the system, responsabilities, the other classes that are used by this class to achieve its responsabilities, if there are any special cases in the class's contract, any precautions taken to fulfill the preconditions in the contract of the server classes.
+Test report
+Metrics report
+Reflection on planning.
+
+Kleine TO DO's:
+Server:
+When the server is started, a port number should be entered that the server will listen to.
+If thportnumberalreadyisinuse,anappropriateerrormessageisreturned,andanewportnumbercanbeentered.
+DONE - Aservershouldbeabletosupportmultipleinstancesofthegamethatareplayedsimultaneouslybydifferentclients.
+TheTUIensuresthatallcommunicationmessagesarewrittentoSystem.out.
+TheservershouldrespecttheprotocolasdefinedforthetutorialgroupduringtheprojectsessioninWeek7,i.e.,theservershouldbeabletocommunicatewithallotherclientsfromthetutorialgroup.
+Client:
+1.TheclientshouldhaveauserfriendlyTUI,whichprovidesseveraloptionstotheuser(e.g.,possibilitytoaenterportnumberandIPaddress)torequestagameattheserver.
+2.Theclientshouldsupporthumanplayers,andcomputerplayerswith(some)artificiallyintelligentbehaviour.
+3.Thethinkingtimeofthecomputerplayer(andthusthepoweroftheartificialintelligence)shouldbeaparameterthatcanbechangedviatheclientTUI.
+4.Theclientprovidesahintfunctionality.Thisshowsahumanplayerapossiblemove,asindicatedbythecomputerplayer.Themovemayonlybeproposed,thehumanplayershouldhavethepossibilitytodecidewhethertoplaythismove,ormakeadifferentone.
+5.Afterthegameisfinished,theplayershouldbeabletostartanewgame.
+6.Ifaplayerquitsthegamebeforeithasfinished,closestheUI,ortheclientcrashes,theotherplayersshouldbeinformed.Inthiscase,theotherplayersshouldbeallowedtoregisteragainwiththeservertoplaythegame.
+7.Aservermightatalltimesdisconnect.Theclientsshouldreacttothisinadecentway,closingallopenconnectionsetc.8.TheclientshouldrespecttheprotocolasdefinedforthetutorialgroupduringtheprojectsessioninWeek7,i.e..theclientshouldbeabletocommunicatewithallotherserversfromthetutorialgroup.
+
+JAVADOC:
+Client.java
+ClientHandler.java
+ClientTUI.java
+MessageUI.java
+Server.java
+ServerGUI.java
+(Board.java)
+ComputerPlayer.java
+Disc.java
+(Game.java)
+HumanPlayer.java
+Player.java
+Strategy.java
+
