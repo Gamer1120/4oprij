@@ -247,9 +247,9 @@ public class Client extends Thread {
 				/*
 				 * Calling in.readLine() when the connection is lost gives an
 				 * IOException, but when in.readLine() has already been called
-				 * and the connection is lost in.readLine will result in null and
-				 * input.equals() will result in an NullPointerException. If the
-				 * connection is lost the client shuts down.
+				 * and the connection is lost in.readLine() will result in null
+				 * and input.equals() will result in an NullPointerException. If
+				 * the connection is lost the client shuts down.
 				 */
 			} catch (IOException | NullPointerException e) {
 				shutdown();

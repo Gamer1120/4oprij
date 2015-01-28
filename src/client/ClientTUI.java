@@ -64,15 +64,24 @@ public class ClientTUI implements ClientView {
 	 */
 	public void readInput() {
 		while (client.isAlive()) {
-			String input = null;
-			String[] splitInput = null;
+			String input = "";
 			try {
-				input = reader.readLine();
-				splitInput = input.split("\\s+");
+				while (input.equals("")) {
+					input = reader.readLine();
+				}
+				/*
+				 * Calling input.readLine() when the connection is lost gives an
+				 * IOException, but when in.readLine() has already been called
+				 * and the connection is lost input.readLine() will result in
+				 * null and input.equals() will result in an
+				 * NullPointerException. If the connection is lost the client
+				 * shuts down.
+				 */
 			} catch (IOException | NullPointerException e) {
 				client.shutdown();
 				break;
 			}
+			String[] splitInput = input.split("\\s+");
 			switch (splitInput[0]) {
 			case Client.QUIT:
 				client.shutdown();
