@@ -138,8 +138,8 @@ public class ClientTUI implements ClientView {
 	 */
 	@Override
 	public void askName() {
-		while (client.isConnected() == null || !client.isConnected()) {
-			if (client.isConnected() == null) {
+		while (client.isConnected() == Client.Connection.FALSE || client.isConnected() == Client.Connection.CONNECTING) {
+			if (client.isConnected() == Client.Connection.FALSE) {
 				addMessage("Please enter your name.");
 				addMessage("If you want to use a game.strategy, and make the computer play for you, use -<LETTER> <NAME>.");
 				addMessage("Available strategies are: ");

@@ -89,9 +89,17 @@ public class Client extends Thread {
 	private Board board;
 
 	/**
-	 * A boolean to determine whether this client is connected.
+	 * The enum to keep track of whether this client is connected or trying to
+	 * connect.
 	 */
-	private Boolean isConnected;
+	public enum Connection {
+		FALSE, CONNECTING, TRUE
+	}
+
+	/**
+	 * An enum to determine whether this client is connected.
+	 */
+	private Connection isConnected;
 	/**
 	 * The Player this client is.
 	 */
@@ -147,7 +155,7 @@ public class Client extends Thread {
 	/*@ requires host != null;
 	 	requires port >= 1 & port <= 65535;
 	 	requires muiArg != null;
-	 	ensures isConnected() == null;
+	 	ensures isConnected() == Connection.FALSE;
 	 	ensures getBoard() == null;
 	 */
 	public Client(InetAddress host, int port, ClientTUI muiArg)
@@ -158,7 +166,7 @@ public class Client extends Thread {
 				sock.getInputStream()));
 		this.out = new BufferedWriter(new OutputStreamWriter(
 				sock.getOutputStream()));
-		this.isConnected = null;
+		this.isConnected = Connection.FALSE;
 		this.invited = new HashMap<String, Integer[]>();
 		this.invitedBy = new HashMap<String, Integer[]>();
 		this.loop = true;
@@ -182,7 +190,7 @@ public class Client extends Thread {
 	public void setUpPlayer(String name) {
 		String[] splitName = name.split("\\s+");
 		if (splitName[0].equals("")) {
-			isConnected = null;
+			isConnected = Connection.FALSE;
 		} else {
 			if (splitName[0].equals("-N")) {
 				if (splitName.length == 1) {
@@ -218,7 +226,7 @@ public class Client extends Thread {
 				this.clientName = splitName[0];
 				this.computerPlayer = null;
 			}
-			isConnected = false;
+			isConnected = Connection.CONNECTING;
 			sendMessage(CONNECT + " " + getClientName() + " " + CLIENT_FEATURES);
 		}
 	}
@@ -254,7 +262,7 @@ public class Client extends Thread {
 			String[] serverMessage = line.split("\\s+");
 			switch (serverMessage[0]) {
 			case Server.ACCEPT_CONNECT:
-				isConnected = true;
+				isConnected = Connection.TRUE;
 				serverConnect(serverMessage);
 				break;
 			case Server.LOBBY:
@@ -280,8 +288,8 @@ public class Client extends Thread {
 				break;
 			case Server.ERROR:
 				mui.addErrorMessage(line.split(" ", 2)[1]);
-				if (!isConnected) {
-					isConnected = null;
+				if (isConnected == Connection.CONNECTING) {
+					isConnected = Connection.FALSE;
 				}
 				break;
 			case Server.BOARD:
@@ -736,7 +744,7 @@ public class Client extends Thread {
 	 * 
 	 * @return true if the client is connected to a server.
 	 */
-	/*@ pure */public Boolean isConnected() {
+	/*@ pure */public Connection isConnected() {
 		return isConnected;
 	}
 
