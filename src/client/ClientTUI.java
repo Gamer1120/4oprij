@@ -216,6 +216,7 @@ public class ClientTUI implements ClientView {
 		} catch (IOException e) {
 			addMessage("[ERROR]Couldn't connect to the server.");
 			setUpClient();
+			return;
 		}
 		client.start();
 		askName();

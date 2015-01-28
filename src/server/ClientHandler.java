@@ -723,6 +723,7 @@ public class ClientHandler extends Thread {
 			} catch (NumberFormatException e) {
 				sendError(Client.MOVE, "Can't parse move.");
 				sendMessage(Server.REQUEST_MOVE);
+				return;
 			}
 			if (!board.isField(col)) {
 				sendError(Client.MOVE, "That column doesn't exist.");

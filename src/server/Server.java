@@ -706,6 +706,7 @@ public class Server extends Thread {
 			out = new PrintWriter(FILENAME);
 		} catch (FileNotFoundException e) {
 			mui.addMessage("Error couldn't save leaderboard.");
+			return;
 		}
 		/*@ loop_invariant out != null;
 			loop_invariant leaderboard.contains(pair);

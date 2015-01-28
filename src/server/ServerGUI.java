@@ -139,6 +139,8 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		try {
 			port = Integer.parseInt(tfPort.getText());
 		} catch (NumberFormatException e) {
+			tfPort.setEditable(true);
+			bConnect.setEnabled(true);
 			addMessage("ERROR: not a valid portnumber!");
 			return;
 		}
@@ -151,6 +153,7 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 			bConnect.setEnabled(true);
 			addMessage("Error listening on port " + port
 					+ ", please select a different one");
+			return;
 		}
 
 	}
