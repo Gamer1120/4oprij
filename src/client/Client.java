@@ -710,7 +710,7 @@ public class Client extends Thread {
 
 	/**
 	 * Method to set the difficulty of a MinMaxStrategy. The difficulty is the
-	 * amount of turns the game.strategy will think ahead.
+	 * amount of turns the strategy will think ahead.
 	 * 
 	 * @param input
 	 *            The raw message the view sent.

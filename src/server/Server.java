@@ -569,6 +569,7 @@ public class Server extends Thread {
 
 	/**
 	 * Generates a line with all players on the leaderboard.
+	 * @return a line with all players on the leaderboard.
 	 */
 	/*@ pure */public String leaderboardToString() {
 		synchronized (leaderboard) {
@@ -604,8 +605,8 @@ public class Server extends Thread {
 	 * 
 	 * @param name
 	 *            Name of he LeaderboardPair
-	 * @param increment
-	 *            Wether to increment or decrement the score
+	 * @param win
+	 *            Whether the player has won, lost or there was a draw.
 	 */
 	//@ requires name != null;
 	public void updateLeaderboard(String name, Boolean win) {

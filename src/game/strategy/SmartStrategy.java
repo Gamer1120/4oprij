@@ -15,7 +15,7 @@ import java.util.ArrayList;
  */
 public class SmartStrategy implements Strategy {
 	/**
-	 * The name this game.strategy has.
+	 * The name this strategy has.
 	 */
 	public final static String NAME = "Smart";
 

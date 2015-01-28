@@ -165,7 +165,12 @@ public class ServerGUI extends JFrame implements ActionListener, MessageUI {
 		taMessages.append(msg + "\n");
 	}
 
-	/** Start a ServerGUI application */
+	/**
+	 * Start a ServerGUI application
+	 *
+	 * @param args
+	 *            The command line arguments.
+	 */
 	public static void main(String[] args) {
 		new ServerGUI();
 	}

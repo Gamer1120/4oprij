@@ -47,7 +47,7 @@ public class ComputerPlayer extends Observable {
 	 * 
 	 * @param disc
 	 *            The Disc this ComputerPlayer should have.
-	 * @param game.strategy
+	 * @param strategy
 	 *            The Strategy this ComputerPlayer should use.
 	 */
 	/*@	requires disc == Disc.YELLOW || disc == Disc.RED;
@@ -81,7 +81,7 @@ public class ComputerPlayer extends Observable {
 	/**
 	 * Sets the Strategy for this ComputerPlayer
 	 * 
-	 * @param game.strategy
+	 * @param strategy
 	 *            The Strategy this ComputerPlayer should have.
 	 */
 	//@ ensures getStrategy() == strategy;

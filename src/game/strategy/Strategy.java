@@ -15,7 +15,7 @@ public interface Strategy {
 	/**
 	 * Returns the name this Strategy has.
 	 * 
-	 * @return The name this game.strategy has.
+	 * @return The name this Strategy has.
 	 */
 	/*@ pure */public String getName();
 
@@ -26,7 +26,7 @@ public interface Strategy {
 	 *            The Board to make a move on.
 	 * @param d
 	 *            The Disc to make a move for.
-	 * @return The move determined by the game.strategy.
+	 * @return The move determined by the Strategy.
 	 */
 	/*@	requires b != null;
 	 	requires d == Disc.YELLOW || d == Disc.RED;

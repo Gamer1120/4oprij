@@ -15,7 +15,7 @@ import java.util.Random;
  */
 public class NaiveStrategy implements Strategy {
 	/**
-	 * The name this game.strategy has.
+	 * The name this strategy has.
 	 */
 	public final static String NAME = "Naive";
 
