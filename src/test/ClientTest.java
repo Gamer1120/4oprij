@@ -5,7 +5,6 @@ import game.Disc;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import server.Server;
 import client.Client;
 import client.ClientTUI;
 
