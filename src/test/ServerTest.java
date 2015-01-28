@@ -11,6 +11,13 @@ import server.ServerGUI;
 
 public class ServerTest {
 
+	// HOW TO SETUP THIS TEST
+	// 1. Delete leaderboard.txt
+	// 2. Run this test.
+	// 3. Compare the results in ServerGUI with this: http://pastebin.com/W2D7ixrY
+	// 4. Close ServerGUI.
+	// 5. Run this test again (because of the leaderboard)
+	// 6. Compare the results in ServerGUI with this: http://pastebin.com/H2Vzrptc
 	public static void main(String[] args) {
 		Server s = null;
 		ServerGUI sgui = null;
