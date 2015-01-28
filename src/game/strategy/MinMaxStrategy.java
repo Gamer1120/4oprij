@@ -151,7 +151,7 @@ public class MinMaxStrategy implements Strategy {
 			 * Shouldn't be larger, except when the user changes the
 			 * thinking time while the computer is thinking.
 			 */
-		} else if (depth >= maxDepth) {
+		} else if (depth >= maxDepth || b.isFull()) {
 			return 0;
 		}
 		int score = 0;

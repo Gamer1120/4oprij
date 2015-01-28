@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 import client.Client;
 
@@ -86,6 +87,12 @@ public class ClientHandler extends Thread {
 	private Board board;
 
 	/**
+	 * Lock used in methods that use board to prevent the board from being
+	 * deleted while a move is being determined. We can't use synchronized
+	 * because the board might be null.
+	 */
+	private final ReentrantLock boardLock = new ReentrantLock();
+	/**
 	 * A boolean indicating wether the server has requested a move.
 	 */
 	private boolean move;
@@ -100,6 +107,7 @@ public class ClientHandler extends Thread {
 		private invariant in != null;
 		private invariant out != null;
 		private invariant playerNumber == -1 || playerNumber == 0 || playerNumber == 1;
+		private invariant boardLock != null;
 	 */
 
 	/**
@@ -676,22 +684,23 @@ public class ClientHandler extends Thread {
 		requires command[0].equals(Client.MOVE);
 	*/
 	private void moveChecks(String[] command) {
-		if (!connected()) {
-			sendError(Client.MOVE, "You have to connect first.");
-		} else if (!inGame()) {
-			sendError(Client.MOVE, "You aren't in a game.");
-		} else {
-			/*
-			 * Make sure the board isn't deleted by game end (disconnect) while
-			 * whe determine a move.
-			 */
-			synchronized (board) {
-				if (!move) {
-					sendError(Client.MOVE, "It's not your turn to move.");
-				} else {
-					validMove(command);
-				}
+		/*
+		 * Make sure the board isn't deleted by game end (disconnect) while
+		 * whe determine a move.
+		 */
+		boardLock.lock();
+		try {
+			if (!connected()) {
+				sendError(Client.MOVE, "You have to connect first.");
+			} else if (!inGame()) {
+				sendError(Client.MOVE, "You aren't in a game.");
+			} else if (!move) {
+				sendError(Client.MOVE, "It's not your turn to move.");
+			} else {
+				validMove(command);
 			}
+		} finally {
+			boardLock.unlock();
 		}
 	}
 
@@ -922,11 +931,14 @@ public class ClientHandler extends Thread {
 	//@ ensures !inGame();
 	private void endGame() {
 		//If we are still trying to do a move, wait till it's done
-		synchronized (board) {
+		boardLock.lock();
+		try {
 			playerNumber = -1;
 			board = null;
 			opponentName = null;
 			server.broadcastLobby();
+		} finally {
+			boardLock.unlock();
 		}
 	}
 
